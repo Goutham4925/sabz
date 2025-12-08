@@ -15,6 +15,7 @@ import Dashboard from "./pages/admin/Dashboard";
 import AdminProducts from "./pages/admin/Products";
 import ProductForm from "./pages/admin/ProductForm";
 import Settings from "./pages/admin/Settings";
+import AboutPage from "./pages/admin/AboutPage";
 
 const queryClient = new QueryClient();
 
@@ -38,6 +39,7 @@ const App = () => (
             <Route path="/admin/products/new" element={<ProductForm />} />
             <Route path="/admin/products/:id/edit" element={<ProductForm />} />
             <Route path="/admin/settings" element={<Settings />} />
+            <Route path="/admin/about" element={<AboutPage />} />
             {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
             <Route path="*" element={<NotFound />} />
           </Routes>

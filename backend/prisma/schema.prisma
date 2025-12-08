@@ -40,7 +40,7 @@ model SiteSetting {
   hero_customers_label String?
   hero_flavors_label  String?
 
-  // ABOUT
+  // HOME ABOUT
   about_badge              String?
   about_title              String?
   about_paragraph1         String?
@@ -74,3 +74,75 @@ model SiteSetting {
 
   @@map("SiteSettings")
 }
+
+model AboutPage {
+  id               Int     @id @default(autoincrement())
+
+  // HERO
+  hero_badge       String?
+  hero_title       String?
+  hero_paragraph1  String?
+  hero_paragraph2  String?
+  hero_image_url   String?
+
+  // VALUES
+  value_1_icon     String?
+  value_1_title    String?
+  value_1_desc     String?
+  value_2_icon     String?
+  value_2_title    String?
+  value_2_desc     String?
+  value_3_icon     String?
+  value_3_title    String?
+  value_3_desc     String?
+  value_4_icon     String?
+  value_4_title    String?
+  value_4_desc     String?
+
+  // TIMELINE HEADINGS (NEW)
+  timeline_heading    String?
+  timeline_subheading String?
+
+  // TIMELINE ENTRIES
+  milestone_1_year   String?
+  milestone_1_title  String?
+  milestone_1_desc   String?
+
+  milestone_2_year   String?
+  milestone_2_title  String?
+  milestone_2_desc   String?
+
+  milestone_3_year   String?
+  milestone_3_title  String?
+  milestone_3_desc   String?
+
+  milestone_4_year   String?
+  milestone_4_title  String?
+  milestone_4_desc   String?
+
+  milestone_5_year   String?
+  milestone_5_title  String?
+  milestone_5_desc   String?
+
+  // TEAM
+  team_1_name      String?
+  team_1_role      String?
+  team_1_image     String?
+
+  team_2_name      String?
+  team_2_role      String?
+  team_2_image     String?
+
+  team_3_name      String?
+  team_3_role      String?
+  team_3_image     String?
+
+  // STATS
+  stat_years      String?
+  stat_flavors    String?
+  stat_countries  String?
+  stat_customers  String?
+
+  @@map("AboutPage")
+}
+

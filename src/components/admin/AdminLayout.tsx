@@ -22,6 +22,7 @@ const navItems = [
   { path: '/admin/dashboard', label: 'Dashboard', icon: LayoutDashboard },
   { path: '/admin/products', label: 'Products', icon: Package },
   { path: '/admin/settings', label: 'Settings', icon: Settings },
+  { path: '/admin/about', label: 'About Page', icon: Home },
 ];
 
 const AdminLayout = ({ children }: AdminLayoutProps) => {
