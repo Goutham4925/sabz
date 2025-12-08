@@ -15,12 +15,51 @@ import {
 import { Loader2, Save } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
 
+
+// FULL CORRECT SCHEMA INTERFACE
 interface SiteSettings {
   id: number;
+
+  // HERO
   hero_title: string | null;
   hero_subtitle: string | null;
+  hero_badge_text: string | null;
   hero_image_url: string | null;
-  about_text: string | null;
+  hero_years_label: string | null;
+  hero_customers_label: string | null;
+  hero_flavors_label: string | null;
+
+  // ABOUT
+  about_title: string | null;
+  about_paragraph1: string | null;
+  about_paragraph2: string | null;
+  about_image_url: string | null;
+
+  about_highlight_1_title: string | null;
+  about_highlight_1_desc: string | null;
+  about_highlight_2_title: string | null;
+  about_highlight_2_desc: string | null;
+  about_highlight_3_title: string | null;
+  about_highlight_3_desc: string | null;
+  about_highlight_4_title: string | null;
+  about_highlight_4_desc: string | null;
+
+  // PRODUCTS
+  products_title: string | null;
+  products_subtitle: string | null;
+
+  // CTA
+  cta_title: string | null;
+  cta_subtitle: string | null;
+  cta_image_url: string | null;
+  cta_primary_label: string | null;
+  cta_primary_href: string | null;
+  cta_badge_text: string | null;
+
+  // FOOTER
+  footer_text: string | null;
+  footer_subtext: string | null;
+  navbar_logo: string | null;
 }
 
 const API_URL = "http://localhost:5000/api";
@@ -31,41 +70,20 @@ const Settings = () => {
   const [saving, setSaving] = useState(false);
   const { toast } = useToast();
 
-  // ------------------------------------------------------------
-  // LOAD SETTINGS FROM NODE BACKEND
-  // ------------------------------------------------------------
+  // LOAD SETTINGS
   useEffect(() => {
     const fetchSettings = async () => {
       try {
         const token = localStorage.getItem("token");
 
         const res = await fetch(`${API_URL}/settings`, {
-          headers: {
-            Authorization: `Bearer ${token}`,  // ← REQUIRED
-          },
+          headers: { Authorization: `Bearer ${token}` },
         });
 
-        if (!res.ok) throw new Error("Failed fetching");
+        if (!res.ok) throw new Error("Fetch failed");
 
         const data = await res.json();
-
-        if (!data) {
-          setSettings({
-            id: 1,
-            hero_title: "",
-            hero_subtitle: "",
-            hero_image_url: "",
-            about_text: "",
-
-            cta_title: "",
-            cta_subtitle: "",
-            cta_primary_label: "",
-            cta_primary_href: "",
-            cta_badge_text: "",
-          });
-        } else {
-          setSettings(data);
-        }
+        setSettings(data);
       } catch (error) {
         toast({
           title: "Error",
@@ -73,17 +91,13 @@ const Settings = () => {
           variant: "destructive",
         });
       }
-
       setLoading(false);
     };
 
     fetchSettings();
   }, [toast]);
 
-
-  // ------------------------------------------------------------
-  // SAVE SETTINGS (PUT /api/settings/:id)
-  // ------------------------------------------------------------
+  // SAVE SETTINGS
   const handleSave = async () => {
     if (!settings) return;
 
@@ -96,21 +110,21 @@ const Settings = () => {
         method: "PUT",
         headers: {
           "Content-Type": "application/json",
-          Authorization: `Bearer ${token}`, // 🍪 MUST SEND ADMIN JWT
+          Authorization: `Bearer ${token}`,
         },
         body: JSON.stringify(settings),
       });
 
-      if (!res.ok) throw new Error("Failed saving");
+      if (!res.ok) throw new Error("Save failed");
 
       toast({
         title: "Success",
-        description: "Settings saved successfully",
+        description: "Settings updated successfully",
       });
     } catch (error) {
       toast({
         title: "Error",
-        description: "Failed to save settings",
+        description: "Failed to save",
         variant: "destructive",
       });
     }
@@ -118,9 +132,6 @@ const Settings = () => {
     setSaving(false);
   };
 
-  // ------------------------------------------------------------
-  // LOADING UI
-  // ------------------------------------------------------------
   if (loading || !settings) {
     return (
       <ProtectedRoute>
@@ -133,109 +144,50 @@ const Settings = () => {
     );
   }
 
-  // ------------------------------------------------------------
-  // UI
-  // ------------------------------------------------------------
   return (
     <ProtectedRoute>
       <AdminLayout>
-        <div className="space-y-6 max-w-2xl">
-          <div>
-            <h1 className="font-display text-3xl text-chocolate">
-              Site Settings
-            </h1>
-            <p className="text-muted-foreground mt-1">
-              Manage your website content
-            </p>
-          </div>
+        <div className="space-y-6 max-w-3xl">
 
           {/* HERO SETTINGS */}
           <Card>
             <CardHeader>
               <CardTitle>Hero Section</CardTitle>
-              <CardDescription>
-                Configure the main banner on your homepage
-              </CardDescription>
             </CardHeader>
-
             <CardContent className="space-y-4">
-              {/* Title */}
-              <div className="space-y-2">
-                <Label htmlFor="hero_title">Hero Title</Label>
-                <Input
-                  id="hero_title"
-                  value={settings.hero_title || ""}
-                  onChange={(e) =>
-                    setSettings({ ...settings, hero_title: e.target.value })
-                  }
-                  placeholder="Crafted with Tradition. Baked with Love."
-                />
-              </div>
 
-              {/* Subtitle */}
-              <div className="space-y-2">
-                <Label htmlFor="hero_subtitle">Hero Subtitle</Label>
-                <Textarea
-                  id="hero_subtitle"
-                  value={settings.hero_subtitle || ""}
-                  onChange={(e) =>
-                    setSettings({ ...settings, hero_subtitle: e.target.value })
-                  }
-                  rows={3}
-                />
-              </div>
+              <Label>Hero Badge Text</Label>
+              <Input
+                value={settings.hero_badge_text || ""}
+                onChange={(e) =>
+                  setSettings({ ...settings, hero_badge_text: e.target.value })
+                }
+                placeholder="Premium Artisan Quality"
+              />
 
-              {/* Image URL */}
-              <div className="space-y-2">
-                <Label htmlFor="hero_image_url">Hero Image URL</Label>
-                <Input
-                  id="hero_image_url"
-                  type="url"
-                  value={settings.hero_image_url || ""}
-                  onChange={(e) =>
-                    setSettings({
-                      ...settings,
-                      hero_image_url: e.target.value,
-                    })
-                  }
-                  placeholder="https://example.com/banner.jpg"
-                />
+              <Label>Hero Title</Label>
+              <Input
+                value={settings.hero_title || ""}
+                onChange={(e) =>
+                  setSettings({ ...settings, hero_title: e.target.value })
+                }
+              />
 
-                {settings.hero_image_url && (
-                  <img
-                    src={settings.hero_image_url}
-                    className="w-full max-w-md h-48 object-cover rounded-lg border mt-2"
-                    onError={(e) =>
-                      ((e.target as HTMLImageElement).src =
-                        "/placeholder.svg")
-                    }
-                  />
-                )}
-              </div>
-            </CardContent>
-          </Card>
+              <Label>Hero Subtitle</Label>
+              <Textarea
+                value={settings.hero_subtitle || ""}
+                onChange={(e) =>
+                  setSettings({ ...settings, hero_subtitle: e.target.value })
+                }
+              />
 
-          {/* ABOUT SECTION */}
-          <Card>
-            <CardHeader>
-              <CardTitle>About Section</CardTitle>
-              <CardDescription>
-                The story shown on your About page
-              </CardDescription>
-            </CardHeader>
-
-            <CardContent>
-              <div className="space-y-2">
-                <Label htmlFor="about_text">About Text</Label>
-                <Textarea
-                  id="about_text"
-                  value={settings.about_text || ""}
-                  onChange={(e) =>
-                    setSettings({ ...settings, about_text: e.target.value })
-                  }
-                  rows={6}
-                />
-              </div>
+              <Label>Hero Image URL</Label>
+              <Input
+                value={settings.hero_image_url || ""}
+                onChange={(e) =>
+                  setSettings({ ...settings, hero_image_url: e.target.value })
+                }
+              />
             </CardContent>
           </Card>
 
@@ -243,86 +195,56 @@ const Settings = () => {
           <Card>
             <CardHeader>
               <CardTitle>CTA Section</CardTitle>
-              <CardDescription>
-                Controls the call-to-action section near the bottom of your homepage
-              </CardDescription>
             </CardHeader>
 
             <CardContent className="space-y-4">
+              <Label>CTA Badge</Label>
+              <Input
+                value={settings.cta_badge_text || ""}
+                onChange={(e) =>
+                  setSettings({ ...settings, cta_badge_text: e.target.value })
+                }
+              />
 
-              {/* CTA Title */}
-              <div className="space-y-2">
-                <Label htmlFor="cta_title">CTA Title (HTML allowed)</Label>
-                <Input
-                  id="cta_title"
-                  value={settings.cta_title || ""}
-                  onChange={(e) =>
-                    setSettings({ ...settings, cta_title: e.target.value })
-                  }
-                  placeholder="Ready to Experience <span class='text-golden'>Golden Perfection</span>?"
-                />
-              </div>
+              <Label>CTA Title</Label>
+              <Input
+                value={settings.cta_title || ""}
+                onChange={(e) =>
+                  setSettings({ ...settings, cta_title: e.target.value })
+                }
+              />
 
-              {/* CTA Subtitle */}
-              <div className="space-y-2">
-                <Label htmlFor="cta_subtitle">CTA Subtitle</Label>
-                <Textarea
-                  id="cta_subtitle"
-                  rows={3}
-                  value={settings.cta_subtitle || ""}
-                  onChange={(e) =>
-                    setSettings({ ...settings, cta_subtitle: e.target.value })
-                  }
-                  placeholder="Order our premium biscuits today and discover why customers love us."
-                />
-              </div>
+              <Label>CTA Subtitle</Label>
+              <Textarea
+                value={settings.cta_subtitle || ""}
+                onChange={(e) =>
+                  setSettings({ ...settings, cta_subtitle: e.target.value })
+                }
+              />
 
-              {/* CTA Primary Button Label */}
-              <div className="space-y-2">
-                <Label htmlFor="cta_primary_label">Primary Button Label</Label>
-                <Input
-                  id="cta_primary_label"
-                  value={settings.cta_primary_label || ""}
-                  onChange={(e) =>
-                    setSettings({ ...settings, cta_primary_label: e.target.value })
-                  }
-                  placeholder="Shop Now"
-                />
-              </div>
+              <Label>CTA Button Label</Label>
+              <Input
+                value={settings.cta_primary_label || ""}
+                onChange={(e) =>
+                  setSettings({ ...settings, cta_primary_label: e.target.value })
+                }
+              />
 
-              {/* CTA Primary Button Link */}
-              <div className="space-y-2">
-                <Label htmlFor="cta_primary_href">Primary Button Link</Label>
-                <Input
-                  id="cta_primary_href"
-                  value={settings.cta_primary_href || ""}
-                  onChange={(e) =>
-                    setSettings({ ...settings, cta_primary_href: e.target.value })
-                  }
-                  placeholder="/products"
-                />
-              </div>
-
+              <Label>CTA Button Link</Label>
+              <Input
+                value={settings.cta_primary_href || ""}
+                onChange={(e) =>
+                  setSettings({ ...settings, cta_primary_href: e.target.value })
+                }
+              />
             </CardContent>
           </Card>
 
-
           {/* SAVE BUTTON */}
-          <div className="flex justify-end">
-            <Button onClick={handleSave} variant="hero" disabled={saving}>
-              {saving ? (
-                <>
-                  <Loader2 className="mr-2 h-4 w-4 animate-spin" />
-                  Saving...
-                </>
-              ) : (
-                <>
-                  <Save className="mr-2 h-4 w-4" />
-                  Save Changes
-                </>
-              )}
-            </Button>
-          </div>
+          <Button onClick={handleSave} disabled={saving}>
+            {saving ? "Saving..." : "Save Changes"}
+          </Button>
+
         </div>
       </AdminLayout>
     </ProtectedRoute>
