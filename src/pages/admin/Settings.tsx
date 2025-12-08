@@ -30,6 +30,7 @@ interface SiteSettings {
   hero_flavors_label: string | null;
 
   // ABOUT
+  about_badge: string | null;
   about_title: string | null;
   about_paragraph1: string | null;
   about_paragraph2: string | null;
@@ -190,6 +191,141 @@ const Settings = () => {
               />
             </CardContent>
           </Card>
+
+          {/* ABOUT SECTION */}
+          <Card>
+            <CardHeader>
+              <CardTitle>About Section</CardTitle>
+              <CardDescription>Edit content for the About section</CardDescription>
+            </CardHeader>
+
+            <CardContent className="space-y-4">
+
+              <Label>About Badge</Label>
+              <Input
+                value={settings.about_badge || ""}
+                onChange={(e) =>
+                  setSettings({ ...settings, about_badge: e.target.value })
+                }
+              />
+              
+              <Label>About Title</Label>
+              <Input
+                value={settings.about_title || ""}
+                onChange={(e) =>
+                  setSettings({ ...settings, about_title: e.target.value })
+                }
+              />
+
+              <Label>Paragraph 1</Label>
+              <Textarea
+                rows={4}
+                value={settings.about_paragraph1 || ""}
+                onChange={(e) =>
+                  setSettings({ ...settings, about_paragraph1: e.target.value })
+                }
+              />
+
+              <Label>Paragraph 2</Label>
+              <Textarea
+                rows={4}
+                value={settings.about_paragraph2 || ""}
+                onChange={(e) =>
+                  setSettings({ ...settings, about_paragraph2: e.target.value })
+                }
+              />
+
+              <Label>About Image URL</Label>
+              <Input
+                value={settings.about_image_url || ""}
+                onChange={(e) =>
+                  setSettings({ ...settings, about_image_url: e.target.value })
+                }
+              />
+
+              <div className="grid grid-cols-2 gap-4">
+
+                {/* HIGHLIGHT 1 */}
+                <div>
+                  <Label>Highlight 1 Title</Label>
+                  <Input
+                    value={settings.about_highlight_1_title || ""}
+                    onChange={(e) =>
+                      setSettings({ ...settings, about_highlight_1_title: e.target.value })
+                    }
+                  />
+                  <Label>Description</Label>
+                  <Textarea
+                    rows={2}
+                    value={settings.about_highlight_1_desc || ""}
+                    onChange={(e) =>
+                      setSettings({ ...settings, about_highlight_1_desc: e.target.value })
+                    }
+                  />
+                </div>
+
+                {/* HIGHLIGHT 2 */}
+                <div>
+                  <Label>Highlight 2 Title</Label>
+                  <Input
+                    value={settings.about_highlight_2_title || ""}
+                    onChange={(e) =>
+                      setSettings({ ...settings, about_highlight_2_title: e.target.value })
+                    }
+                  />
+                  <Label>Description</Label>
+                  <Textarea
+                    rows={2}
+                    value={settings.about_highlight_2_desc || ""}
+                    onChange={(e) =>
+                      setSettings({ ...settings, about_highlight_2_desc: e.target.value })
+                    }
+                  />
+                </div>
+
+                {/* HIGHLIGHT 3 */}
+                <div>
+                  <Label>Highlight 3 Title</Label>
+                  <Input
+                    value={settings.about_highlight_3_title || ""}
+                    onChange={(e) =>
+                      setSettings({ ...settings, about_highlight_3_title: e.target.value })
+                    }
+                  />
+                  <Label>Description</Label>
+                  <Textarea
+                    rows={2}
+                    value={settings.about_highlight_3_desc || ""}
+                    onChange={(e) =>
+                      setSettings({ ...settings, about_highlight_3_desc: e.target.value })
+                    }
+                  />
+                </div>
+
+                {/* HIGHLIGHT 4 */}
+                <div>
+                  <Label>Highlight 4 Title</Label>
+                  <Input
+                    value={settings.about_highlight_4_title || ""}
+                    onChange={(e) =>
+                      setSettings({ ...settings, about_highlight_4_title: e.target.value })
+                    }
+                  />
+                  <Label>Description</Label>
+                  <Textarea
+                    rows={2}
+                    value={settings.about_highlight_4_desc || ""}
+                    onChange={(e) =>
+                      setSettings({ ...settings, about_highlight_4_desc: e.target.value })
+                    }
+                  />
+                </div>
+
+              </div>
+
+            </CardContent>
+          </Card>
+
 
           {/* CTA SECTION */}
           <Card>

@@ -54,6 +54,7 @@ router.put("/:id", async (req, res) => {
       hero_customers_label: true,
       hero_flavors_label: true,
 
+      about_badge: true,
       about_title: true,
       about_paragraph1: true,
       about_paragraph2: true,

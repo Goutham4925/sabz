@@ -41,6 +41,7 @@ model SiteSetting {
   hero_flavors_label  String?
 
   // ABOUT
+  about_badge              String?
   about_title              String?
   about_paragraph1         String?
   about_paragraph2         String?

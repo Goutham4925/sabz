@@ -12,6 +12,7 @@ export interface SiteSettings {
   hero_customers_label: string | null;
   hero_flavors_label: string | null;
 
+  about_badge: string | null;
   about_title: string | null;
   about_paragraph1: string | null;
   about_paragraph2: string | null;
