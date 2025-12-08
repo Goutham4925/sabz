@@ -9,10 +9,14 @@ export function HeroSection() {
 
   useEffect(() => {
     async function loadSettings() {
-      const res = await fetch("http://localhost:5000/api/settings");
-      const data = await res.json();
-      setSettings(data);
-      setIsVisible(true);
+      try {
+        const res = await fetch("http://localhost:5000/api/settings");
+        const data = await res.json();
+        setSettings(data);
+        setIsVisible(true);
+      } catch (err) {
+        console.error("Hero load error:", err);
+      }
     }
     loadSettings();
   }, []);
@@ -24,24 +28,26 @@ export function HeroSection() {
       {/* Background */}
       <div className="absolute inset-0 bg-gradient-hero" />
 
-      {/* Decorative animations */}
+      {/* Decorative blobs */}
       <div className="absolute top-20 left-10 w-72 h-72 bg-primary/10 rounded-full blur-3xl animate-float" />
-      <div
-        className="absolute bottom-20 right-10 w-96 h-96 bg-accent/10 rounded-full blur-3xl animate-float"
-        style={{ animationDelay: "2s" }}
-      />
-      <div
-        className="absolute top-1/4 right-1/4 w-16 h-16 bg-gradient-to-br from-primary/20 to-accent/20 rounded-full blur-sm animate-float"
-        style={{ animationDelay: "1s" }}
-      />
-      <div
-        className="absolute bottom-1/3 left-1/4 w-12 h-12 bg-gradient-to-br from-accent/20 to-primary/20 rounded-full blur-sm animate-float"
-        style={{ animationDelay: "3s" }}
-      />
+      <div className="absolute bottom-20 right-10 w-96 h-96 bg-accent/10 rounded-full blur-3xl animate-float" style={{ animationDelay: "2s" }} />
+      <div className="absolute top-1/4 right-1/4 w-16 h-16 bg-gradient-to-br from-primary/20 to-accent/20 rounded-full blur-sm animate-float" style={{ animationDelay: "1s" }} />
+      <div className="absolute bottom-1/3 left-1/4 w-12 h-12 bg-gradient-to-br from-accent/20 to-primary/20 rounded-full blur-sm animate-float" style={{ animationDelay: "3s" }} />
+
+      {/* Hero Image (DYNAMIC) */}
+      {settings.hero_image_url && (
+        <img
+          src={settings.hero_image_url}
+          alt="Hero Background"
+          className="absolute inset-0 w-full h-full object-cover opacity-40"
+          onError={(e) => (e.currentTarget.src = "/placeholder.svg")}
+        />
+      )}
 
       {/* Content */}
       <div className="container mx-auto px-4 md:px-8 relative z-10">
         <div className="max-w-4xl mx-auto text-center">
+
           {/* Badge */}
           <div
             className={`inline-flex items-center gap-2 badge-premium mb-8 transition-all duration-1000 ${
@@ -49,27 +55,29 @@ export function HeroSection() {
             }`}
           >
             <Sparkles className="w-4 h-4" />
-            <span>{settings.hero_subtitle || "Premium Artisan Quality"}</span>
+            <span>{settings.hero_badge_text || "Premium Artisan Quality"}</span>
           </div>
 
-          {/* Dynamic Title from Admin */}
+          {/* Title */}
           <h1
-            className={`font-display text-5xl md:text-7xl lg:text-8xl font-bold text-foreground leading-tight mb-6 transition-all duration-1000 delay-100 ${
+            className={`font-display text-5xl md:text-7xl lg:text-8xl font-bold leading-tight mb-6 transition-all duration-1000 delay-100 ${
               isVisible ? "opacity-100 translate-y-0" : "opacity-0 translate-y-10"
             }`}
-            dangerouslySetInnerHTML={{ __html: settings.hero_title }}
+            dangerouslySetInnerHTML={{
+              __html: settings.hero_title || "Crafted with <span class='text-primary'>Tradition</span>.",
+            }}
           />
 
-          {/* Dynamic description */}
+          {/* Subtitle */}
           <p
             className={`text-muted-foreground text-lg md:text-xl max-w-2xl mx-auto mb-10 leading-relaxed transition-all duration-1000 delay-200 ${
               isVisible ? "opacity-100 translate-y-0" : "opacity-0 translate-y-10"
             }`}
           >
-            {settings.hero_subtitle}
+            {settings.hero_subtitle || "Premium biscuits made fresh everyday."}
           </p>
 
-          {/* CTA Buttons */}
+          {/* CTAs */}
           <div
             className={`flex flex-col sm:flex-row items-center justify-center gap-4 transition-all duration-1000 delay-300 ${
               isVisible ? "opacity-100 translate-y-0" : "opacity-0 translate-y-10"
