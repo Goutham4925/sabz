@@ -10,7 +10,9 @@ import {
   LogOut, 
   Menu, 
   X,
-  Home
+  Home,
+  Mail,              // ✅ FIXED
+  MessageCircle      // ✅ FIXED
 } from 'lucide-react';
 import { cn } from '@/lib/utils';
 
@@ -23,6 +25,10 @@ const navItems = [
   { path: '/admin/products', label: 'Products', icon: Package },
   { path: '/admin/settings', label: 'Settings', icon: Settings },
   { path: '/admin/about', label: 'About Page', icon: Home },
+
+  // NEW
+  { path: '/admin/contact', label: 'Contact Page', icon: Mail },
+  { path: '/admin/messages', label: 'Messages', icon: MessageCircle },
 ];
 
 const AdminLayout = ({ children }: AdminLayoutProps) => {
@@ -38,12 +44,14 @@ const AdminLayout = ({ children }: AdminLayoutProps) => {
 
   return (
     <div className="min-h-screen bg-muted/30">
-      {/* Mobile header */}
+
+      {/* MOBILE HEADER */}
       <div className="lg:hidden fixed top-0 left-0 right-0 z-50 bg-background border-b border-border px-4 py-3 flex items-center justify-between">
         <div className="flex items-center gap-2">
           <Cookie className="h-6 w-6 text-primary" />
           <span className="font-display text-lg text-chocolate">Admin</span>
         </div>
+
         <button
           onClick={() => setSidebarOpen(!sidebarOpen)}
           className="p-2 hover:bg-muted rounded-lg"
@@ -52,13 +60,16 @@ const AdminLayout = ({ children }: AdminLayoutProps) => {
         </button>
       </div>
 
-      {/* Sidebar */}
-      <aside className={cn(
-        "fixed top-0 left-0 z-40 h-screen w-64 bg-background border-r border-border transition-transform duration-300",
-        "lg:translate-x-0",
-        sidebarOpen ? "translate-x-0" : "-translate-x-full"
-      )}>
+      {/* SIDEBAR */}
+      <aside
+        className={cn(
+          "fixed top-0 left-0 z-40 h-screen w-64 bg-background border-r border-border transition-transform duration-300",
+          "lg:translate-x-0",
+          sidebarOpen ? "translate-x-0" : "-translate-x-full"
+        )}
+      >
         <div className="flex flex-col h-full">
+
           {/* Logo */}
           <div className="p-6 border-b border-border">
             <Link to="/" className="flex items-center gap-3">
@@ -83,8 +94,8 @@ const AdminLayout = ({ children }: AdminLayoutProps) => {
                   onClick={() => setSidebarOpen(false)}
                   className={cn(
                     "flex items-center gap-3 px-4 py-3 rounded-lg transition-colors",
-                    isActive 
-                      ? "bg-primary/10 text-primary font-medium" 
+                    isActive
+                      ? "bg-primary/10 text-primary font-medium"
                       : "text-muted-foreground hover:bg-muted hover:text-foreground"
                   )}
                 >
@@ -104,6 +115,7 @@ const AdminLayout = ({ children }: AdminLayoutProps) => {
               <Home className="h-5 w-5" />
               View Site
             </Link>
+
             <Button
               variant="ghost"
               className="w-full justify-start gap-3 text-muted-foreground hover:text-destructive"
@@ -113,23 +125,25 @@ const AdminLayout = ({ children }: AdminLayoutProps) => {
               Sign Out
             </Button>
           </div>
+
         </div>
       </aside>
 
-      {/* Overlay */}
+      {/* MOBILE OVERLAY */}
       {sidebarOpen && (
-        <div 
+        <div
           className="lg:hidden fixed inset-0 z-30 bg-black/50"
           onClick={() => setSidebarOpen(false)}
         />
       )}
 
-      {/* Main content */}
+      {/* MAIN CONTENT */}
       <main className="lg:ml-64 min-h-screen pt-16 lg:pt-0">
         <div className="p-6 lg:p-8">
           {children}
         </div>
       </main>
+
     </div>
   );
 };

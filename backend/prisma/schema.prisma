@@ -146,3 +146,56 @@ model AboutPage {
   @@map("AboutPage")
 }
 
+model ContactPage {
+  id         Int     @id @default(autoincrement())
+
+  hero_badge    String?
+  hero_title    String?
+  hero_subtitle String?
+
+  card_1_icon  String?
+  card_1_title String?
+  card_1_line1 String?
+  card_1_line2 String?
+
+  card_2_icon  String?
+  card_2_title String?
+  card_2_line1 String?
+  card_2_line2 String?
+
+  card_3_icon  String?
+  card_3_title String?
+  card_3_line1 String?
+  card_3_line2 String?
+
+  card_4_icon  String?
+  card_4_title String?
+  card_4_line1 String?
+  card_4_line2 String?
+
+  faq_1_q String?
+  faq_1_a String?
+
+  faq_2_q String?
+  faq_2_a String?
+
+  faq_3_q String?
+  faq_3_a String?
+
+  faq_4_q String?
+  faq_4_a String?
+
+  map_title   String?
+  map_address String?
+
+  @@map("ContactPage")
+}
+
+model ContactMessage {
+  id        Int      @id @default(autoincrement())
+  name      String
+  email     String
+  subject   String
+  message   String
+  createdAt DateTime @default(now())
+}

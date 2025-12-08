@@ -6,6 +6,7 @@ require("dotenv").config();
 const authRoutes = require("./routes/auth");
 const productRoutes = require("./routes/products");
 const settingsRoutes = require("./routes/settings");
+const contactPageRoutes = require("./routes/contactPage");
 
 const { verifyToken } = require("./middleware/auth");
 
@@ -35,6 +36,8 @@ app.use("/api/auth", authRoutes);
 app.use("/api/products", productRoutes);
 app.use("/api/settings", settingsRoutes);
 app.use("/api/about", require("./routes/about"));
+app.use("/api/contact-page", contactPageRoutes); 
+app.use("/api/messages", require("./routes/contactMessages"));
 
 // ----------------------------
 // HEALTH CHECK
