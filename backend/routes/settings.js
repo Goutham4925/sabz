@@ -1,14 +1,13 @@
 // backend/routes/settings.js
 const express = require("express");
 const prisma = require("../prisma/client");
-const { verifyToken } = require("../middleware/auth");
 
 const router = express.Router();
 
-// --------------------------------------
-// GET /api/settings  (PUBLIC)
-// --------------------------------------
-router.get("/", async (_req, res) => {
+// ----------------------------
+// GET /api/settings
+// ----------------------------
+router.get("/", async (req, res) => {
   try {
     let settings = await prisma.siteSetting.findFirst();
 
@@ -16,8 +15,7 @@ router.get("/", async (_req, res) => {
       settings = await prisma.siteSetting.create({
         data: {
           hero_title: "Crafted with Tradition. Baked with Love.",
-          hero_subtitle:
-            "Experience the golden perfection of handcrafted biscuits, made with the finest ingredients and recipes passed down through generations.",
+          hero_subtitle: "Premium biscuits made with the finest ingredients.",
         },
       });
     }
@@ -29,73 +27,69 @@ router.get("/", async (_req, res) => {
   }
 });
 
-// --------------------------------------
-// PUT /api/settings/:id  (PROTECTED)
-// --------------------------------------
-router.put("/:id", verifyToken, async (req, res) => {
+// ----------------------------
+// PUT /api/settings/:id
+// ----------------------------
+router.put("/:id", async (req, res) => {
   try {
     const id = Number(req.params.id);
-    if (Number.isNaN(id)) {
+    if (isNaN(id)) {
       return res.status(400).json({ error: "Invalid ID" });
     }
 
-    const {
-      hero_title,
-      hero_subtitle,
-      hero_image_url,
-      hero_badge,
-      hero_cta_primary_label,
-      hero_cta_primary_link,
-      hero_cta_secondary_label,
-      hero_cta_secondary_link,
-      stat1_label,
-      stat1_value,
-      stat2_label,
-      stat2_value,
-      stat3_label,
-      stat3_value,
-      about_title,
-      about_subtitle,
-      about_text,
-      highlight1_title,
-      highlight1_text,
-      highlight2_title,
-      highlight2_text,
-      highlight3_title,
-      highlight3_text,
-      highlight4_title,
-      highlight4_text,
-    } = req.body;
+    let data = { ...req.body };
+
+    // Convert "" → null
+    Object.keys(data).forEach((key) => {
+      if (data[key] === "") data[key] = null;
+    });
+
+    // Only allow Prisma fields
+    const allowed = {
+      hero_title: true,
+      hero_subtitle: true,
+      hero_badge_text: true,
+      hero_image_url: true,
+      hero_years_label: true,
+      hero_customers_label: true,
+      hero_flavors_label: true,
+
+      about_title: true,
+      about_paragraph1: true,
+      about_paragraph2: true,
+      about_image_url: true,
+      about_highlight_1_title: true,
+      about_highlight_1_desc: true,
+      about_highlight_2_title: true,
+      about_highlight_2_desc: true,
+      about_highlight_3_title: true,
+      about_highlight_3_desc: true,
+      about_highlight_4_title: true,
+      about_highlight_4_desc: true,
+
+      products_title: true,
+      products_subtitle: true,
+
+      cta_title: true,
+      cta_subtitle: true,
+      cta_image_url: true,
+      cta_primary_label: true,
+      cta_primary_href: true,
+      cta_badge_text: true,
+
+      footer_text: true,
+      footer_subtext: true,
+      navbar_logo: true,
+    };
+
+    // Remove ALL fields not inside allowed list
+    Object.keys(data).forEach((key) => {
+      if (!allowed[key]) delete data[key];
+    });
 
     const updated = await prisma.siteSetting.update({
       where: { id },
-      data: {
-        hero_title: hero_title ?? null,
-        hero_subtitle: hero_subtitle ?? null,
-        hero_image_url: hero_image_url ?? null,
-        hero_badge: hero_badge ?? null,
-        hero_cta_primary_label: hero_cta_primary_label ?? null,
-        hero_cta_primary_link: hero_cta_primary_link ?? null,
-        hero_cta_secondary_label: hero_cta_secondary_label ?? null,
-        hero_cta_secondary_link: hero_cta_secondary_link ?? null,
-        stat1_label: stat1_label ?? null,
-        stat1_value: stat1_value ?? null,
-        stat2_label: stat2_label ?? null,
-        stat2_value: stat2_value ?? null,
-        stat3_label: stat3_label ?? null,
-        stat3_value: stat3_value ?? null,
-        about_title: about_title ?? null,
-        about_subtitle: about_subtitle ?? null,
-        about_text: about_text ?? null,
-        highlight1_title: highlight1_title ?? null,
-        highlight1_text: highlight1_text ?? null,
-        highlight2_title: highlight2_title ?? null,
-        highlight2_text: highlight2_text ?? null,
-        highlight3_title: highlight3_title ?? null,
-        highlight3_text: highlight3_text ?? null,
-        highlight4_title: highlight4_title ?? null,
-        highlight4_text: highlight4_text ?? null,
-      },
+      data,
     });
 
     res.json(updated);

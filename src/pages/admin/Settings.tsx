@@ -56,6 +56,12 @@ const Settings = () => {
             hero_subtitle: "",
             hero_image_url: "",
             about_text: "",
+
+            cta_title: "",
+            cta_subtitle: "",
+            cta_primary_label: "",
+            cta_primary_href: "",
+            cta_badge_text: "",
           });
         } else {
           setSettings(data);
@@ -232,6 +238,74 @@ const Settings = () => {
               </div>
             </CardContent>
           </Card>
+
+          {/* CTA SECTION */}
+          <Card>
+            <CardHeader>
+              <CardTitle>CTA Section</CardTitle>
+              <CardDescription>
+                Controls the call-to-action section near the bottom of your homepage
+              </CardDescription>
+            </CardHeader>
+
+            <CardContent className="space-y-4">
+
+              {/* CTA Title */}
+              <div className="space-y-2">
+                <Label htmlFor="cta_title">CTA Title (HTML allowed)</Label>
+                <Input
+                  id="cta_title"
+                  value={settings.cta_title || ""}
+                  onChange={(e) =>
+                    setSettings({ ...settings, cta_title: e.target.value })
+                  }
+                  placeholder="Ready to Experience <span class='text-golden'>Golden Perfection</span>?"
+                />
+              </div>
+
+              {/* CTA Subtitle */}
+              <div className="space-y-2">
+                <Label htmlFor="cta_subtitle">CTA Subtitle</Label>
+                <Textarea
+                  id="cta_subtitle"
+                  rows={3}
+                  value={settings.cta_subtitle || ""}
+                  onChange={(e) =>
+                    setSettings({ ...settings, cta_subtitle: e.target.value })
+                  }
+                  placeholder="Order our premium biscuits today and discover why customers love us."
+                />
+              </div>
+
+              {/* CTA Primary Button Label */}
+              <div className="space-y-2">
+                <Label htmlFor="cta_primary_label">Primary Button Label</Label>
+                <Input
+                  id="cta_primary_label"
+                  value={settings.cta_primary_label || ""}
+                  onChange={(e) =>
+                    setSettings({ ...settings, cta_primary_label: e.target.value })
+                  }
+                  placeholder="Shop Now"
+                />
+              </div>
+
+              {/* CTA Primary Button Link */}
+              <div className="space-y-2">
+                <Label htmlFor="cta_primary_href">Primary Button Link</Label>
+                <Input
+                  id="cta_primary_href"
+                  value={settings.cta_primary_href || ""}
+                  onChange={(e) =>
+                    setSettings({ ...settings, cta_primary_href: e.target.value })
+                  }
+                  placeholder="/products"
+                />
+              </div>
+
+            </CardContent>
+          </Card>
+
 
           {/* SAVE BUTTON */}
           <div className="flex justify-end">

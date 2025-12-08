@@ -32,7 +32,7 @@ app.use("/api/auth", authRoutes);
 // ----------------------------
 // PROTECTED ROUTES (Admin Only)
 // ----------------------------
-app.use("/api/products", verifyToken, productRoutes);
+app.use("/api/products", productRoutes);
 app.use("/api/settings", settingsRoutes);
 
 // ----------------------------
