@@ -1,0 +1,92 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider  = "postgresql"
+  url       = env("DATABASE_URL")
+  directUrl = env("DATABASE_URL")
+}
+
+model User {
+  id        Int      @id @default(autoincrement())
+  email     String   @unique
+  password  String
+  role      String   @default("admin")
+  createdAt DateTime @default(now())
+}
+
+model Product {
+  id          Int      @id @default(autoincrement())
+  name        String
+  description String?
+  price       Float?
+  category    String?
+  image_url   String?
+  is_featured Boolean   @default(false)
+  created_at  DateTime  @default(now())
+  updated_at  DateTime  @updatedAt
+}
+
+model SiteSetting {
+  id              Int     @id @default(autoincrement())
+
+  // -----------------------------------
+  // HERO SECTION
+  // -----------------------------------
+  hero_title      String?
+  hero_subtitle   String?
+  hero_image_url  String?
+  hero_badge      String?   @default("Premium Artisan Quality Since 1980")
+
+  hero_cta_primary_label    String? @default("View Products")
+  hero_cta_primary_link     String? @default("/products")
+  hero_cta_secondary_label  String? @default("Our Story")
+  hero_cta_secondary_link   String? @default("/about")
+
+  // Hero Stats
+  stat1_label     String? @default("Years of Excellence")
+  stat1_value     String? @default("40+")
+
+  stat2_label     String? @default("Happy Customers")
+  stat2_value     String? @default("50K+")
+
+  stat3_label     String? @default("Unique Flavors")
+  stat3_value     String? @default("25+")
+
+  // -----------------------------------
+  // ABOUT SECTION
+  // -----------------------------------
+  about_title     String?   @default("A Legacy of Delicious Moments")
+  about_subtitle  String?   @default("The story behind our craft")
+  about_text      String?
+
+  // About Highlights
+  highlight1_title String? @default("Since 1980")
+  highlight1_text  String? @default("Over 40 years of baking excellence")
+
+  highlight2_title String? @default("Made with Love")
+  highlight2_text  String? @default("Every biscuit crafted by hand")
+
+  highlight3_title String? @default("Natural Ingredients")
+  highlight3_text  String? @default("Only the finest, organic materials")
+
+  highlight4_title String? @default("Award Winning")
+  highlight4_text  String? @default("Recognized for quality worldwide")
+
+  // -----------------------------------
+  // CTA SECTION (Shop Now section)
+  // -----------------------------------
+  cta_badge_text     String? @default("Perfect for Gifting")
+  cta_title          String? @default("Ready to Experience")
+  cta_highlight      String? @default("Golden Perfection?")
+  cta_subtitle       String? @default("Order our premium biscuits today and discover why customers trust us.")
+
+  cta_primary_text   String? @default("Shop Now")
+  cta_primary_link   String? @default("/products")
+
+  cta_secondary_text String? @default("Corporate Orders")
+  cta_secondary_link String? @default("/contact")
+
+  @@map("SiteSettings")
+}
