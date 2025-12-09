@@ -12,6 +12,7 @@ import {
   Shield,
   RotateCcw,
 } from "lucide-react";
+import { useGlobalLoading } from "@/context/LoadingContext";
 
 const API_URL = "http://localhost:5000/api";
 
@@ -20,11 +21,15 @@ const ProductDetail = () => {
   const [product, setProduct] = useState<any>(null);
   const [loading, setLoading] = useState(true);
 
+  const { setLoading: setGlobalLoading } = useGlobalLoading();
+
   // ============================
   // FETCH PRODUCT FROM BACKEND
   // ============================
   useEffect(() => {
-    async function loadProduct() {
+    const loadProduct = async () => {
+      setGlobalLoading(true); // Start global loader
+
       try {
         const res = await fetch(`${API_URL}/products/${id}`);
         if (!res.ok) throw new Error("Product not found");
@@ -35,25 +40,21 @@ const ProductDetail = () => {
         setProduct(null);
       } finally {
         setLoading(false);
+        setGlobalLoading(false); // Stop global loader
       }
-    }
+    };
 
     loadProduct();
   }, [id]);
 
-  // ============================
-  // LOADING STATE
-  // ============================
-  if (loading) {
-    return (
-      <div className="min-h-screen flex items-center justify-center">
-        <p className="text-muted-foreground text-lg">Loading product...</p>
-      </div>
-    );
-  }
+  // --------------------------------
+  // Prevent page flicker (global loader)
+  // --------------------------------
+  if (loading) return null;
+
 
   // ============================
-  // NOT FOUND
+  // PRODUCT NOT FOUND
   // ============================
   if (!product) {
     return (
@@ -73,7 +74,7 @@ const ProductDetail = () => {
   }
 
   // ============================
-  // PRODUCT FOUND — DISPLAY PAGE
+  // PRODUCT FOUND — SHOW PAGE
   // ============================
   return (
     <div className="min-h-screen">
@@ -92,6 +93,7 @@ const ProductDetail = () => {
           </Link>
 
           <div className="grid grid-cols-1 lg:grid-cols-2 gap-12">
+            
             {/* ============================
                 PRODUCT IMAGE
             ============================ */}
@@ -110,7 +112,8 @@ const ProductDetail = () => {
                 PRODUCT INFO
             ============================ */}
             <div className="flex flex-col">
-              {/* (Optional) Rating Placeholder */}
+              
+              {/* Rating Display */}
               <div className="flex items-center gap-2 mb-4">
                 <div className="flex items-center gap-1">
                   {[...Array(5)].map((_, i) => (
@@ -139,9 +142,7 @@ const ProductDetail = () => {
                 {product.price ? `$${product.price.toFixed(2)}` : "—"}
               </div>
 
-              {/* ============================
-                  ACTION BUTTONS
-              ============================ */}
+              {/* Action Buttons */}
               <div className="flex flex-col sm:flex-row gap-4 mb-10">
                 <Button variant="hero" size="xl" className="flex-1">
                   <ShoppingCart className="w-5 h-5" />
@@ -152,9 +153,7 @@ const ProductDetail = () => {
                 </Button>
               </div>
 
-              {/* ============================
-                  PRODUCT FEATURES
-              ============================ */}
+              {/* Product Features */}
               <div className="grid grid-cols-3 gap-4 py-8 border-t border-border">
                 <div className="text-center">
                   <Truck className="w-6 h-6 text-primary mx-auto mb-2" />
@@ -170,9 +169,7 @@ const ProductDetail = () => {
                 </div>
               </div>
 
-              {/* ============================
-                  OPTIONAL INGREDIENTS
-              ============================ */}
+              {/* Ingredients */}
               {product.ingredients && (
                 <div className="py-8 border-t border-border">
                   <h3 className="font-display text-xl font-semibold mb-4">
@@ -190,6 +187,7 @@ const ProductDetail = () => {
                   </div>
                 </div>
               )}
+
             </div>
           </div>
         </div>

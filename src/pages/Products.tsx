@@ -4,6 +4,7 @@ import { Footer } from "@/components/layout/Footer";
 import { ProductCard } from "@/components/home/ProductCard";
 import { Button } from "@/components/ui/button";
 import { Link } from "react-router-dom";
+import { useGlobalLoading } from "@/context/LoadingContext";
 
 // Swiper for mobile
 import { Swiper, SwiperSlide } from "swiper/react";
@@ -27,11 +28,16 @@ const Products = () => {
   const [showPrices, setShowPrices] = useState(true);
   const [loading, setLoading] = useState(true);
 
+  const { setLoading: setGlobalLoading } = useGlobalLoading();
+
   // -----------------------------------------------
   // FETCH PRODUCTS
   // -----------------------------------------------
   useEffect(() => {
     const load = async () => {
+      // Start global loader
+      setGlobalLoading(true);
+
       try {
         const res = await fetch(`${API_URL}/products`);
         const data = await res.json();
@@ -39,8 +45,12 @@ const Products = () => {
       } catch (err) {
         console.error("Failed to fetch products:", err);
       }
+
       setLoading(false);
+      // Stop global loader when data is ready
+      setGlobalLoading(false);
     };
+
     load();
   }, []);
 
@@ -51,6 +61,9 @@ const Products = () => {
     activeCategory === "all"
       ? products
       : products.filter((p) => p.category === activeCategory);
+
+  // Prevent initial page flicker
+  if (loading) return null;
 
   return (
     <div className="min-h-screen">
@@ -98,59 +111,50 @@ const Products = () => {
             </label>
           </div>
 
-          {/* LOADING */}
-          {loading && (
-            <p className="text-center text-muted-foreground">Loading products...</p>
-          )}
-
           {/* -------------------------- */}
           {/* DESKTOP GRID */}
           {/* -------------------------- */}
-          {!loading && (
-            <div className="hidden md:grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-8">
-              {filteredProducts.map((product, index) => (
-                <div
-                  key={product.id}
-                  className="animate-fade-up"
-                  style={{ animationDelay: `${index * 100}ms` }}
-                >
+          <div className="hidden md:grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-8">
+            {filteredProducts.map((product, index) => (
+              <div
+                key={product.id}
+                className="animate-fade-up"
+                style={{ animationDelay: `${index * 100}ms` }}
+              >
+                <ProductCard
+                  {...product}
+                  image_url={product.image_url}
+                  showPrice={showPrices}
+                />
+              </div>
+            ))}
+          </div>
+
+          {/* -------------------------- */}
+          {/* MOBILE SWIPER */}
+          {/* -------------------------- */}
+          <div className="md:hidden mb-12">
+            <Swiper
+              modules={[Pagination]}
+              spaceBetween={20}
+              slidesPerView={1.2}
+              pagination={{ clickable: true }}
+              style={{ paddingBottom: "40px" }}
+            >
+              {filteredProducts.map((product) => (
+                <SwiperSlide key={product.id}>
                   <ProductCard
                     {...product}
                     image_url={product.image_url}
                     showPrice={showPrices}
                   />
-                </div>
+                </SwiperSlide>
               ))}
-            </div>
-          )}
-
-          {/* -------------------------- */}
-          {/* MOBILE SWIPER */}
-          {/* -------------------------- */}
-          {!loading && (
-            <div className="md:hidden mb-12">
-              <Swiper
-                modules={[Pagination]}
-                spaceBetween={20}
-                slidesPerView={1.2}
-                pagination={{ clickable: true }}
-                style={{ paddingBottom: "40px" }}
-              >
-                {filteredProducts.map((product) => (
-                  <SwiperSlide key={product.id}>
-                    <ProductCard
-                      {...product}
-                      image_url={product.image_url}
-                      showPrice={showPrices}
-                    />
-                  </SwiperSlide>
-                ))}
-              </Swiper>
-            </div>
-          )}
+            </Swiper>
+          </div>
 
           {/* EMPTY STATE */}
-          {!loading && filteredProducts.length === 0 && (
+          {filteredProducts.length === 0 && (
             <div className="text-center py-16">
               <p className="text-muted-foreground text-lg">
                 No products found in this category.

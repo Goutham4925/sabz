@@ -6,6 +6,7 @@ import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
 import { MapPin, Phone, Mail, Clock, Send } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
+import { useGlobalLoading } from "@/context/LoadingContext";
 
 const API = "http://localhost:5000/api/contact-page";
 const MESSAGE_API = "http://localhost:5000/api/messages";
@@ -19,6 +20,7 @@ const iconMap: any = {
 
 const Contact = () => {
   const { toast } = useToast();
+  const { setLoading: setGlobalLoading } = useGlobalLoading();
 
   const [page, setPage] = useState<any>(null);
   const [loading, setLoading] = useState(true);
@@ -33,17 +35,26 @@ const Contact = () => {
   const [isSubmitting, setIsSubmitting] = useState(false);
 
   useEffect(() => {
-    fetch(API)
-      .then((r) => r.json())
-      .then((d) => {
-        setPage(d);
+    const load = async () => {
+      setGlobalLoading(true);
+
+      try {
+        const r = await fetch(API);
+        const data = await r.json();
+        setPage(data);
+      } finally {
         setLoading(false);
-      });
+        setGlobalLoading(false);
+      }
+    };
+
+    load();
   }, []);
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setIsSubmitting(true);
+    setGlobalLoading(true);
 
     try {
       const r = await fetch(MESSAGE_API, {
@@ -69,11 +80,13 @@ const Contact = () => {
     }
 
     setIsSubmitting(false);
+    setGlobalLoading(false);
   };
 
   const handleChange = (e: any) =>
     setFormData((prev) => ({ ...prev, [e.target.name]: e.target.value }));
 
+  // Prevent flicker — loader covers whole page
   if (loading || !page) return null;
 
   return (
@@ -107,7 +120,6 @@ const Contact = () => {
               </h2>
 
               <form onSubmit={handleSubmit} className="space-y-6">
-
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                   <div>
                     <label className="block text-sm font-medium mb-2">Your Name</label>
@@ -131,15 +143,8 @@ const Contact = () => {
                 </div>
 
                 <Button type="submit" variant="hero" className="w-full" disabled={isSubmitting}>
-                  {isSubmitting ? (
-                    "Sending..."
-                  ) : (
-                    <>
-                      Send Message <Send className="w-5 h-5 ml-2" />
-                    </>
-                  )}
+                  {isSubmitting ? "Sending..." : <>Send Message <Send className="w-5 h-5 ml-2" /></>}
                 </Button>
-
               </form>
             </div>
 
@@ -148,7 +153,6 @@ const Contact = () => {
               <h2 className="font-display text-2xl font-semibold mb-8">Contact Information</h2>
 
               <div className="grid grid-cols-1 sm:grid-cols-2 gap-6 mb-12">
-
                 {[1, 2, 3, 4].map((i) => {
                   const iconVal = page[`card_${i}_icon`];
                   const isImage = iconVal?.startsWith("http");
@@ -157,32 +161,22 @@ const Contact = () => {
                   return (
                     <div key={i} className="glass-card p-6 hover:shadow-elevated">
                       <div className="w-12 h-12 rounded-xl flex items-center justify-center mb-4 bg-gradient-to-br from-primary to-accent">
-
                         {isImage ? (
-                          <img
-                            src={iconVal}
-                            className="w-full h-full object-cover rounded-xl"
-                          />
+                          <img src={iconVal} className="w-full h-full object-cover rounded-xl" />
                         ) : (
                           <Icon className="w-6 h-6 text-primary-foreground" />
                         )}
-
                       </div>
 
                       <h3 className="font-display font-semibold mb-2">
                         {page[`card_${i}_title`]}
                       </h3>
 
-                      <p className="text-muted-foreground text-sm">
-                        {page[`card_${i}_line1`]}
-                      </p>
-                      <p className="text-muted-foreground text-sm">
-                        {page[`card_${i}_line2`]}
-                      </p>
+                      <p className="text-muted-foreground text-sm">{page[`card_${i}_line1`]}</p>
+                      <p className="text-muted-foreground text-sm">{page[`card_${i}_line2`]}</p>
                     </div>
                   );
                 })}
-
               </div>
 
               {/* MAP */}
@@ -195,8 +189,8 @@ const Contact = () => {
                   </div>
                 </div>
               </div>
-
             </div>
+
           </div>
 
           {/* FAQ */}
@@ -208,12 +202,8 @@ const Contact = () => {
             <div className="grid grid-cols-1 md:grid-cols-2 gap-6 max-w-4xl mx-auto">
               {[1, 2, 3, 4].map((i) => (
                 <div key={i} className="glass-card p-6">
-                  <h3 className="font-display font-semibold mb-2">
-                    {page[`faq_${i}_q`]}
-                  </h3>
-                  <p className="text-muted-foreground text-sm">
-                    {page[`faq_${i}_a`]}
-                  </p>
+                  <h3 className="font-display font-semibold mb-2">{page[`faq_${i}_q`]}</h3>
+                  <p className="text-muted-foreground text-sm">{page[`faq_${i}_a`]}</p>
                 </div>
               ))}
             </div>
