@@ -24,15 +24,18 @@ app.use(
 );
 
 app.use(express.json());
+app.use("/uploads", express.static("public/uploads"));
 
 // ----------------------------
 // PUBLIC ROUTES
 // ----------------------------
 app.use("/api/auth", authRoutes);
 
+
 // ----------------------------
 // PROTECTED ROUTES (Admin Only)
 // ----------------------------
+app.use("/api/upload", require("./routes/upload"));
 app.use("/api/products", productRoutes);
 app.use("/api/settings", settingsRoutes);
 app.use("/api/about", require("./routes/about"));
