@@ -28,4 +28,17 @@ router.get("/", async (req, res) => {
   }
 });
 
+router.delete("/:id", async (req, res) => {
+  try {
+    await prisma.contactMessage.delete({
+      where: { id: Number(req.params.id) }
+    });
+
+    res.json({ success: true });
+  } catch (err) {
+    console.error("DELETE /api/messages ERROR:", err);
+    res.status(500).json({ error: "Failed to delete message" });
+  }
+});
+
 module.exports = router;
