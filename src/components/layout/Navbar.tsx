@@ -1,123 +1,169 @@
-import { useState, useEffect } from 'react';
-import { Link, useLocation } from 'react-router-dom';
-import { Menu, X, Cookie } from 'lucide-react';
-import { Button } from '@/components/ui/button';
-import { cn } from '@/lib/utils';
+import { useState, useEffect } from "react";
+import { Link, useLocation } from "react-router-dom";
+import { Menu, X, Cookie } from "lucide-react";
+import { Button } from "@/components/ui/button";
+import { cn } from "@/lib/utils";
 
 const navLinks = [
-  { name: 'Home', path: '/' },
-  { name: 'Products', path: '/products' },
-  { name: 'About', path: '/about' },
-  { name: 'Contact', path: '/contact' },
+  { name: "Home", path: "/" },
+  { name: "Products", path: "/products" },
+  { name: "About", path: "/about" },
+  { name: "Contact", path: "/contact" },
 ];
 
 export function Navbar() {
   const [isScrolled, setIsScrolled] = useState(false);
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
+  const [settings, setSettings] = useState<any>(null);
   const location = useLocation();
 
+  // Load site settings
   useEffect(() => {
-    const handleScroll = () => {
-      setIsScrolled(window.scrollY > 20);
+    const load = async () => {
+      const r = await fetch("http://localhost:5000/api/settings");
+      setSettings(await r.json());
     };
-
-    window.addEventListener('scroll', handleScroll);
-    return () => window.removeEventListener('scroll', handleScroll);
+    load();
   }, []);
 
+  // Scrolled state
   useEffect(() => {
-    setIsMobileMenuOpen(false);
-  }, [location]);
+    const handleScroll = () => setIsScrolled(window.scrollY > 20);
+    window.addEventListener("scroll", handleScroll);
+    return () => window.removeEventListener("scroll", handleScroll);
+  }, []);
+
+  // Close mobile menu on route change
+  useEffect(() => setIsMobileMenuOpen(false), [location]);
+
+  if (!settings) return null;
+
+  const showText = settings.show_company_text !== false;
+  const logo = settings.navbar_logo;
+  const brandImage = settings.navbar_brand_image;
 
   return (
     <header
       className={cn(
-        'fixed top-0 left-0 right-0 z-50 transition-all duration-500',
+        "fixed top-0 left-0 right-0 z-50 transition-all duration-500",
         isScrolled
-          ? 'bg-background/95 backdrop-blur-md shadow-soft py-3'
-          : 'bg-transparent py-5'
+          ? "bg-background/95 backdrop-blur-md shadow-soft py-3"
+          : "bg-transparent py-5"
       )}
     >
       <div className="container mx-auto px-4 md:px-8">
         <nav className="flex items-center justify-between">
-          {/* Logo */}
-          <Link
-            to="/"
-            className="flex items-center gap-3 group"
-          >
-            <div className="relative w-12 h-12 bg-gradient-to-br from-primary to-accent rounded-full flex items-center justify-center shadow-lg group-hover:shadow-glow transition-shadow duration-300">
-              <Cookie className="w-6 h-6 text-primary-foreground" />
+
+          {/* LOGO + BRAND */}
+          <Link to="/" className="flex items-center gap-3 md:gap-4">
+
+            {/* MAIN LOGO */}
+            <div
+              className="
+                relative 
+                h-14 w-24                /* Mobile */
+                sm:h-16 sm:w-28          /* Small Tablets */
+                md:h-20 md:w-32          /* Tablet / Laptop */
+                lg:h-24 lg:w-40          /* Desktop */
+                overflow-hidden 
+                flex items-end justify-center
+              "
+            >
+              {logo ? (
+                <img
+                  src={logo}
+                  className="object-contain w-full h-full"
+                  alt="Logo"
+                />
+              ) : (
+                <Cookie className="w-8 h-8 text-primary" />
+              )}
             </div>
-            <div className="flex flex-col">
-              <span className="font-display text-xl font-bold text-foreground tracking-tight">
-                Golden Crust
-              </span>
-              <span className="text-xs text-muted-foreground tracking-widest uppercase">
-                Artisan Biscuits
-              </span>
+
+            {/* BRAND TEXT + BRAND IMAGE */}
+            <div className="flex flex-col justify-center">
+
+              {/* BRAND IMAGE */}
+              {brandImage && (
+                <img
+                  src={brandImage}
+                  className="
+                    h-10 w-auto            /* Mobile */
+                    sm:h-12                /* Tablets */
+                    md:h-14                /* Larger screens */
+                    object-contain
+                  "
+                  alt="Brand"
+                />
+              )}
+
+              {/* OPTIONALLY SHOW COMPANY TEXT */}
+              {showText && (
+                <div className="leading-tight">
+                  <span className="font-display text-lg md:text-xl font-bold text-foreground">
+                    Gobbly Treat
+                  </span>
+                  <span className="text-[10px] md:text-xs text-muted-foreground uppercase tracking-widest">
+                    Artisan Biscuits
+                  </span>
+                </div>
+              )}
             </div>
+
           </Link>
 
-          {/* Desktop Navigation */}
+          {/* DESKTOP NAVIGATION */}
           <div className="hidden md:flex items-center gap-8">
-            {navLinks.map((link) => (
+            {navLinks.map((l) => (
               <Link
-                key={link.path}
-                to={link.path}
+                key={l.path}
+                to={l.path}
                 className={cn(
-                  'nav-link font-medium text-sm tracking-wide uppercase',
-                  location.pathname === link.path && 'text-primary'
+                  "font-medium text-sm tracking-wide uppercase",
+                  location.pathname === l.path && "text-primary"
                 )}
               >
-                {link.name}
+                {l.name}
               </Link>
             ))}
-            <Button variant="default" size="sm">
-              Order Now
-            </Button>
+            <Button variant="default" size="sm">Order Now</Button>
           </div>
 
-          {/* Mobile Menu Button */}
+          {/* MOBILE TOGGLE BUTTON */}
           <button
-            className="md:hidden p-2 text-foreground"
+            className="md:hidden p-2"
             onClick={() => setIsMobileMenuOpen(!isMobileMenuOpen)}
-            aria-label="Toggle menu"
           >
-            {isMobileMenuOpen ? (
-              <X className="w-6 h-6" />
-            ) : (
-              <Menu className="w-6 h-6" />
-            )}
+            {isMobileMenuOpen ? <X className="h-6 w-6" /> : <Menu className="h-6 w-6" />}
           </button>
         </nav>
 
-        {/* Mobile Navigation */}
+        {/* MOBILE NAVIGATION */}
         <div
           className={cn(
-            'md:hidden overflow-hidden transition-all duration-500',
-            isMobileMenuOpen ? 'max-h-96 opacity-100 mt-6' : 'max-h-0 opacity-0'
+            "md:hidden overflow-hidden transition-all duration-500 bg-background/75 backdrop-blur-md shadow-lg px-4",
+            isMobileMenuOpen ? "max-h-96 opacity-100 mt-6" : "max-h-0 opacity-0"
           )}
         >
           <div className="flex flex-col gap-4 pb-6">
-            {navLinks.map((link) => (
+            {navLinks.map((l) => (
               <Link
-                key={link.path}
-                to={link.path}
+                key={l.path}
+                to={l.path}
                 className={cn(
-                  'font-medium text-base py-2 border-b border-border transition-colors',
-                  location.pathname === link.path
-                    ? 'text-primary border-primary'
-                    : 'text-foreground/80 hover:text-primary'
+                  "font-medium text-base py-2 border-b border-border",
+                  location.pathname === l.path
+                    ? "text-primary border-primary"
+                    : "text-foreground/80"
                 )}
               >
-                {link.name}
+                {l.name}
               </Link>
             ))}
-            <Button variant="default" className="mt-4">
-              Order Now
-            </Button>
+            <Button className="mt-4">Order Now</Button>
           </div>
         </div>
+
       </div>
     </header>
   );

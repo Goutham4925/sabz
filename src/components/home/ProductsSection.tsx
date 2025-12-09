@@ -4,6 +4,12 @@ import { Button } from "@/components/ui/button";
 import { Link } from "react-router-dom";
 import { ArrowRight } from "lucide-react";
 
+// Swiper Imports
+import { Swiper, SwiperSlide } from "swiper/react";
+import { Pagination } from "swiper/modules";
+import "swiper/css";
+import "swiper/css/pagination";
+
 const API_URL = "http://localhost:5000/api";
 
 export function ProductsSection() {
@@ -12,17 +18,14 @@ export function ProductsSection() {
   const [isVisible, setIsVisible] = useState(false);
   const sectionRef = useRef<HTMLElement>(null);
 
-  // -------------------------------
-  // FETCH REAL PRODUCTS
-  // -------------------------------
   useEffect(() => {
     const loadProducts = async () => {
       try {
         const res = await fetch(`${API_URL}/products`);
         const data = await res.json();
-        setProducts(data.slice(0, 4)); // show only 4 featured items
-      } catch (error) {
-        console.error("Failed to load products:", error);
+        setProducts(data.slice(0, 4));
+      } catch (err) {
+        console.error("Failed to load products:", err);
       }
       setLoading(false);
     };
@@ -30,9 +33,7 @@ export function ProductsSection() {
     loadProducts();
   }, []);
 
-  // -------------------------------
-  // ANIMATION OBSERVER
-  // -------------------------------
+  // Fade-in animation
   useEffect(() => {
     const observer = new IntersectionObserver(
       ([entry]) => entry.isIntersecting && setIsVisible(true),
@@ -44,9 +45,10 @@ export function ProductsSection() {
   }, []);
 
   return (
-    <section ref={sectionRef} className="py-24 bg-background relative overflow-hidden">
-      <div className="absolute top-0 left-0 w-full h-32 bg-gradient-to-b from-secondary/50 to-transparent" />
-
+    <section
+      ref={sectionRef}
+      className="py-24 bg-background relative overflow-hidden"
+    >
       <div className="container mx-auto px-4 md:px-8 relative z-10">
 
         {/* Section Header */}
@@ -76,31 +78,52 @@ export function ProductsSection() {
           </p>
         </div>
 
-        {/* Loading State */}
+        {/* Loading */}
         {loading && (
           <p className="text-center text-muted-foreground">Loading products...</p>
         )}
 
-        {/* Empty State */}
+        {/* Empty */}
         {!loading && products.length === 0 && (
-          <p className="text-center text-muted-foreground">
-            No products available yet.
-          </p>
+          <p className="text-center text-muted-foreground">No products available.</p>
         )}
 
-        {/* Products Grid */}
-        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-8 mb-12">
-          {products.map((product, index) => (
+        {/* -------------------------------- */}
+        {/* DESKTOP GRID (hidden on mobile) */}
+        {/* -------------------------------- */}
+        <div className="hidden md:grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-8 mb-12">
+          {products.map((p, i) => (
             <div
-              key={product.id}
+              key={p.id}
               className={`transition-all duration-700 ${
                 isVisible ? "opacity-100 translate-y-0" : "opacity-0 translate-y-10"
               }`}
-              style={{ transitionDelay: `${300 + index * 100}ms` }}
+              style={{ transitionDelay: `${300 + i * 100}ms` }}
             >
-              <ProductCard {...product} />
+              <ProductCard {...p} />
             </div>
           ))}
+        </div>
+
+        {/* -------------------------------- */}
+        {/* MOBILE SWIPER (hidden on desktop) */}
+        {/* -------------------------------- */}
+        <div className="md:hidden mb-12">
+          <Swiper
+            modules={[Pagination]}
+            spaceBetween={20}
+            slidesPerView={1.2}
+            pagination={{ clickable: true }}
+            style={{ paddingBottom: "40px" }}
+          >
+            {products.map((p, index) => (
+              <SwiperSlide key={p.id}>
+                <div className="w-full">
+                  <ProductCard {...p} />
+                </div>
+              </SwiperSlide>
+            ))}
+          </Swiper>
         </div>
 
         {/* View All Button */}

@@ -81,6 +81,8 @@ router.put("/:id", async (req, res) => {
       footer_text: true,
       footer_subtext: true,
       navbar_logo: true,
+      navbar_brand_image: true,
+      show_company_text: true,
     };
 
     // Remove ALL fields not inside allowed list

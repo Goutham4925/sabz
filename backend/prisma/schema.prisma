@@ -70,9 +70,11 @@ model SiteSetting {
   cta_badge_text         String?
 
   // FOOTER + NAVBAR
-  footer_text        String?
-  footer_subtext     String?
-  navbar_logo        String?
+  footer_text             String?
+  footer_subtext          String?
+  navbar_logo             String?
+  navbar_brand_image      String?
+  show_company_text      Boolean   @default(true)
 
   @@map("SiteSettings")
 }
