@@ -17,7 +17,6 @@ const About = () => {
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
-    // CACHE BUSTER → ALWAYS FETCH NEW DATA
     fetch(API + "?v=" + Date.now(), { cache: "no-store" })
       .then((r) => r.json())
       .then((d) => {
@@ -34,12 +33,12 @@ const About = () => {
       <Navbar />
 
       <main className="pt-32 pb-24">
-        
+
         {/* HERO SECTION */}
         <section className="container mx-auto px-4 md:px-8 mb-24">
           <div className="grid grid-cols-1 lg:grid-cols-2 gap-16 items-center">
 
-            {/* Left */}
+            {/* LEFT */}
             <div>
               <span className="badge-premium mb-4 inline-block animate-fade-up">
                 {about.hero_badge || "Our Story"}
@@ -60,7 +59,7 @@ const About = () => {
               </p>
             </div>
 
-            {/* Right */}
+            {/* RIGHT HERO IMAGE */}
             <div className="relative animate-fade-up stagger-4">
               <div className="relative rounded-3xl overflow-hidden shadow-elevated">
                 <img
@@ -92,13 +91,27 @@ const About = () => {
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-8">
 
               {[1, 2, 3, 4].map((i) => {
-                const Icon = iconMap[about[`value_${i}_icon`]] || Heart;
+                const iconValue = about[`value_${i}_icon`];
+
+                const isImage = iconValue && iconValue.startsWith("http");
+                const Icon = iconMap[iconValue] || Heart;
 
                 return (
                   <div key={i} className="glass-card p-8 text-center">
-                    <div className="w-16 h-16 bg-gradient-to-br from-primary to-accent rounded-2xl flex items-center justify-center mx-auto mb-6">
-                      <Icon className="w-8 h-8 text-primary-foreground" />
-                    </div>
+
+                    {/* ICON OR UPLOADED IMAGE */}
+                    {isImage ? (
+                      <div className="w-16 h-16 rounded-2xl overflow-hidden mx-auto mb-6">
+                        <img
+                          src={iconValue}
+                          className="w-full h-full object-cover"
+                        />
+                      </div>
+                    ) : (
+                      <div className="w-16 h-16 bg-gradient-to-br from-primary to-accent rounded-2xl flex items-center justify-center mx-auto mb-6">
+                        <Icon className="w-8 h-8 text-primary-foreground" />
+                      </div>
+                    )}
 
                     <h3 className="font-display text-xl font-semibold mb-3">
                       {about[`value_${i}_title`]}
@@ -119,7 +132,6 @@ const About = () => {
         <section className="py-24">
           <div className="container mx-auto px-4 md:px-8 max-w-4xl">
 
-            {/* NEW DYNAMIC HEADING */}
             <div className="text-center max-w-2xl mx-auto mb-16">
               <h2 className="section-title mb-4">
                 {about.timeline_heading || "Our Journey"}
@@ -130,10 +142,12 @@ const About = () => {
             </div>
 
             {[1,2,3,4,5].map((i, index) => (
-              <div key={i}
+              <div
+                key={i}
                 className={`flex gap-8 mb-12 last:mb-0 ${
                   index % 2 ? "flex-row-reverse" : "flex-row"
-                }`}>
+                }`}
+              >
 
                 <div className="flex-1 text-right">
                   {index % 2 === 0 && (

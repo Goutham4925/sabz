@@ -24,6 +24,8 @@ app.use(
 );
 
 app.use(express.json());
+
+
 app.use("/uploads", express.static("public/uploads"));
 
 // ----------------------------
@@ -35,6 +37,8 @@ app.use("/api/auth", authRoutes);
 // ----------------------------
 // PROTECTED ROUTES (Admin Only)
 // ----------------------------
+
+app.use("/api/admin", require("./routes/admin"));
 app.use("/api/upload", require("./routes/upload"));
 app.use("/api/products", productRoutes);
 app.use("/api/settings", settingsRoutes);

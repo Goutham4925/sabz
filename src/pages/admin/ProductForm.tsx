@@ -15,7 +15,7 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
-import { ArrowLeft, Loader2, Save } from "lucide-react";
+import { ArrowLeft, Loader2, Save, Upload } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
 import { z } from "zod";
 
@@ -26,7 +26,7 @@ const productSchema = z.object({
   description: z.string().max(500).optional(),
   price: z.number().min(0, "Price must be positive").optional(),
   category: z.string().min(1, "Category is required"),
-  image_url: z.string().url("Must be a valid URL").optional().or(z.literal("")),
+  image_url: z.string().optional(),
   is_featured: z.boolean(),
 });
 
@@ -51,54 +51,91 @@ const ProductForm = () => {
     is_featured: false,
   });
 
-  // -----------------------------------------------
-  // LOAD PRODUCT FOR EDITING (FROM BACKEND)
-  // -----------------------------------------------
-  useEffect(() => {
-    if (isEditing) {
-      setLoading(true);
-      const token = localStorage.getItem("token");
+  // ---------------------------------------------
+  // ⭐ IMAGE UPLOAD HANDLER
+  // ---------------------------------------------
+  const handleUpload = async (e: any) => {
+    const file = e.target.files?.[0];
+    if (!file) return;
 
-      fetch(`${API_URL}/products/${id}`, {
-        headers: {
-          Authorization: `Bearer ${token}`,
-        },
-      })
-        .then(async (res) => {
-          if (!res.ok) throw new Error("Product not found");
-          return res.json();
-        })
-        .then((data) => {
-          setFormData({
-            name: data.name,
-            description: data.description || "",
-            price: data.price?.toString() || "",
-            category: data.category || "Classic",
-            image_url: data.image_url || "",
-            is_featured: data.is_featured || false,
-          });
-        })
-        .catch(() => {
-          toast({
-            title: "Error",
-            description: "Failed to load product",
-            variant: "destructive",
-          });
-          navigate("/admin/products");
-        })
-        .finally(() => setLoading(false));
+    const formBody = new FormData();
+    formBody.append("image", file);
+
+    try {
+      const res = await fetch("http://localhost:5000/api/upload", {
+        method: "POST",
+        body: formBody,
+      });
+
+      const data = await res.json();
+
+      setFormData((prev) => ({
+        ...prev,
+        image_url: data.url, // Full uploaded URL
+      }));
+
+      toast({
+        title: "Image Uploaded",
+        description: "Image added successfully!",
+      });
+    } catch (err) {
+      toast({
+        title: "Upload Failed",
+        description: "Unable to upload image.",
+        variant: "destructive",
+      });
     }
-  }, [id, isEditing, navigate, toast]);
+  };
 
-  // -----------------------------------------------
-  // VALIDATE INPUT
-  // -----------------------------------------------
+  // ---------------------------------------------
+  // LOAD EXISTING PRODUCT
+  // ---------------------------------------------
+  useEffect(() => {
+    if (!isEditing) return;
+
+    setLoading(true);
+    const token = localStorage.getItem("token");
+
+    fetch(`${API_URL}/products/${id}`, {
+      headers: {
+        Authorization: `Bearer ${token}`,
+      },
+    })
+      .then(async (res) => {
+        if (!res.ok) throw new Error("Product not found");
+        return res.json();
+      })
+      .then((data) => {
+        setFormData({
+          name: data.name,
+          description: data.description || "",
+          price: data.price?.toString() || "",
+          category: data.category || "Classic",
+          image_url: data.image_url || "",
+          is_featured: data.is_featured || false,
+        });
+      })
+      .catch(() => {
+        toast({
+          title: "Error",
+          description: "Failed to load product",
+          variant: "destructive",
+        });
+        navigate("/admin/products");
+      })
+      .finally(() => setLoading(false));
+  }, [id]);
+
+  // ---------------------------------------------
+  // VALIDATION
+  // ---------------------------------------------
   const validateForm = () => {
     try {
       productSchema.parse({
         ...formData,
         price: formData.price ? parseFloat(formData.price) : undefined,
       });
+
       setErrors({});
       return true;
     } catch (error) {
@@ -114,9 +151,9 @@ const ProductForm = () => {
     }
   };
 
-  // -----------------------------------------------
-  // SAVE PRODUCT (CREATE / UPDATE)
-  // -----------------------------------------------
+  // ---------------------------------------------
+  // SUBMIT HANDLER
+  // ---------------------------------------------
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!validateForm()) return;
@@ -124,6 +161,7 @@ const ProductForm = () => {
     setSaving(true);
 
     const token = localStorage.getItem("token");
+
     const productData = {
       name: formData.name,
       description: formData.description || null,
@@ -134,10 +172,8 @@ const ProductForm = () => {
     };
 
     try {
-      const response = await fetch(
-        isEditing
-          ? `${API_URL}/products/${id}`
-          : `${API_URL}/products`,
+      const res = await fetch(
+        isEditing ? `${API_URL}/products/${id}` : `${API_URL}/products`,
         {
           method: isEditing ? "PUT" : "POST",
           headers: {
@@ -148,7 +184,7 @@ const ProductForm = () => {
         }
       );
 
-      if (!response.ok) throw new Error("Failed to save product");
+      if (!res.ok) throw new Error("Save failed");
 
       toast({
         title: "Success",
@@ -167,9 +203,9 @@ const ProductForm = () => {
     setSaving(false);
   };
 
-  // -----------------------------------------------
-  // LOADING UI FOR EDIT MODE
-  // -----------------------------------------------
+  // ---------------------------------------------
+  // LOADING STATE
+  // ---------------------------------------------
   if (loading) {
     return (
       <ProtectedRoute>
@@ -182,48 +218,45 @@ const ProductForm = () => {
     );
   }
 
-  // -----------------------------------------------
+  // ---------------------------------------------
   // FORM UI
-  // -----------------------------------------------
+  // ---------------------------------------------
   return (
     <ProtectedRoute>
       <AdminLayout>
         <div className="space-y-6 max-w-2xl">
+
           {/* Back Button */}
-          <div className="flex items-center gap-4">
-            <Button variant="ghost" size="sm" onClick={() => navigate("/admin/products")}>
-              <ArrowLeft className="h-4 w-4 mr-2" />
-              Back
-            </Button>
-          </div>
+          <Button
+            variant="ghost"
+            size="sm"
+            onClick={() => navigate("/admin/products")}
+          >
+            <ArrowLeft className="h-4 w-4 mr-2" /> Back
+          </Button>
 
           {/* Title */}
-          <div>
-            <h1 className="font-display text-3xl text-chocolate">
-              {isEditing ? "Edit Product" : "Add New Product"}
-            </h1>
-            <p className="text-muted-foreground mt-1">
-              {isEditing
-                ? "Update product information"
-                : "Create a new product for your catalog"}
-            </p>
-          </div>
+          <h1 className="font-display text-3xl text-chocolate">
+            {isEditing ? "Edit Product" : "Add New Product"}
+          </h1>
 
           {/* Form */}
           <Card>
             <CardHeader>
               <CardTitle>Product Details</CardTitle>
             </CardHeader>
+
             <CardContent>
               <form onSubmit={handleSubmit} className="space-y-6">
+
                 {/* Name */}
                 <div className="space-y-2">
-                  <Label htmlFor="name">Product Name *</Label>
+                  <Label>Product Name *</Label>
                   <Input
-                    id="name"
                     value={formData.name}
-                    onChange={(e) => setFormData({ ...formData, name: e.target.value })}
-                    placeholder="Classic Butter Cookies"
+                    onChange={(e) =>
+                      setFormData({ ...formData, name: e.target.value })
+                    }
                     className={errors.name ? "border-destructive" : ""}
                   />
                   {errors.name && (
@@ -233,42 +266,42 @@ const ProductForm = () => {
 
                 {/* Description */}
                 <div className="space-y-2">
-                  <Label htmlFor="description">Description</Label>
+                  <Label>Description</Label>
                   <Textarea
-                    id="description"
                     value={formData.description}
+                    rows={4}
                     onChange={(e) =>
                       setFormData({ ...formData, description: e.target.value })
                     }
-                    rows={4}
-                    placeholder="Describe your product..."
                   />
                 </div>
 
                 {/* Price + Category */}
                 <div className="grid grid-cols-2 gap-4">
                   <div className="space-y-2">
-                    <Label htmlFor="price">Price ($)</Label>
+                    <Label>Price</Label>
                     <Input
-                      id="price"
                       type="number"
-                      step="0.01"
-                      min="0"
                       value={formData.price}
-                      onChange={(e) => setFormData({ ...formData, price: e.target.value })}
-                      placeholder="12.99"
+                      onChange={(e) =>
+                        setFormData({ ...formData, price: e.target.value })
+                      }
+                      placeholder="10.00"
                     />
                   </div>
 
                   <div className="space-y-2">
-                    <Label>Category *</Label>
+                    <Label>Category</Label>
                     <Select
                       value={formData.category}
-                      onValueChange={(value) => setFormData({ ...formData, category: value })}
+                      onValueChange={(val) =>
+                        setFormData({ ...formData, category: val })
+                      }
                     >
                       <SelectTrigger>
-                        <SelectValue placeholder="Select category" />
+                        <SelectValue />
                       </SelectTrigger>
+
                       <SelectContent>
                         {categories.map((c) => (
                           <SelectItem key={c} value={c}>
@@ -280,26 +313,40 @@ const ProductForm = () => {
                   </div>
                 </div>
 
-                {/* Image URL */}
+                {/* IMAGE UPLOAD */}
                 <div className="space-y-2">
-                  <Label htmlFor="image_url">Image URL</Label>
-                  <Input
-                    id="image_url"
-                    value={formData.image_url}
-                    onChange={(e) =>
-                      setFormData({ ...formData, image_url: e.target.value })
-                    }
-                    placeholder="https://example.com/cookies.jpg"
-                  />
+                  <Label>Product Image</Label>
+
+                  <div className="flex items-center gap-3">
+                    <Input
+                      value={formData.image_url}
+                      onChange={(e) =>
+                        setFormData({ ...formData, image_url: e.target.value })
+                      }
+                    />
+
+                    <input
+                      type="file"
+                      id="productUpload"
+                      className="hidden"
+                      accept="image/*"
+                      onChange={handleUpload}
+                    />
+
+                    <Button
+                      type="button"
+                      onClick={() =>
+                        document.getElementById("productUpload")?.click()
+                      }
+                    >
+                      <Upload className="h-4 w-4 mr-1" /> Upload
+                    </Button>
+                  </div>
 
                   {formData.image_url && (
                     <img
                       src={formData.image_url}
-                      alt="Preview"
-                      className="w-32 h-32 object-cover mt-2 rounded-lg border"
-                      onError={(e) =>
-                        ((e.target as HTMLImageElement).src = "/placeholder.svg")
-                      }
+                      className="w-32 h-32 object-cover rounded mt-2 border"
                     />
                   )}
                 </div>
@@ -309,7 +356,7 @@ const ProductForm = () => {
                   <div>
                     <Label>Featured Product</Label>
                     <p className="text-sm text-muted-foreground">
-                      Featured products appear on the homepage
+                      Appears on homepage highlights
                     </p>
                   </div>
 
@@ -321,8 +368,8 @@ const ProductForm = () => {
                   />
                 </div>
 
-                {/* Buttons */}
-                <div className="flex gap-4">
+                {/* Submit */}
+                <div className="flex gap-3">
                   <Button
                     type="button"
                     variant="outline"
@@ -334,11 +381,11 @@ const ProductForm = () => {
                   <Button type="submit" variant="hero" disabled={saving}>
                     {saving ? (
                       <>
-                        <Loader2 className="mr-2 h-4 w-4 animate-spin" /> Saving...
+                        <Loader2 className="h-4 w-4 animate-spin mr-2" /> Saving...
                       </>
                     ) : (
                       <>
-                        <Save className="mr-2 h-4 w-4" />
+                        <Save className="h-4 w-4 mr-2" />{" "}
                         {isEditing ? "Update Product" : "Create Product"}
                       </>
                     )}

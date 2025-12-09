@@ -82,7 +82,7 @@ const Contact = () => {
 
       <main className="pt-32 pb-24">
         <div className="container mx-auto px-4 md:px-8">
-          
+
           {/* HERO */}
           <div className="text-center max-w-3xl mx-auto mb-16">
             <span className="badge-premium mb-4 inline-block animate-fade-up">
@@ -99,7 +99,7 @@ const Contact = () => {
           </div>
 
           <div className="grid grid-cols-1 lg:grid-cols-2 gap-16">
-            
+
             {/* CONTACT FORM */}
             <div className="glass-card p-8 md:p-10 animate-fade-up stagger-3">
               <h2 className="font-display text-2xl font-semibold mb-6">
@@ -111,55 +111,36 @@ const Contact = () => {
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                   <div>
                     <label className="block text-sm font-medium mb-2">Your Name</label>
-                    <Input
-                      name="name"
-                      value={formData.name}
-                      onChange={handleChange}
-                      required
-                    />
+                    <Input name="name" value={formData.name} onChange={handleChange} required />
                   </div>
 
                   <div>
                     <label className="block text-sm font-medium mb-2">Email</label>
-                    <Input
-                      name="email"
-                      type="email"
-                      value={formData.email}
-                      onChange={handleChange}
-                      required
-                    />
+                    <Input name="email" type="email" value={formData.email} onChange={handleChange} required />
                   </div>
                 </div>
 
                 <div>
                   <label className="block text-sm font-medium mb-2">Subject</label>
-                  <Input
-                    name="subject"
-                    value={formData.subject}
-                    onChange={handleChange}
-                    required
-                  />
+                  <Input name="subject" value={formData.subject} onChange={handleChange} required />
                 </div>
 
                 <div>
                   <label className="block text-sm font-medium mb-2">Message</label>
-                  <Textarea
-                    name="message"
-                    rows={6}
-                    value={formData.message}
-                    onChange={handleChange}
-                    required
-                  />
+                  <Textarea name="message" rows={6} value={formData.message} onChange={handleChange} required />
                 </div>
 
                 <Button type="submit" variant="hero" className="w-full" disabled={isSubmitting}>
-                  {isSubmitting ? "Sending..." : <>
-                    Send Message <Send className="w-5 h-5 ml-2" />
-                  </>}
+                  {isSubmitting ? (
+                    "Sending..."
+                  ) : (
+                    <>
+                      Send Message <Send className="w-5 h-5 ml-2" />
+                    </>
+                  )}
                 </Button>
 
               </form>
-
             </div>
 
             {/* CONTACT CARDS */}
@@ -167,14 +148,25 @@ const Contact = () => {
               <h2 className="font-display text-2xl font-semibold mb-8">Contact Information</h2>
 
               <div className="grid grid-cols-1 sm:grid-cols-2 gap-6 mb-12">
-                
+
                 {[1, 2, 3, 4].map((i) => {
-                  const Icon = iconMap[page[`card_${i}_icon`]] ?? MapPin;
+                  const iconVal = page[`card_${i}_icon`];
+                  const isImage = iconVal?.startsWith("http");
+                  const Icon = iconMap[iconVal] ?? MapPin;
 
                   return (
                     <div key={i} className="glass-card p-6 hover:shadow-elevated">
-                      <div className="w-12 h-12 bg-gradient-to-br from-primary to-accent rounded-xl flex items-center justify-center mb-4">
-                        <Icon className="w-6 h-6 text-primary-foreground" />
+                      <div className="w-12 h-12 rounded-xl flex items-center justify-center mb-4 bg-gradient-to-br from-primary to-accent">
+
+                        {isImage ? (
+                          <img
+                            src={iconVal}
+                            className="w-full h-full object-cover rounded-xl"
+                          />
+                        ) : (
+                          <Icon className="w-6 h-6 text-primary-foreground" />
+                        )}
+
                       </div>
 
                       <h3 className="font-display font-semibold mb-2">
@@ -214,7 +206,6 @@ const Contact = () => {
             </h2>
 
             <div className="grid grid-cols-1 md:grid-cols-2 gap-6 max-w-4xl mx-auto">
-
               {[1, 2, 3, 4].map((i) => (
                 <div key={i} className="glass-card p-6">
                   <h3 className="font-display font-semibold mb-2">
@@ -225,7 +216,6 @@ const Contact = () => {
                   </p>
                 </div>
               ))}
-
             </div>
           </section>
 

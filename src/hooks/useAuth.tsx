@@ -17,14 +17,15 @@ interface AuthContextType {
 
 const AuthContext = createContext<AuthContextType | undefined>(undefined);
 
+// UNIVERSAL SIGNUP SWITCH
+const ALLOW_SIGNUP = true; // Set to false to disable signups
+
 export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
   const [user, setUser] = useState<User | null>(null);
   const [loading, setLoading] = useState(true);
   const [isAdmin, setIsAdmin] = useState(false);
 
-  // --------------------------------------------------------
-  // FETCH USER INFO FROM BACKEND USING STORED JWT
-  // --------------------------------------------------------
+  // Load user from token
   const fetchUser = async () => {
     const token = localStorage.getItem("token");
     if (!token) {
@@ -39,14 +40,13 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
         headers: { Authorization: `Bearer ${token}` },
       });
 
-      if (!res.ok) throw new Error("Auth failed");
+      if (!res.ok) throw new Error("Invalid token");
 
       const data = await res.json();
       setUser(data);
-
-      // Determine admin role
       setIsAdmin(data.role === "admin");
-    } catch (err) {
+
+    } catch {
       setUser(null);
       setIsAdmin(false);
     }
@@ -54,14 +54,11 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
     setLoading(false);
   };
 
-  // Load user on mount
   useEffect(() => {
     fetchUser();
   }, []);
 
-  // --------------------------------------------------------
-  // LOGIN → POST /api/auth/login
-  // --------------------------------------------------------
+  // LOGIN
   const signIn = async (email: string, password: string) => {
     try {
       const res = await fetch("http://localhost:5000/api/auth/login", {
@@ -73,12 +70,10 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
       const data = await res.json();
 
       if (!res.ok) {
-        return { error: data.error || "Login failed" };
+        return { error: data.message || "Login failed" };
       }
 
-      // Save JWT
       localStorage.setItem("token", data.token);
-
       await fetchUser();
 
       return { error: null };
@@ -87,10 +82,12 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
     }
   };
 
-  // --------------------------------------------------------
-  // REGISTER → POST /api/auth/register
-  // --------------------------------------------------------
+  // SIGNUP WITH GLOBAL SWITCH
   const signUp = async (email: string, password: string) => {
+    if (!ALLOW_SIGNUP) {
+      return { error: "Signup is disabled" };
+    }
+
     try {
       const res = await fetch("http://localhost:5000/api/auth/register", {
         method: "POST",
@@ -101,23 +98,17 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
       const data = await res.json();
 
       if (!res.ok) {
-        return { error: data.error || "Registration failed" };
+        return { error: data.message || "Registration failed" };
       }
 
-      // Auto login after signup
-      localStorage.setItem("token", data.token);
-
-      await fetchUser();
-
       return { error: null };
+
     } catch {
       return { error: "Network error" };
     }
   };
 
-  // --------------------------------------------------------
   // LOGOUT
-  // --------------------------------------------------------
   const signOut = () => {
     localStorage.removeItem("token");
     setUser(null);
@@ -125,15 +116,12 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
   };
 
   return (
-    <AuthContext.Provider
-      value={{ user, loading, isAdmin, signIn, signUp, signOut }}
-    >
+    <AuthContext.Provider value={{ user, loading, isAdmin, signIn, signUp, signOut }}>
       {children}
     </AuthContext.Provider>
   );
 };
 
-// Hook to consume Auth context
 export const useAuth = () => {
   const ctx = useContext(AuthContext);
   if (!ctx) throw new Error("useAuth must be used within an AuthProvider");

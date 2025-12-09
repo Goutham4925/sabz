@@ -11,8 +11,9 @@ import {
   Menu, 
   X,
   Home,
-  Mail,              // ✅ FIXED
-  MessageCircle      // ✅ FIXED
+  Mail,
+  MessageCircle,
+  ShieldCheck    // ✅ NEW ICON FOR PENDING USERS
 } from 'lucide-react';
 import { cn } from '@/lib/utils';
 
@@ -26,9 +27,14 @@ const navItems = [
   { path: '/admin/settings', label: 'Settings', icon: Settings },
   { path: '/admin/about', label: 'About Page', icon: Home },
 
-  // NEW
+  // NEW CONTACT PAGE
   { path: '/admin/contact', label: 'Contact Page', icon: Mail },
+
+  // NEW MESSAGES PAGE
   { path: '/admin/messages', label: 'Messages', icon: MessageCircle },
+
+  // ✅ NEW Pending Users Page (Admin Approval)
+  { path: '/admin/pending-users', label: 'Pending Users', icon: ShieldCheck },
 ];
 
 const AdminLayout = ({ children }: AdminLayoutProps) => {

@@ -9,12 +9,14 @@ datasource db {
 }
 
 model User {
-  id        Int      @id @default(autoincrement())
-  email     String   @unique
-  password  String
-  role      String   @default("admin")
-  createdAt DateTime @default(now())
+  id         String   @id @default(uuid())
+  email      String   @unique
+  password   String
+  role       String   @default("USER")
+  isApproved Boolean  @default(false)
+  createdAt  DateTime @default(now())
 }
+
 
 model Product {
   id          Int      @id @default(autoincrement())
@@ -199,3 +201,4 @@ model ContactMessage {
   message   String
   createdAt DateTime @default(now())
 }
+
