@@ -18,7 +18,8 @@ import Settings from "./pages/admin/Settings";
 import AboutPage from "./pages/admin/AboutPage";
 import ContactPageAdmin from "./pages/admin/ContactPageAdmin";
 import MessagesPage from "./pages/admin/Messages";
-import PendingUsers from "./pages/admin/pending-users";
+import PendingUsers from "./pages/admin/UserManagement";
+import UserManagement from "./pages/admin/UserManagement";
 
 
 const queryClient = new QueryClient();
@@ -46,7 +47,7 @@ const App = () => (
             <Route path="/admin/about" element={<AboutPage />} />
             <Route path="/admin/contact" element={<ContactPageAdmin />} />
             <Route path="/admin/messages" element={<MessagesPage />} />
-            <Route path="/admin/pending-users" element={<PendingUsers />} />
+            <Route path="/admin/users" element={<UserManagement />} />
             {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
             <Route path="*" element={<NotFound />} />
           </Routes>

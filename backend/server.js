@@ -8,7 +8,8 @@ const productRoutes = require("./routes/products");
 const settingsRoutes = require("./routes/settings");
 const contactPageRoutes = require("./routes/contactPage");
 
-const { verifyToken } = require("./middleware/auth");
+// const { verifyToken } = require("./middleware/auth");
+const { verifyAdmin } = require("./middleware/auth");
 
 const app = express();
 const PORT = process.env.PORT || 5000;
@@ -38,7 +39,7 @@ app.use("/api/auth", authRoutes);
 // PROTECTED ROUTES (Admin Only)
 // ----------------------------
 
-app.use("/api/admin", require("./routes/admin"));
+app.use("/api/admin", verifyAdmin, require("./routes/admin"));
 app.use("/api/upload", require("./routes/upload"));
 app.use("/api/products", productRoutes);
 app.use("/api/settings", settingsRoutes);

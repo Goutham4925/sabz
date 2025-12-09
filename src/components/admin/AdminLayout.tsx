@@ -13,7 +13,7 @@ import {
   Home,
   Mail,
   MessageCircle,
-  ShieldCheck    // ✅ NEW ICON FOR PENDING USERS
+  Users  
 } from 'lucide-react';
 import { cn } from '@/lib/utils';
 
@@ -34,7 +34,7 @@ const navItems = [
   { path: '/admin/messages', label: 'Messages', icon: MessageCircle },
 
   // ✅ NEW Pending Users Page (Admin Approval)
-  { path: '/admin/pending-users', label: 'Pending Users', icon: ShieldCheck },
+  { path: '/admin/users', label: 'Users', icon: Users },
 ];
 
 const AdminLayout = ({ children }: AdminLayoutProps) => {
