@@ -2,7 +2,7 @@ import { Toaster } from "@/components/ui/toaster";
 import { Toaster as Sonner } from "@/components/ui/sonner";
 import { TooltipProvider } from "@/components/ui/tooltip";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
-import { BrowserRouter, Routes, Route } from "react-router-dom";
+import { BrowserRouter, Routes, Route, useLocation } from "react-router-dom";
 import { AuthProvider } from "@/hooks/useAuth";
 
 import Index from "./pages/Index";
@@ -28,22 +28,26 @@ import UniversalLoader from "@/components/ui/UniversalLoader";
 
 const queryClient = new QueryClient();
 
-// A wrapper to show the global loader everywhere
-function AppWithLoader() {
+function RouterWrapper() {
   const { loading } = useGlobalLoading();
+  const location = useLocation();
+
+  const isAdmin = location.pathname.startsWith("/admin");
 
   return (
     <>
-      {loading && <UniversalLoader />}
+      {/* Show loader only on PUBLIC screens */}
+      {!isAdmin && loading && <UniversalLoader />}
 
       <Routes>
+        {/* PUBLIC ROUTES */}
         <Route path="/" element={<Index />} />
         <Route path="/products" element={<Products />} />
         <Route path="/products/:id" element={<ProductDetail />} />
         <Route path="/about" element={<About />} />
         <Route path="/contact" element={<Contact />} />
 
-        {/* Admin routes */}
+        {/* ADMIN ROUTES (no loader) */}
         <Route path="/admin/login" element={<AdminLogin />} />
         <Route path="/admin/dashboard" element={<Dashboard />} />
         <Route path="/admin/products" element={<AdminProducts />} />
@@ -55,7 +59,7 @@ function AppWithLoader() {
         <Route path="/admin/messages" element={<MessagesPage />} />
         <Route path="/admin/users" element={<UserManagement />} />
 
-        {/* Catch-all */}
+        {/* 404 */}
         <Route path="*" element={<NotFound />} />
       </Routes>
     </>
@@ -70,7 +74,7 @@ const App = () => (
       <BrowserRouter>
         <AuthProvider>
           <LoadingProvider>
-            <AppWithLoader />
+            <RouterWrapper />
           </LoadingProvider>
         </AuthProvider>
       </BrowserRouter>
