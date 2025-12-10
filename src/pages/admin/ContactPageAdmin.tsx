@@ -24,6 +24,11 @@ export default function ContactPageAdmin() {
     const form = new FormData();
     form.append("image", file);
 
+    // Send old image URL for deletion
+    if (data[field]) {
+      form.append("oldImage", data[field]);
+    }
+
     try {
       const res = await fetch("http://localhost:5000/api/upload", {
         method: "POST",
@@ -32,17 +37,24 @@ export default function ContactPageAdmin() {
 
       const out = await res.json();
 
-      setData((prev: any) => ({ ...prev, [field]: out.url }));
+      setData((prev: any) => ({
+        ...prev,
+        [field]: out.url, // save new url
+      }));
 
-      toast({ title: "Uploaded!", description: "Icon updated successfully." });
-    } catch (e) {
+      toast({
+        title: "Image Updated!",
+        description: "Old image deleted automatically.",
+      });
+    } catch {
       toast({
         title: "Upload Failed",
-        description: "Could not upload file",
+        description: "Could not upload image.",
         variant: "destructive",
       });
     }
   };
+
 
   useEffect(() => {
     fetch(API)

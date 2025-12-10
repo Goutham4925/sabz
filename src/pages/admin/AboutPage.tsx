@@ -24,6 +24,11 @@ export default function AboutPageAdmin() {
     const form = new FormData();
     form.append("image", file);
 
+    // Send old image URL for deletion
+    if (data[field]) {
+      form.append("oldImage", data[field]);
+    }
+
     try {
       const res = await fetch("http://localhost:5000/api/upload", {
         method: "POST",
@@ -34,12 +39,12 @@ export default function AboutPageAdmin() {
 
       setData((prev: any) => ({
         ...prev,
-        [field]: out.url,
+        [field]: out.url, // save new url
       }));
 
       toast({
-        title: "Image Uploaded!",
-        description: "Preview updated successfully.",
+        title: "Image Updated!",
+        description: "Old image deleted automatically.",
       });
     } catch {
       toast({
@@ -49,6 +54,7 @@ export default function AboutPageAdmin() {
       });
     }
   };
+
 
   // -------------------------
   // FETCH ABOUT PAGE

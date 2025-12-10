@@ -61,6 +61,11 @@ const ProductForm = () => {
     const formBody = new FormData();
     formBody.append("image", file);
 
+    // IMPORTANT: Send old image to delete
+    if (formData.image_url) {
+      formBody.append("oldImage", formData.image_url);
+    }
+
     try {
       const res = await fetch("http://localhost:5000/api/upload", {
         method: "POST",
@@ -71,12 +76,12 @@ const ProductForm = () => {
 
       setFormData((prev) => ({
         ...prev,
-        image_url: data.url, // Full uploaded URL
+        image_url: data.url,
       }));
 
       toast({
-        title: "Image Uploaded",
-        description: "Image added successfully!",
+        title: "Image Updated!",
+        description: "Old image deleted successfully.",
       });
     } catch (err) {
       toast({
@@ -86,6 +91,7 @@ const ProductForm = () => {
       });
     }
   };
+
 
   // ---------------------------------------------
   // LOAD EXISTING PRODUCT

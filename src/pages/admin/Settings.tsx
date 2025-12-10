@@ -66,8 +66,13 @@ export default function Settings() {
     const file = e.target.files?.[0];
     if (!file) return;
 
-    const formData = new FormData();
+    const formData = new FormData(); // <-- This is correct (camelCase)
     formData.append("image", file);
+
+    // DELETE OLD IMAGE
+    if (settings[field]) {
+      formData.append("oldImage", settings[field]);
+    }
 
     try {
       const res = await fetch(`${API_URL}/upload`, {
@@ -82,8 +87,11 @@ export default function Settings() {
         [field]: data.url,
       }));
 
-      toast({ title: "Image Uploaded", description: "Uploaded successfully!" });
-    } catch {
+      toast({
+        title: "Image Updated!",
+        description: "Old image deleted successfully.",
+      });
+    } catch (err) {
       toast({
         title: "Upload Failed",
         description: "Unable to upload image.",
@@ -91,6 +99,7 @@ export default function Settings() {
       });
     }
   };
+
 
   // ----------------------------
   // FETCH SETTINGS
