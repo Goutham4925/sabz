@@ -2,24 +2,68 @@ const express = require("express");
 const prisma = require("../prisma/client");
 const router = express.Router();
 
-// POST contact form message
+/* ============================================================
+   POST — NEW CONTACT MESSAGE or PRODUCT ENQUIRY
+============================================================ */
 router.post("/", async (req, res) => {
   try {
-    const msg = await prisma.contactMessage.create({
-      data: req.body,
+    const {
+      name,
+      email,
+      phone,
+      subject,
+      message,
+      productId,      // NEW
+    } = req.body;
+
+    let enrichedSubject = subject;
+    let enrichedMessage = message;
+    let productName = null;
+
+    // If enquiry contains a productId, pull its name
+    if (productId) {
+      const product = await prisma.product.findUnique({
+        where: { id: Number(productId) }
+      });
+
+      if (product) {
+        productName = product.name;
+
+        // Auto-inject product info into message
+        enrichedSubject = subject || `Enquiry about ${product.name}`;
+
+        enrichedMessage =
+          message ||
+          `Customer has requested information about the product "${product.name}".`;
+      }
+    }
+
+    const saved = await prisma.contactMessage.create({
+      data: {
+        name,
+        email,
+        phone: phone || null,       // NEW FIELD
+        subject: enrichedSubject,
+        message: enrichedMessage,
+        productId: productId ? Number(productId) : null,
+        productName,
+      },
     });
 
-    res.json({ success: true, message: "Message received", msg });
+    res.json({ success: true, message: "Message stored", saved });
   } catch (err) {
+    console.error("Failed saving message:", err);
     res.status(500).json({ error: "Failed to save message" });
   }
 });
 
-// Admin — Get all messages
+/* ============================================================
+   GET ALL MESSAGES (ADMIN)
+============================================================ */
 router.get("/", async (req, res) => {
   try {
     const messages = await prisma.contactMessage.findMany({
-      orderBy: { createdAt: "desc" }
+      orderBy: { createdAt: "desc" },
     });
 
     res.json(messages);
@@ -28,16 +72,18 @@ router.get("/", async (req, res) => {
   }
 });
 
+/* ============================================================
+   DELETE MESSAGE
+============================================================ */
 router.delete("/:id", async (req, res) => {
   try {
     await prisma.contactMessage.delete({
-      where: { id: Number(req.params.id) }
+      where: { id: Number(req.params.id) },
     });
-
     res.json({ success: true });
   } catch (err) {
-    console.error("DELETE /api/messages ERROR:", err);
-    res.status(500).json({ error: "Failed to delete message" });
+    console.error("Delete Error:", err);
+    res.status(500).json({ error: "Failed to delete" });
   }
 });
 

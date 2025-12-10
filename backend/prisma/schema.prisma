@@ -32,20 +32,28 @@ model Category {
 // PRODUCT MODEL — Updated with dynamic categories
 ///////////////////////////////////////////////////////////////////////////
 model Product {
-  id          Int       @id @default(autoincrement())
+  id          Int      @id @default(autoincrement())
   name        String
   description String?
   price       Float?
-  image_url   String?
-  is_featured Boolean   @default(false)
-
-  // --- NEW DYNAMIC CATEGORY RELATION ---
   categoryId  Int?
   category    Category? @relation(fields: [categoryId], references: [id])
 
-  created_at  DateTime  @default(now())
-  updated_at  DateTime  @updatedAt
+  image_url   String?
+  is_featured Boolean   @default(false)
+
+  // NEW FIELDS
+  ingredients     String?   // Store as a comma-separated string
+  highlights      String?   // e.g. “Crunchy, Handcrafted, Healthy”
+  nutrition_info  String?   // Long text (JSON or plain)
+  shelf_life      String?
+  weight          String?
+  package_type    String?
+
+  created_at      DateTime @default(now())
+  updated_at      DateTime @updatedAt
 }
+
 
 ///////////////////////////////////////////////////////////////////////////
 // SITE SETTINGS
@@ -226,9 +234,12 @@ model ContactPage {
 ///////////////////////////////////////////////////////////////////////////
 model ContactMessage {
   id        Int      @id @default(autoincrement())
-  name      String
-  email     String
-  subject   String
-  message   String
+  name          String
+  email         String
+  subject       String
+  message       String
+  phone         String?      
+  productId     Int?         
+  productName   String?      
   createdAt DateTime @default(now())
 }
