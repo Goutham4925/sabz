@@ -20,19 +20,24 @@ import {
   Loader2,
   Save,
   Upload,
-  Trash2,
   ImagePlus,
+  Trash2,
 } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
 import { z } from "zod";
 
 const API_URL = "http://localhost:5000/api";
 
-// Validation
+/* ---------------------------------------------
+   VALIDATION SCHEMA
+--------------------------------------------- */
 const productSchema = z.object({
   name: z.string().min(1, "Name is required"),
   description: z.string().optional(),
-  price: z.preprocess((v) => (v === "" ? undefined : Number(v)), z.number().optional()),
+  price: z.preprocess(
+    (v) => (v === "" ? undefined : Number(v)),
+    z.number().optional()
+  ),
   categoryId: z.string().optional(),
   image_url: z.string().optional(),
   is_featured: z.boolean().optional(),
@@ -44,20 +49,47 @@ const productSchema = z.object({
   package_type: z.string().optional(),
 });
 
+/* ---------------------------------------------
+   TYPES
+--------------------------------------------- */
+interface GalleryImage {
+  id: number;
+  url: string;
+}
+
+interface FormDataType {
+  name: string;
+  description: string;
+  price: string | number;
+  categoryId: string;
+  image_url: string;
+  is_featured: boolean;
+  ingredients: string;
+  highlights: string;
+  nutrition_info: string;
+  shelf_life: string;
+  weight: string;
+  package_type: string;
+}
+
 export default function ProductForm() {
   const { id } = useParams();
   const isEditing = !!id;
   const navigate = useNavigate();
   const { toast } = useToast();
 
+  /* ---------------------------------------------
+     STATE
+  --------------------------------------------- */
   const [saving, setSaving] = useState(false);
   const [loading, setLoading] = useState(false);
-  const [categories, setCategories] = useState([]);
-  const [errors, setErrors] = useState({});
 
-  const [gallery, setGallery] = useState([]); // MULTIPLE IMAGES
+  const [categories, setCategories] = useState<any[]>([]);
+  const [errors, setErrors] = useState<Record<string, string>>({});
 
-  const [formData, setFormData] = useState({
+  const [gallery, setGallery] = useState<GalleryImage[]>([]);
+
+  const [formData, setFormData] = useState<FormDataType>({
     name: "",
     description: "",
     price: "",
@@ -72,7 +104,9 @@ export default function ProductForm() {
     package_type: "",
   });
 
-  // Load categories
+  /* ---------------------------------------------
+     FETCH CATEGORIES
+  --------------------------------------------- */
   useEffect(() => {
     (async () => {
       try {
@@ -84,12 +118,15 @@ export default function ProductForm() {
     })();
   }, []);
 
-  // Load product (edit)
+  /* ---------------------------------------------
+     LOAD PRODUCT IF EDITING
+  --------------------------------------------- */
   useEffect(() => {
     if (!isEditing) return;
 
     (async () => {
       setLoading(true);
+
       const res = await fetch(`${API_URL}/products/${id}`);
       const data = await res.json();
 
@@ -108,36 +145,47 @@ export default function ProductForm() {
         package_type: data.package_type || "",
       });
 
-      setGallery(data.images || []); // load existing gallery
+      setGallery(data.images || []);
       setLoading(false);
     })();
   }, [id]);
 
-  // Upload main image
-  const handleUpload = async (e: any) => {
+  /* ---------------------------------------------
+     UPLOAD MAIN IMAGE
+  --------------------------------------------- */
+  const handleUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
     if (!file) return;
 
     const form = new FormData();
     form.append("image", file);
-    if (formData.image_url) form.append("oldImage", formData.image_url);
 
-    const res = await fetch(`${API_URL}/upload`, { method: "POST", body: form });
+    if (formData.image_url) {
+      form.append("oldImage", formData.image_url);
+    }
+
+    const res = await fetch(`${API_URL}/upload`, {
+      method: "POST",
+      body: form,
+    });
+
     const out = await res.json();
-
     setFormData((prev) => ({ ...prev, image_url: out.url }));
+
     toast({ title: "Uploaded main image" });
   };
 
-  // Upload multiple gallery images
-  const handleGalleryUpload = async (e: any) => {
-    const files = Array.from(e.target.files);
+  /* ---------------------------------------------
+     UPLOAD MULTIPLE GALLERY IMAGES
+  --------------------------------------------- */
+  const handleGalleryUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
+    const files = Array.from(e.target.files ?? []);
     if (!files.length) return;
 
     if (!isEditing) {
       return toast({
         title: "Save product first",
-        description: "Gallery upload works after product is created.",
+        description: "You can upload gallery images after product is created.",
         variant: "destructive",
       });
     }
@@ -151,43 +199,53 @@ export default function ProductForm() {
         body: form,
       });
 
-      const img = await res.json();
+      const img: GalleryImage = await res.json();
       setGallery((prev) => [...prev, img]);
     }
 
     toast({ title: "Gallery images uploaded" });
   };
 
-  // Delete gallery image
+  /* ---------------------------------------------
+     DELETE GALLERY IMAGE
+  --------------------------------------------- */
   const deleteGalleryImage = async (imageId: number) => {
     await fetch(`${API_URL}/product-images/${imageId}`, { method: "DELETE" });
     setGallery((prev) => prev.filter((img) => img.id !== imageId));
   };
 
-  // Validate
+  /* ---------------------------------------------
+     VALIDATE FORM
+  --------------------------------------------- */
   const validateForm = () => {
     try {
       productSchema.parse(formData);
       setErrors({});
       return true;
-    } catch (err) {
-      const errorObj = {};
-      err.errors.forEach((e) => (errorObj[e.path[0]] = e.message));
-      setErrors(errorObj);
+    } catch (err: any) {
+      const errObj: Record<string, string> = {};
+      err.errors?.forEach((e: any) => {
+        errObj[e.path[0]] = e.message;
+      });
+      setErrors(errObj);
       return false;
     }
   };
 
-  // Submit
-  const handleSubmit = async (e: any) => {
+  /* ---------------------------------------------
+     SUBMIT FORM
+  --------------------------------------------- */
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!validateForm()) return;
 
     setSaving(true);
+
     const payload = {
       ...formData,
       price: formData.price ? Number(formData.price) : null,
-      categoryId: formData.categoryId === "none" ? null : Number(formData.categoryId),
+      categoryId:
+        formData.categoryId === "none" ? null : Number(formData.categoryId),
     };
 
     const res = await fetch(
@@ -201,23 +259,28 @@ export default function ProductForm() {
 
     const saved = await res.json();
 
-    // After creation → allow gallery upload
-    if (!isEditing) navigate(`/admin/products/edit/${saved.id}`);
-    else navigate("/admin/products");
+    if (!isEditing) return navigate(`/admin/products/edit/${saved.id}`);
 
+    navigate("/admin/products");
     toast({ title: "Saved successfully" });
     setSaving(false);
   };
 
+  /* ---------------------------------------------
+     LOADING STATE
+  --------------------------------------------- */
   if (loading)
     return (
       <AdminLayout>
-        <div className="flex justify-center py-16">
+        <div className="flex justify-center py-20">
           <Loader2 className="h-8 w-8 animate-spin" />
         </div>
       </AdminLayout>
     );
 
+  /* ---------------------------------------------
+     UI
+  --------------------------------------------- */
   return (
     <ProtectedRoute>
       <AdminLayout>
@@ -242,9 +305,13 @@ export default function ProductForm() {
                   <Label>Name *</Label>
                   <Input
                     value={formData.name}
-                    onChange={(e) => setFormData({ ...formData, name: e.target.value })}
+                    onChange={(e) =>
+                      setFormData({ ...formData, name: e.target.value })
+                    }
                   />
-                  {errors.name && <p className="text-red-500">{errors.name}</p>}
+                  {errors.name && (
+                    <p className="text-red-500 text-sm">{errors.name}</p>
+                  )}
                 </div>
 
                 {/* DESCRIPTION */}
@@ -276,12 +343,12 @@ export default function ProductForm() {
                     <Label>Category</Label>
                     <Select
                       value={formData.categoryId}
-                      onValueChange={(value) =>
-                        setFormData({ ...formData, categoryId: value })
+                      onValueChange={(v) =>
+                        setFormData({ ...formData, categoryId: v })
                       }
                     >
                       <SelectTrigger>
-                        <SelectValue placeholder="Select category" />
+                        <SelectValue placeholder="Select Category" />
                       </SelectTrigger>
 
                       <SelectContent>
@@ -299,6 +366,7 @@ export default function ProductForm() {
                 {/* MAIN IMAGE */}
                 <div>
                   <Label>Main Image</Label>
+
                   <div className="flex gap-3">
                     <Input
                       value={formData.image_url}
@@ -317,7 +385,9 @@ export default function ProductForm() {
 
                     <Button
                       type="button"
-                      onClick={() => document.getElementById("uploadMain")?.click()}
+                      onClick={() =>
+                        document.getElementById("uploadMain")?.click()
+                      }
                     >
                       <Upload className="h-4 w-4 mr-1" /> Upload
                     </Button>
@@ -326,12 +396,12 @@ export default function ProductForm() {
                   {formData.image_url && (
                     <img
                       src={formData.image_url}
-                      className="w-32 h-32 mt-2 rounded object-cover"
+                      className="w-32 h-32 mt-3 rounded object-cover shadow"
                     />
                   )}
                 </div>
 
-                {/* MULTI IMAGE UPLOAD */}
+                {/* GALLERY UPLOAD */}
                 {isEditing && (
                   <div>
                     <Label>Gallery Images</Label>
@@ -339,21 +409,22 @@ export default function ProductForm() {
                     <input
                       type="file"
                       id="uploadGallery"
-                      multiple
                       className="hidden"
+                      multiple
                       accept="image/*"
                       onChange={handleGalleryUpload}
                     />
 
                     <Button
                       type="button"
-                      onClick={() => document.getElementById("uploadGallery")?.click()}
                       className="mt-2"
+                      onClick={() =>
+                        document.getElementById("uploadGallery")?.click()
+                      }
                     >
                       <ImagePlus className="h-4 w-4 mr-1" /> Upload Gallery Images
                     </Button>
 
-                    {/* GALLERY PREVIEW */}
                     <div className="grid grid-cols-3 gap-4 mt-4">
                       {gallery.map((img) => (
                         <div key={img.id} className="relative">
@@ -361,12 +432,13 @@ export default function ProductForm() {
                             src={img.url}
                             className="w-full h-28 object-cover rounded"
                           />
+
                           <button
                             type="button"
                             onClick={() => deleteGalleryImage(img.id)}
                             className="absolute top-1 right-1 bg-red-600 text-white p-1 rounded"
                           >
-                            <Trash2 size={14} />
+                            <Trash2 size={16} />
                           </button>
                         </div>
                       ))}
@@ -375,7 +447,7 @@ export default function ProductForm() {
                 )}
 
                 {/* FEATURED */}
-                <div className="flex justify-between p-4 bg-muted rounded items-center">
+                <div className="flex justify-between bg-muted p-4 rounded items-center">
                   <Label>Featured Product</Label>
                   <Switch
                     checked={formData.is_featured}
@@ -390,7 +462,9 @@ export default function ProductForm() {
                   <Label>Ingredients</Label>
                   <Textarea
                     value={formData.ingredients}
-                    onChange={(e) => setFormData({ ...formData, ingredients: e.target.value })}
+                    onChange={(e) =>
+                      setFormData({ ...formData, ingredients: e.target.value })
+                    }
                   />
 
                   <Label>Highlights</Label>
@@ -405,7 +479,10 @@ export default function ProductForm() {
                   <Textarea
                     value={formData.nutrition_info}
                     onChange={(e) =>
-                      setFormData({ ...formData, nutrition_info: e.target.value })
+                      setFormData({
+                        ...formData,
+                        nutrition_info: e.target.value,
+                      })
                     }
                   />
 
@@ -415,7 +492,10 @@ export default function ProductForm() {
                       <Input
                         value={formData.shelf_life}
                         onChange={(e) =>
-                          setFormData({ ...formData, shelf_life: e.target.value })
+                          setFormData({
+                            ...formData,
+                            shelf_life: e.target.value,
+                          })
                         }
                       />
                     </div>
@@ -435,15 +515,18 @@ export default function ProductForm() {
                       <Input
                         value={formData.package_type}
                         onChange={(e) =>
-                          setFormData({ ...formData, package_type: e.target.value })
+                          setFormData({
+                            ...formData,
+                            package_type: e.target.value,
+                          })
                         }
                       />
                     </div>
                   </div>
                 </div>
 
-                {/* SUBMIT */}
-                <div className="flex gap-3">
+                {/* SUBMIT BUTTONS */}
+                <div className="flex gap-3 pt-4">
                   <Button
                     type="button"
                     variant="outline"
