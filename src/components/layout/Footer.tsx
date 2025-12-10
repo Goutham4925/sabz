@@ -9,8 +9,9 @@ import {
   Instagram,
   Twitter,
 } from "lucide-react";
+import { API_URL } from "@/config/api";
 
-const API_URL = "http://localhost:5000/api";
+// const API_URL = "http://localhost:5000/api";
 
 const quickLinks = [
   { name: "Home", path: "/" },

@@ -2,6 +2,7 @@ import { useEffect, useState } from "react";
 import { Button } from "@/components/ui/button";
 import { ArrowRight, Sparkles } from "lucide-react";
 import { Link } from "react-router-dom";
+import { API_URL } from "@/config/api";
 
 export function HeroSection() {
   const [settings, setSettings] = useState<any>(null);
@@ -10,7 +11,7 @@ export function HeroSection() {
   useEffect(() => {
     async function loadSettings() {
       try {
-        const res = await fetch("http://localhost:5000/api/settings");
+        const res = await fetch(`${API_URL}/settings`);
         const data = await res.json();
         setSettings(data);
         setIsVisible(true);

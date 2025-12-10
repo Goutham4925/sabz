@@ -7,9 +7,10 @@ import { Textarea } from "@/components/ui/textarea";
 import { MapPin, Phone, Mail, Clock, Send } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
 import { useGlobalLoading } from "@/context/LoadingContext";
+import { API_URL } from "@/config/api";
 
-const API = "http://localhost:5000/api/contact-page";
-const MESSAGE_API = "http://localhost:5000/api/messages";
+const API = `${API_URL}/contact-page`;
+const MESSAGE_API = `${API_URL}/messages`;
 
 const iconMap: any = {
   MapPin,

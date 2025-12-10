@@ -8,8 +8,9 @@ import { Textarea } from "@/components/ui/textarea";
 import { Card, CardHeader, CardTitle, CardContent } from "@/components/ui/card";
 import { Loader2, Save, Upload } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
+import { API_URL } from "@/config/api"; 
 
-const API = "http://localhost:5000/api/about";
+// const API_URL = "http://localhost:5000/api/about";
 
 export default function AboutPageAdmin() {
   const [data, setData] = useState<any>(null);
@@ -30,7 +31,7 @@ export default function AboutPageAdmin() {
     }
 
     try {
-      const res = await fetch("http://localhost:5000/api/upload", {
+      const res = await fetch(`${API_URL}/upload`, {
         method: "POST",
         body: form,
       });
@@ -60,7 +61,7 @@ export default function AboutPageAdmin() {
   // FETCH ABOUT PAGE
   // -------------------------
   useEffect(() => {
-    fetch(API)
+    fetch(`${API_URL}/about`)
       .then((res) => res.json())
       .then((d) => {
         const fields = [
@@ -101,7 +102,7 @@ export default function AboutPageAdmin() {
     try {
       const token = localStorage.getItem("token");
 
-      await fetch(`${API}/${data.id}`, {
+      await fetch(`${API_URL}/${data.id}`, {
         method: "PUT",
         headers: {
           "Content-Type": "application/json",

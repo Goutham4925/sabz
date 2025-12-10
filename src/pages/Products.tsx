@@ -10,8 +10,9 @@ import { Pagination } from "swiper/modules";
 
 import "swiper/css";
 import "swiper/css/pagination";
+import { API_URL } from "@/config/api";
 
-const API_URL = "http://localhost:5000/api";
+// const API_URL = "http://localhost:5000/api";
 
 const Products = () => {
   const [products, setProducts] = useState([]);

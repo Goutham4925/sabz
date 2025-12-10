@@ -3,6 +3,7 @@ import { Link, useLocation } from "react-router-dom";
 import { Menu, X, Cookie } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { cn } from "@/lib/utils";
+import { API_URL } from "@/config/api";
 
 const navLinks = [
   { name: "Home", path: "/" },
@@ -20,7 +21,7 @@ export function Navbar() {
   // Load site settings
   useEffect(() => {
     const load = async () => {
-      const r = await fetch("http://localhost:5000/api/settings");
+      const r = await fetch(`${API_URL}/settings`);
       setSettings(await r.json());
     };
     load();

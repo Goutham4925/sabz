@@ -6,8 +6,11 @@ const fs = require("fs");
 
 const router = express.Router();
 
+// Dynamic Base URL (Render / Production / Local)
+const BASE_URL = process.env.BASE_URL || "http://localhost:5000";
+
 /* =============================================================
-   MULTER STORAGE (same folder as upload.js → public/uploads/)
+   MULTER STORAGE (public/uploads/)
 =============================================================== */
 const storage = multer.diskStorage({
   destination: (req, file, cb) => {
@@ -33,9 +36,8 @@ router.post("/:productId", upload.single("image"), async (req, res) => {
       return res.status(400).json({ error: "No file uploaded" });
     }
 
-    const fileUrl = `http://localhost:5000/uploads/${req.file.filename}`;
+    const fileUrl = `${BASE_URL}/uploads/${req.file.filename}`;
 
-    // Save in DB
     const img = await prisma.productImage.create({
       data: {
         productId,
@@ -66,17 +68,14 @@ router.delete("/:imageId", async (req, res) => {
       return res.status(404).json({ error: "Image not found" });
     }
 
-    // Extract filename from URL
     const filename = img.url.split("/uploads/")[1];
     const filepath = path.join("public/uploads", filename);
 
-    // Delete file
     if (fs.existsSync(filepath)) {
       fs.unlinkSync(filepath);
       console.log("Deleted image file:", filepath);
     }
 
-    // Delete DB record
     await prisma.productImage.delete({ where: { id: imageId } });
 
     res.json({ success: true });

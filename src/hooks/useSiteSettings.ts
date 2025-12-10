@@ -1,6 +1,8 @@
 import { useEffect, useState } from "react";
+import { API_URL } from "@/config/api";
 
-const API_URL = "http://localhost:5000/api";
+
+// const API_URL = "http://localhost:5000/api";
 
 export interface SiteSettings {
   id: number;

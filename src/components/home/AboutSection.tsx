@@ -1,5 +1,6 @@
 import { useEffect, useState, useRef } from "react";
 import { Award, Heart, Leaf, Clock } from "lucide-react";
+import { API_URL } from "@/config/api";
 
 export function AboutSection() {
   const [settings, setSettings] = useState<any>(null);
@@ -10,7 +11,7 @@ export function AboutSection() {
   // FETCH ABOUT SETTINGS
   useEffect(() => {
     async function load() {
-      const res = await fetch("http://localhost:5000/api/settings");
+      const res = await fetch(`${API_URL}/settings`);
       const json = await res.json();
       setSettings(json);
       setLoading(false);

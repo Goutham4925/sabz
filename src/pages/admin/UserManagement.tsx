@@ -4,14 +4,15 @@ import ProtectedRoute from "@/components/admin/ProtectedRoute";
 import AdminLayout from "@/components/admin/AdminLayout";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
+import { API_URL } from "@/config/api";
 
-const API = "http://localhost:5000/api/admin";
+// const API_URL = "http://localhost:5000/api/admin";
 
 export default function UserManagement() {
   const [users, setUsers] = useState([]);
 
   const loadUsers = async () => {
-    const r = await fetch(API + "/users", {
+    const r = await fetch(API_URL + "/users", {
       headers: { Authorization: `Bearer ${localStorage.getItem("token")}` },
     });
     setUsers(await r.json());
@@ -59,7 +60,7 @@ export default function UserManagement() {
               <div className="flex gap-2">
                 
                 {!u.isApproved && (
-                  <Button onClick={() => action(`${API}/approve/${u.id}`)}>
+                  <Button onClick={() => action(`${API_URL}/approve/${u.id}`)}>
                     Approve
                   </Button>
                 )}
@@ -67,7 +68,7 @@ export default function UserManagement() {
                 {!u.isApproved && (
                   <Button
                     variant="destructive"
-                    onClick={() => action(`${API}/reject/${u.id}`, "DELETE")}
+                    onClick={() => action(`${API_URL}/reject/${u.id}`, "DELETE")}
                   >
                     Reject
                   </Button>
@@ -76,7 +77,7 @@ export default function UserManagement() {
                 {u.role === "user" && u.isApproved && (
                   <Button
                     variant="secondary"
-                    onClick={() => action(`${API}/promote/${u.id}`)}
+                    onClick={() => action(`${API_URL}/promote/${u.id}`)}
                   >
                     Promote to Admin
                   </Button>
@@ -85,7 +86,7 @@ export default function UserManagement() {
                 {u.role === "admin" && (
                   <Button
                     variant="outline"
-                    onClick={() => action(`${API}/demote/${u.id}`)}
+                    onClick={() => action(`${API_URL}/demote/${u.id}`)}
                   >
                     Demote Admin
                   </Button>
@@ -93,7 +94,7 @@ export default function UserManagement() {
 
                 <Button
                   variant="destructive"
-                  onClick={() => action(`${API}/delete/${u.id}`, "DELETE")}
+                  onClick={() => action(`${API_URL}/delete/${u.id}`, "DELETE")}
                 >
                   Delete
                 </Button>

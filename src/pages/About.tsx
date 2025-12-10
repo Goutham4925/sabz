@@ -3,8 +3,9 @@ import { Navbar } from "@/components/layout/Navbar";
 import { Footer } from "@/components/layout/Footer";
 import { Award, Heart, Leaf, Users, Cookie } from "lucide-react";
 import { useGlobalLoading } from "@/context/LoadingContext";
+import { API_URL } from "@/config/api"; 
 
-const API = "http://localhost:5000/api/about";
+// const API_URL = "http://localhost:5000/api/about";
 
 const iconMap: any = {
   Heart,
@@ -23,7 +24,7 @@ const About = () => {
     // Start universal loader
     setGlobalLoading(true);
 
-    fetch(API + "?v=" + Date.now(), { cache: "no-store" })
+    fetch(`${API_URL}/about?v=${Date.now()}`, { cache: "no-store" })
       .then((r) => r.json())
       .then((d) => {
         setAbout(d);

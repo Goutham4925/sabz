@@ -19,8 +19,9 @@ import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
 import { useToast } from "@/hooks/use-toast";
 import { useGlobalLoading } from "@/context/LoadingContext";
+import { API_URL } from "@/config/api";
 
-const API_URL = "http://localhost:5000/api";
+// const API_URL = "http://localhost:5000/api";
 
 export default function ProductDetail() {
   const { id } = useParams();

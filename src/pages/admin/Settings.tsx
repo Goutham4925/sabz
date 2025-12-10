@@ -8,6 +8,7 @@ import { Textarea } from "@/components/ui/textarea";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Loader2 } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
+import { API_URL } from "@/config/api";
 
 interface SiteSettings {
   id: number;
@@ -50,7 +51,7 @@ interface SiteSettings {
   footer_subtext: string | null;
 }
 
-const API_URL = "http://localhost:5000/api";
+// const API_URL = "http://localhost:5000/api";
 
 export default function Settings() {
   const [settings, setSettings] = useState<SiteSettings | null>(null);

@@ -7,8 +7,9 @@ import { Badge } from "@/components/ui/badge";
 import { Trash2, Loader2, Eye } from "lucide-react";
 import { Link } from "react-router-dom";
 import { useToast } from "@/hooks/use-toast";
+import { API_URL } from "@/config/api";
 
-const API = "http://localhost:5000/api/messages";
+// const API_URL = "http://localhost:5000/api/messages";
 
 export default function MessagesPage() {
   const [messages, setMessages] = useState<any[]>([]);
@@ -21,14 +22,14 @@ export default function MessagesPage() {
   }, []);
 
   const loadMessages = async () => {
-    const res = await fetch(API);
+    const res = await fetch(API_URL);
     setMessages(await res.json());
   };
 
   const markAsRead = async (id: number) => {
     setReadingId(id);
 
-    const res = await fetch(`${API}/${id}/read`, { method: "PUT" });
+    const res = await fetch(`${API_URL}/${id}/read`, { method: "PUT" });
 
     if (res.ok) {
       setMessages((prev) =>
@@ -50,7 +51,7 @@ export default function MessagesPage() {
     if (!confirm("Delete this message?")) return;
     setLoadingId(id);
 
-    const res = await fetch(`${API}/${id}`, { method: "DELETE" });
+    const res = await fetch(`${API_URL}/${id}`, { method: "DELETE" });
 
     if (res.ok) {
       setMessages((prev) => prev.filter((m) => m.id !== id));

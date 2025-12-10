@@ -21,8 +21,9 @@ import {
   Server,
   Database,
 } from "lucide-react";
+import { API_URL } from "@/config/api";
 
-const API = "http://localhost:5000/api";
+// const API_URL = "http://localhost:5000/api";
 
 export default function Dashboard() {
   const [stats, setStats] = useState({
@@ -51,7 +52,7 @@ export default function Dashboard() {
 
     try {
       // Fetch Products
-      const productRes = await fetch(`${API}/products`);
+      const productRes = await fetch(`${API_URL}/products`);
       const products = await productRes.json();
 
       const categories = new Set(products.map((p: any) => p.category));
@@ -60,7 +61,7 @@ export default function Dashboard() {
         (products.length || 1);
 
       // Fetch Users
-      const userRes = await fetch(`${API}/admin/users`, {
+      const userRes = await fetch(`${API_URL}/admin/users`, {
         headers: { Authorization: `Bearer ${token}` },
       });
       const users = await userRes.json();
@@ -69,7 +70,7 @@ export default function Dashboard() {
       const admins = users.filter((u: any) => u.role === "admin").length;
 
       // Fetch Messages
-      const msgRes = await fetch(`${API}/messages`);
+      const msgRes = await fetch(`${API_URL}/messages`);
       const messages = await msgRes.json();
 
       const unread = messages.filter((m: any) => !m.is_read).length;
@@ -112,7 +113,7 @@ export default function Dashboard() {
     { title: "Messages", value: stats.totalMessages, icon: Mail },
     { title: "Unread Messages", value: stats.unreadMessages, icon: MessageSquare },
 
-    { title: "API Status", value: stats.apiStatus, icon: Server },
+    { title: "API_URL Status", value: stats.apiStatus, icon: Server },
     { title: "Database", value: stats.dbStatus, icon: Database },
   ];
 

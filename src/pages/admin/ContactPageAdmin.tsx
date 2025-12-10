@@ -8,8 +8,9 @@ import { Textarea } from "@/components/ui/textarea";
 import { Button } from "@/components/ui/button";
 import { Loader2, Save, Upload } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
+import { API_URL } from "@/config/api";
 
-const API = "http://localhost:5000/api/contact-page";
+// const API_URL = "http://localhost:5000/api/contact-page";
 
 export default function ContactPageAdmin() {
   const [data, setData] = useState<any>(null);
@@ -30,7 +31,7 @@ export default function ContactPageAdmin() {
     }
 
     try {
-      const res = await fetch("http://localhost:5000/api/upload", {
+      const res = await fetch(`${API_URL}/upload`, {
         method: "POST",
         body: form,
       });
@@ -57,7 +58,7 @@ export default function ContactPageAdmin() {
 
 
   useEffect(() => {
-    fetch(API)
+    fetch(`${API_URL}/contact-page`)
       .then((res) => res.json())
       .then((d) => {
         const fields = [
@@ -111,7 +112,7 @@ export default function ContactPageAdmin() {
   const save = async () => {
     setSaving(true);
 
-    await fetch(`${API}/${data.id}`, {
+    await fetch(`${API_URL}/${data.id}`, {
       method: "PUT",
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify(data),
