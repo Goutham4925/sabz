@@ -4,15 +4,13 @@ const prisma = require("../prisma/client");
 const router = express.Router();
 
 /* ============================================================
-   GET ALL PRODUCTS
-   - Includes category info
+   1️⃣ GET ALL PRODUCTS (ADMIN + PUBLIC LISTING)
+   Includes category
 ============================================================ */
 router.get("/", async (req, res) => {
   try {
     const products = await prisma.product.findMany({
-      include: {
-        category: true,
-      },
+      include: { category: true },
       orderBy: { created_at: "desc" },
     });
 
@@ -24,7 +22,25 @@ router.get("/", async (req, res) => {
 });
 
 /* ============================================================
-   GET PRODUCT BY ID
+   2️⃣ GET ONLY FEATURED PRODUCTS (HOMEPAGE)
+============================================================ */
+router.get("/featured", async (req, res) => {
+  try {
+    const featured = await prisma.product.findMany({
+      where: { is_featured: true },
+      include: { category: true },
+      orderBy: { created_at: "desc" },
+    });
+
+    res.json(featured);
+  } catch (err) {
+    console.error("GET /products/featured error:", err);
+    res.status(500).json({ error: "Failed to fetch featured products" });
+  }
+});
+
+/* ============================================================
+   3️⃣ GET PRODUCT BY ID (includes category)
 ============================================================ */
 router.get("/:id", async (req, res) => {
   try {
@@ -48,7 +64,7 @@ router.get("/:id", async (req, res) => {
 });
 
 /* ============================================================
-   CREATE PRODUCT
+   4️⃣ CREATE PRODUCT  (ALL FIELDS INCLUDED)
 ============================================================ */
 router.post("/", async (req, res) => {
   try {
@@ -59,6 +75,14 @@ router.post("/", async (req, res) => {
       categoryId,
       image_url,
       is_featured,
+
+      // NEW FIELDS
+      ingredients,
+      highlights,
+      nutrition_info,
+      shelf_life,
+      weight,
+      package_type,
     } = req.body;
 
     const product = await prisma.product.create({
@@ -69,6 +93,14 @@ router.post("/", async (req, res) => {
         categoryId: categoryId ? Number(categoryId) : null,
         image_url: image_url || null,
         is_featured: Boolean(is_featured),
+
+        // NEW FIELDS
+        ingredients: ingredients || null,
+        highlights: highlights || null,
+        nutrition_info: nutrition_info || null,
+        shelf_life: shelf_life || null,
+        weight: weight || null,
+        package_type: package_type || null,
       },
     });
 
@@ -80,13 +112,11 @@ router.post("/", async (req, res) => {
 });
 
 /* ============================================================
-   UPDATE PRODUCT
+   5️⃣ UPDATE PRODUCT  (ALL FIELDS INCLUDED)
 ============================================================ */
 router.put("/:id", async (req, res) => {
   try {
     const id = Number(req.params.id);
-    if (Number.isNaN(id))
-      return res.status(400).json({ error: "Invalid ID" });
 
     const {
       name,
@@ -95,6 +125,14 @@ router.put("/:id", async (req, res) => {
       categoryId,
       image_url,
       is_featured,
+
+      // NEW FIELDS
+      ingredients,
+      highlights,
+      nutrition_info,
+      shelf_life,
+      weight,
+      package_type,
     } = req.body;
 
     const product = await prisma.product.update({
@@ -106,6 +144,14 @@ router.put("/:id", async (req, res) => {
         categoryId: categoryId ? Number(categoryId) : null,
         image_url: image_url || null,
         is_featured: Boolean(is_featured),
+
+        // NEW FIELDS
+        ingredients: ingredients || null,
+        highlights: highlights || null,
+        nutrition_info: nutrition_info || null,
+        shelf_life: shelf_life || null,
+        weight: weight || null,
+        package_type: package_type || null,
       },
     });
 
@@ -117,14 +163,11 @@ router.put("/:id", async (req, res) => {
 });
 
 /* ============================================================
-   DELETE PRODUCT
+   6️⃣ DELETE PRODUCT
 ============================================================ */
 router.delete("/:id", async (req, res) => {
   try {
     const id = Number(req.params.id);
-    if (Number.isNaN(id))
-      return res.status(400).json({ error: "Invalid ID" });
-
     await prisma.product.delete({ where: { id } });
 
     res.json({ success: true });

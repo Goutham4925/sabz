@@ -21,9 +21,17 @@ export function ProductsSection() {
   useEffect(() => {
     const loadProducts = async () => {
       try {
-        const res = await fetch(`${API_URL}/products`);
+        const res = await fetch(`${API_URL}/products/featured`);
         const data = await res.json();
-        setProducts(data.slice(0, 4));
+
+        // FEATURED FIRST → then fallback
+        const featured = data.filter((p) => p.is_featured === true);
+        const nonFeatured = data.filter((p) => !p.is_featured);
+
+        // Combine and take only 4 for home
+        const finalList = [...featured, ...nonFeatured].slice(0, 4);
+
+        setProducts(finalList);
       } catch (err) {
         console.error("Failed to load products:", err);
       }
@@ -33,7 +41,7 @@ export function ProductsSection() {
     loadProducts();
   }, []);
 
-  // Fade-in animation
+  // Fade-in animation on scroll
   useEffect(() => {
     const observer = new IntersectionObserver(
       ([entry]) => entry.isIntersecting && setIsVisible(true),
@@ -51,7 +59,7 @@ export function ProductsSection() {
     >
       <div className="container mx-auto px-4 md:px-8 relative z-10">
 
-        {/* Section Header */}
+        {/* Header */}
         <div className="text-center max-w-3xl mx-auto mb-16">
           <span
             className={`badge-premium mb-4 inline-block transition-all duration-700 ${
@@ -88,9 +96,7 @@ export function ProductsSection() {
           <p className="text-center text-muted-foreground">No products available.</p>
         )}
 
-        {/* -------------------------------- */}
-        {/* DESKTOP GRID (hidden on mobile) */}
-        {/* -------------------------------- */}
+        {/* DESKTOP GRID */}
         <div className="hidden md:grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-8 mb-12">
           {products.map((p, i) => (
             <div
@@ -105,9 +111,7 @@ export function ProductsSection() {
           ))}
         </div>
 
-        {/* -------------------------------- */}
-        {/* MOBILE SWIPER (hidden on desktop) */}
-        {/* -------------------------------- */}
+        {/* MOBILE SWIPER */}
         <div className="md:hidden mb-12">
           <Swiper
             modules={[Pagination]}
@@ -116,11 +120,9 @@ export function ProductsSection() {
             pagination={{ clickable: true }}
             style={{ paddingBottom: "40px" }}
           >
-            {products.map((p, index) => (
+            {products.map((p) => (
               <SwiperSlide key={p.id}>
-                <div className="w-full">
-                  <ProductCard {...p} />
-                </div>
+                <ProductCard {...p} />
               </SwiperSlide>
             ))}
           </Swiper>
