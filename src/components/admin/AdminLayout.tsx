@@ -90,7 +90,7 @@ const AdminLayout = ({ children }: AdminLayoutProps) => {
                 <Cookie className="h-5 w-5 text-primary" />
               </div>
               <div>
-                <span className="font-display text-lg text-chocolate block">Golden Crust</span>
+                <span className="font-display text-lg text-chocolate block">Gobbly Treat</span>
                 <span className="text-xs text-muted-foreground">Admin Panel</span>
               </div>
             </Link>

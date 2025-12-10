@@ -64,13 +64,13 @@ export function HeroSection() {
               isVisible ? "opacity-100 translate-y-0" : "opacity-0 translate-y-10"
             }`}
             dangerouslySetInnerHTML={{
-              __html: settings.hero_title || "Crafted with <span class='text-primary'>Tradition</span>.",
+              __html: settings.hero_title || "Crafted with <span class='text-[#e4a95c]'>Tradition</span>. Baked with Love.",
             }}
           />
 
           {/* Subtitle */}
           <p
-            className={`text-[#e4a95c] text-muted-foreground text-lg md:text-xl max-w-2xl mx-auto mb-10 leading-relaxed transition-all duration-1000 delay-200 ${
+            className={`text-[#e4a95c] text-lg md:text-xl max-w-2xl mx-auto mb-10 leading-relaxed transition-all duration-1000 delay-200 ${
               isVisible ? "opacity-100 translate-y-0" : "opacity-0 translate-y-10"
             }`}
           >

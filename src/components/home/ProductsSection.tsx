@@ -74,7 +74,7 @@ export function ProductsSection() {
               isVisible ? "opacity-100 translate-y-0" : "opacity-0 translate-y-10"
             }`}
           >
-            Premium <span className="text-gradient">Biscuits</span>
+            Premium <span className="text-[#e4a95c]">Biscuits</span>
           </h2>
 
           <p
