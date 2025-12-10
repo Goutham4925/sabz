@@ -29,12 +29,17 @@ import {
 
 const API_URL = "http://localhost:5000/api";
 
+interface Category {
+  id: number;
+  name: string;
+}
+
 interface Product {
   id: number;
   name: string;
   description: string | null;
   price: number | null;
-  category: string | null;
+  category: Category | null; // ⬅️ Important fix
   is_featured: boolean | null;
   image_url: string | null;
   created_at: string;
@@ -137,6 +142,7 @@ const Products = () => {
             <CardHeader>
               <CardTitle>All Products</CardTitle>
             </CardHeader>
+
             <CardContent>
               {loading ? (
                 <div className="flex items-center justify-center py-8">
@@ -175,9 +181,10 @@ const Products = () => {
                             {product.name}
                           </TableCell>
 
+                          {/* FIX: Ensure category is category.name */}
                           <TableCell>
                             <Badge variant="secondary">
-                              {product.category}
+                              {product.category?.name || "Uncategorized"}
                             </Badge>
                           </TableCell>
 
@@ -225,6 +232,7 @@ const Products = () => {
                                     <AlertDialogTitle>
                                       Delete Product
                                     </AlertDialogTitle>
+
                                     <AlertDialogDescription>
                                       Are you sure you want to delete "
                                       {product.name}"? This action cannot be

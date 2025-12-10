@@ -42,6 +42,7 @@ app.use("/api/auth", authRoutes);
 app.use("/api/admin", verifyAdmin, require("./routes/admin"));
 app.use("/api/upload", require("./routes/upload"));
 app.use("/api/products", productRoutes);
+app.use("/api/categories", require("./routes/categories"));
 app.use("/api/settings", settingsRoutes);
 app.use("/api/about", require("./routes/about"));
 app.use("/api/contact-page", contactPageRoutes); 

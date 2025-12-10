@@ -13,7 +13,8 @@ import {
   Home,
   Mail,
   MessageCircle,
-  Users  
+  Users,
+  Tags,     //  ICON FOR CATEGORIES
 } from 'lucide-react';
 import { cn } from '@/lib/utils';
 
@@ -23,17 +24,23 @@ interface AdminLayoutProps {
 
 const navItems = [
   { path: '/admin/dashboard', label: 'Dashboard', icon: LayoutDashboard },
+
+  // PRODUCTS + CATEGORIES GROUP
   { path: '/admin/products', label: 'Products', icon: Package },
+
+  //  CATEGORY PAGE
+  { path: '/admin/categories', label: 'Categories', icon: Tags },
+
   { path: '/admin/settings', label: 'Settings', icon: Settings },
   { path: '/admin/about', label: 'About Page', icon: Home },
 
-  // NEW CONTACT PAGE
+  // CONTACT PAGE
   { path: '/admin/contact', label: 'Contact Page', icon: Mail },
 
-  // NEW MESSAGES PAGE
+  // MESSAGES PAGE
   { path: '/admin/messages', label: 'Messages', icon: MessageCircle },
 
-  // ✅ NEW Pending Users Page (Admin Approval)
+  // USERS PAGE
   { path: '/admin/users', label: 'Users', icon: Users },
 ];
 
@@ -75,7 +82,7 @@ const AdminLayout = ({ children }: AdminLayoutProps) => {
         )}
       >
         <div className="flex flex-col h-full">
-
+          
           {/* Logo */}
           <div className="p-6 border-b border-border">
             <Link to="/" className="flex items-center gap-3">

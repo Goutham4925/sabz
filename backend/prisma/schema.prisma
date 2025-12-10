@@ -17,21 +17,41 @@ model User {
   createdAt  DateTime @default(now())
 }
 
+///////////////////////////////////////////////////////////////////////////
+// CATEGORY MODEL (NEW) — Dynamic product categories
+///////////////////////////////////////////////////////////////////////////
+model Category {
+  id        Int       @id @default(autoincrement())
+  name      String    @unique
+  createdAt DateTime  @default(now())
 
+  products  Product[]
+}
+
+///////////////////////////////////////////////////////////////////////////
+// PRODUCT MODEL — Updated with dynamic categories
+///////////////////////////////////////////////////////////////////////////
 model Product {
-  id          Int      @id @default(autoincrement())
+  id          Int       @id @default(autoincrement())
   name        String
   description String?
   price       Float?
-  category    String?
   image_url   String?
   is_featured Boolean   @default(false)
+
+  // --- NEW DYNAMIC CATEGORY RELATION ---
+  categoryId  Int?
+  category    Category? @relation(fields: [categoryId], references: [id])
+
   created_at  DateTime  @default(now())
   updated_at  DateTime  @updatedAt
 }
 
+///////////////////////////////////////////////////////////////////////////
+// SITE SETTINGS
+///////////////////////////////////////////////////////////////////////////
 model SiteSetting {
-  id            Int     @id @default(autoincrement())
+  id                 Int      @id @default(autoincrement())
 
   // HERO
   hero_title          String?
@@ -74,11 +94,14 @@ model SiteSetting {
   footer_subtext          String?
   navbar_logo             String?
   navbar_brand_image      String?
-  show_company_text      Boolean   @default(true)
+  show_company_text       Boolean   @default(true)
 
   @@map("SiteSettings")
 }
 
+///////////////////////////////////////////////////////////////////////////
+// ABOUT PAGE DATA
+///////////////////////////////////////////////////////////////////////////
 model AboutPage {
   id               Int     @id @default(autoincrement())
 
@@ -103,7 +126,7 @@ model AboutPage {
   value_4_title    String?
   value_4_desc     String?
 
-  // TIMELINE HEADINGS (NEW)
+  // TIMELINE HEADINGS
   timeline_heading    String?
   timeline_subheading String?
 
@@ -150,6 +173,9 @@ model AboutPage {
   @@map("AboutPage")
 }
 
+///////////////////////////////////////////////////////////////////////////
+// CONTACT PAGE DATA
+///////////////////////////////////////////////////////////////////////////
 model ContactPage {
   id         Int     @id @default(autoincrement())
 
@@ -195,6 +221,9 @@ model ContactPage {
   @@map("ContactPage")
 }
 
+///////////////////////////////////////////////////////////////////////////
+// CONTACT MESSAGES
+///////////////////////////////////////////////////////////////////////////
 model ContactMessage {
   id        Int      @id @default(autoincrement())
   name      String
@@ -203,4 +232,3 @@ model ContactMessage {
   message   String
   createdAt DateTime @default(now())
 }
-
