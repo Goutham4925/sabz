@@ -120,13 +120,13 @@ export function Navbar() {
                 to={l.path}
                 className={cn(
                   "font-medium text-sm tracking-wide uppercase",
-                  location.pathname === l.path && "text-primary"
+                  location.pathname === l.path && "text-golden"
                 )}
               >
                 {l.name}
               </Link>
             ))}
-            <Button variant="default" size="sm">Order Now</Button>
+            <Button className="bg-gradient-to-r from-golden to-accent text-chocolate px-4 py-2  font-semibold hover:opacity-90 transition" variant="default" size="sm">Order Now</Button>
           </div>
 
           {/* MOBILE TOGGLE BUTTON */}

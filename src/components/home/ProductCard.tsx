@@ -46,7 +46,7 @@ export function ProductCard({
 
           <div className="flex items-center justify-between">
             {showPrice && price !== null && (
-              <span className="font-display text-2xl font-bold text-primary">
+              <span className="font-display text-2xl font-bold text-golden">
                 ₹{price.toFixed(2)}
               </span>
             )}
@@ -56,7 +56,7 @@ export function ProductCard({
         </div>
 
         {/* Glow Hover Effect */}
-        <div className="absolute -inset-0.5 bg-gradient-to-r from-primary/50 to-accent/50 rounded-2xl opacity-0 group-hover:opacity-100 blur transition-opacity duration-500 -z-10" />
+        <div className=" text-transparent bg-clip-text bg-gradient-to-r from-primary/50 to-accent/50 rounded-2xl opacity-0 group-hover:opacity-100 blur transition-opacity duration-500 -z-10" />
       </div>
     </Link>
   );

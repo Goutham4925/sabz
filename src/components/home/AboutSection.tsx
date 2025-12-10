@@ -83,7 +83,7 @@ export function AboutSection() {
               {highlights.map((item, index) =>
                 item.title ? (
                   <div key={index} className="glass-card p-4 flex items-start gap-3">
-                    <div className="w-10 h-10 bg-gradient-to-br from-primary to-accent rounded-full flex items-center justify-center">
+                    <div className="w-10 h-10 bg-gradient-to-br from-golden to-accent rounded-full flex items-center justify-center">
                       <item.icon className="w-5 h-5 text-primary-foreground" />
                     </div>
                     <div>

@@ -50,7 +50,7 @@ export function HeroSection() {
 
           {/* Badge */}
           <div
-            className={`inline-flex items-center gap-2 badge-premium mb-8 transition-all duration-1000 ${
+            className={`inline-flex items-center gap-2 bg-cream/10 border border-cream/20 text-cream px-4 py-2 rounded-full text-sm mb-8 transition-all duration-700 ${
               isVisible ? "opacity-100 translate-y-0" : "opacity-0 translate-y-10"
             }`}
           >
@@ -70,7 +70,7 @@ export function HeroSection() {
 
           {/* Subtitle */}
           <p
-            className={`text-muted-foreground text-lg md:text-xl max-w-2xl mx-auto mb-10 leading-relaxed transition-all duration-1000 delay-200 ${
+            className={`text-[#e4a95c] text-muted-foreground text-lg md:text-xl max-w-2xl mx-auto mb-10 leading-relaxed transition-all duration-1000 delay-200 ${
               isVisible ? "opacity-100 translate-y-0" : "opacity-0 translate-y-10"
             }`}
           >
@@ -84,14 +84,14 @@ export function HeroSection() {
             }`}
           >
             <Link to="/products">
-              <Button variant="hero" size="xl" className="group">
+              <Button variant="hero" size="xl" className="bg-gradient-to-r from-golden to-accent text-chocolate">
                 View Products
                 <ArrowRight className="w-5 h-5 group-hover:translate-x-1 transition-transform" />
               </Button>
             </Link>
 
             <Link to="/about">
-              <Button variant="outline" size="xl">
+              <Button className="border-cream/30 text-cream hover:bg-cream/10 hover:text-cream" variant="outline" size="xl">
                 Our Story
               </Button>
             </Link>

@@ -6,53 +6,111 @@ import { useSiteSettings } from "@/hooks/useSiteSettings";
 
 export function CTASection() {
   const { settings } = useSiteSettings();
+
   const [visible, setVisible] = useState(false);
   const ref = useRef<HTMLElement>(null);
+  const observerRef = useRef<IntersectionObserver | null>(null);
 
+  // ---- RE-TRIGGER animation when settings load ----
   useEffect(() => {
-    const observer = new IntersectionObserver(([entry]) => {
-      if (entry.isIntersecting) setVisible(true);
-    });
+    if (!settings) return; // wait until loaded
+    setVisible(false); // reset animation
+    setTimeout(() => attachObserver(), 50); // give DOM time to render
+  }, [settings]);
 
-    if (ref.current) observer.observe(ref.current);
-    return () => observer.disconnect();
-  }, []);
+  const attachObserver = () => {
+    if (!ref.current) return;
+
+    if (observerRef.current) {
+      observerRef.current.disconnect();
+    }
+
+    observerRef.current = new IntersectionObserver(
+      ([entry]) => {
+        if (entry.isIntersecting) {
+          setVisible(true);
+          observerRef.current?.disconnect(); // ensure one-time trigger
+        }
+      },
+      { threshold: 0.3 }
+    );
+
+    observerRef.current.observe(ref.current);
+  };
 
   if (!settings) return null;
 
   return (
-    <section ref={ref} className="py-24 bg-chocolate relative overflow-hidden">
-      <div className="container mx-auto px-4 text-center">
+    <section
+      ref={ref}
+      className="py-24 bg-chocolate relative overflow-hidden"
+    >
+      {/* Background Blur Balls */}
+      <div className="absolute inset-0 pointer-events-none">
+        <div className="absolute top-1/4 left-1/4 w-64 h-64 bg-golden opacity-10 rounded-full blur-3xl" />
+        <div className="absolute bottom-1/4 right-1/4 w-80 h-80 bg-primary opacity-10 rounded-full blur-3xl" />
+      </div>
 
+      <div className="container mx-auto px-4 md:px-8 relative z-10 text-center max-w-3xl">
+        
         {/* Badge */}
-        <div className={`badge transition-all ${visible ? "opacity-100" : "opacity-0"}`}>
+        <div
+          className={`inline-flex items-center gap-2 bg-cream/10 border border-cream/20 text-cream px-4 py-2 rounded-full text-sm mb-8 transition-all duration-700 ${
+            visible ? "opacity-100 translate-y-0" : "opacity-0 translate-y-10"
+          }`}
+        >
           <Gift className="w-4 h-4" />
           <span>{settings.cta_badge_text || "Perfect for Gifting"}</span>
         </div>
 
         {/* Title */}
         <h2
-          className="text-cream font-display text-5xl font-bold"
+          className={`font-display text-4xl md:text-5xl lg:text-6xl font-bold text-cream mb-6 transition-all duration-700 delay-100 ${
+            visible ? "opacity-100 translate-y-0" : "opacity-0 translate-y-10"
+          }`}
           dangerouslySetInnerHTML={{
-            __html: settings.cta_title || "Ready to Experience <span class='text-golden'>Golden Perfection</span>?"
+            __html:
+              settings.cta_title ||
+              "Ready to Experience <span class='text-golden'>Golden Perfection</span>?",
           }}
         />
 
         {/* Subtitle */}
-        <p className="text-cream/70 mt-4">
-          {settings.cta_subtitle || "Order our premium biscuits today."}
+        <p
+          className={`text-cream/70 text-lg md:text-xl max-w-2xl mx-auto mb-10 transition-all duration-700 delay-200 ${
+            visible ? "opacity-100 translate-y-0" : "opacity-0 translate-y-10"
+          }`}
+        >
+          {settings.cta_subtitle ||
+            "Order our premium biscuits today and discover why customers love us."}
         </p>
 
-        {/* Button */}
-        <div className="mt-10">
+        {/* Buttons */}
+        <div
+          className={`flex flex-col sm:flex-row items-center justify-center gap-4 transition-all duration-700 delay-300 ${
+            visible ? "opacity-100 translate-y-0" : "opacity-0 translate-y-10"
+          }`}
+        >
           <Link to={settings.cta_primary_href || "/products"}>
-            <Button size="xl">
+            <Button
+              size="xl"
+              className="bg-gradient-to-r from-golden to-accent text-chocolate font-bold hover:shadow-glow"
+            >
               {settings.cta_primary_label || "Shop Now"}
-              <ArrowRight className="w-5 h-5" />
+              <ArrowRight className="w-5 h-5 ml-2" />
+            </Button>
+          </Link>
+
+          <Link to="/contact">
+            <Button
+              variant="outline"
+              size="xl"
+              className="border-cream/30 text-cream hover:bg-cream/10 hover:text-cream"
+            >
+              Corporate Orders
             </Button>
           </Link>
         </div>
-
       </div>
     </section>
   );

@@ -136,7 +136,7 @@ export function ProductsSection() {
           style={{ transitionDelay: "700ms" }}
         >
           <Link to="/products">
-            <Button variant="default" size="lg" className="group">
+            <Button variant="default" size="lg" className="bg-gradient-to-r from-golden to-accent text-white">
               View All Products
               <ArrowRight className="w-5 h-5 group-hover:translate-x-1 transition-transform" />
             </Button>
