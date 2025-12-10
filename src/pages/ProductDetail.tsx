@@ -111,7 +111,8 @@ export default function ProductDetail() {
       email: form.email,
       phone: form.phone,
       subject: `Product Enquiry: ${product.name}`,
-      message: (form.message || "") + `\n\nProduct: ${product.name}`,
+      message: form.message,
+      productId: product.id,
     };
 
     try {
@@ -128,6 +129,7 @@ export default function ProductDetail() {
       toast({ title: "Error sending enquiry", variant: "destructive" });
     }
   };
+
 
   return (
     <div className="min-h-screen">

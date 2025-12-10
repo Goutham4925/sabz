@@ -22,14 +22,14 @@ export default function MessagesPage() {
   }, []);
 
   const loadMessages = async () => {
-    const res = await fetch(API_URL);
+    const res = await fetch(`${API_URL}/messages`);
     setMessages(await res.json());
   };
 
   const markAsRead = async (id: number) => {
     setReadingId(id);
 
-    const res = await fetch(`${API_URL}/${id}/read`, { method: "PUT" });
+    const res = await fetch(`${API_URL}/messages/${id}/read`, { method: "PUT" });
 
     if (res.ok) {
       setMessages((prev) =>
@@ -51,7 +51,7 @@ export default function MessagesPage() {
     if (!confirm("Delete this message?")) return;
     setLoadingId(id);
 
-    const res = await fetch(`${API_URL}/${id}`, { method: "DELETE" });
+    const res = await fetch(`${API_URL}/messages/${id}`, { method: "DELETE" });
 
     if (res.ok) {
       setMessages((prev) => prev.filter((m) => m.id !== id));
