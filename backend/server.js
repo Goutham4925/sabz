@@ -8,7 +8,6 @@ const productRoutes = require("./routes/products");
 const settingsRoutes = require("./routes/settings");
 const contactPageRoutes = require("./routes/contactPage");
 
-// const { verifyToken } = require("./middleware/auth");
 const { verifyAdmin } = require("./middleware/auth");
 
 const app = express();
@@ -19,14 +18,14 @@ const PORT = process.env.PORT || 5000;
 // ----------------------------
 app.use(
   cors({
-    origin: "*", // allow frontend
+    origin: "*",
     methods: ["GET", "POST", "PUT", "DELETE"],
   })
 );
 
 app.use(express.json());
 
-
+// Serve uploaded images
 app.use("/uploads", express.static("public/uploads"));
 
 // ----------------------------
@@ -34,19 +33,20 @@ app.use("/uploads", express.static("public/uploads"));
 // ----------------------------
 app.use("/api/auth", authRoutes);
 
-
-// ----------------------------
-// PROTECTED ROUTES (Admin Only)
-// ----------------------------
-
-app.use("/api/admin", verifyAdmin, require("./routes/admin"));
-app.use("/api/upload", require("./routes/upload"));
+// FRONTEND access for browsing
 app.use("/api/products", productRoutes);
 app.use("/api/categories", require("./routes/categories"));
-app.use("/api/settings", settingsRoutes);
-app.use("/api/about", require("./routes/about"));
-app.use("/api/contact-page", contactPageRoutes); 
+app.use("/api/product-images", require("./routes/productImages"));
+app.use("/api/upload", require("./routes/upload")); 
 app.use("/api/messages", require("./routes/contactMessages"));
+app.use("/api/contact-page", contactPageRoutes);
+app.use("/api/about", require("./routes/about"));
+app.use("/api/settings", settingsRoutes);
+
+// ----------------------------
+// ADMIN-PROTECTED ROUTES
+// ----------------------------
+app.use("/api/admin", verifyAdmin, require("./routes/admin"));
 
 // ----------------------------
 // HEALTH CHECK

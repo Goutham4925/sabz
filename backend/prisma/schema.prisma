@@ -8,6 +8,9 @@ datasource db {
   directUrl = env("DATABASE_URL")
 }
 
+///////////////////////////////////////////////////////////////////////////
+// USER MODEL
+///////////////////////////////////////////////////////////////////////////
 model User {
   id         String   @id @default(uuid())
   email      String   @unique
@@ -18,7 +21,7 @@ model User {
 }
 
 ///////////////////////////////////////////////////////////////////////////
-// CATEGORY MODEL (NEW) — Dynamic product categories
+// CATEGORY MODEL
 ///////////////////////////////////////////////////////////////////////////
 model Category {
   id        Int       @id @default(autoincrement())
@@ -29,31 +32,49 @@ model Category {
 }
 
 ///////////////////////////////////////////////////////////////////////////
-// PRODUCT MODEL — Updated with dynamic categories
+// PRODUCT MODEL — Supports gallery images + all your fields
 ///////////////////////////////////////////////////////////////////////////
 model Product {
   id          Int      @id @default(autoincrement())
   name        String
   description String?
   price       Float?
+
   categoryId  Int?
   category    Category? @relation(fields: [categoryId], references: [id])
 
-  image_url   String?
-  is_featured Boolean   @default(false)
+  image_url   String?           // Main product image
 
-  // NEW FIELDS
-  ingredients     String?   // Store as a comma-separated string
-  highlights      String?   // e.g. “Crunchy, Handcrafted, Healthy”
-  nutrition_info  String?   // Long text (JSON or plain)
+  gallery     Json?             // Optional JSON gallery (if you want to store array also)
+
+  is_featured Boolean @default(false)
+
+  // Product details
+  ingredients     String?
+  highlights      String?
+  nutrition_info  String?
   shelf_life      String?
   weight          String?
   package_type    String?
 
   created_at      DateTime @default(now())
   updated_at      DateTime @updatedAt
+
+  // Multiple gallery images
+  images      ProductImage[]
 }
 
+///////////////////////////////////////////////////////////////////////////
+// PRODUCT IMAGE MODEL — TRUE Multiple Image Support
+///////////////////////////////////////////////////////////////////////////
+model ProductImage {
+  id         Int      @id @default(autoincrement())
+  productId  Int
+  url        String
+  created_at DateTime @default(now())
+
+  product    Product  @relation(fields: [productId], references: [id])
+}
 
 ///////////////////////////////////////////////////////////////////////////
 // SITE SETTINGS
@@ -108,7 +129,7 @@ model SiteSetting {
 }
 
 ///////////////////////////////////////////////////////////////////////////
-// ABOUT PAGE DATA
+// ABOUT PAGE
 ///////////////////////////////////////////////////////////////////////////
 model AboutPage {
   id               Int     @id @default(autoincrement())
@@ -134,11 +155,10 @@ model AboutPage {
   value_4_title    String?
   value_4_desc     String?
 
-  // TIMELINE HEADINGS
+  // TIMELINE
   timeline_heading    String?
   timeline_subheading String?
 
-  // TIMELINE ENTRIES
   milestone_1_year   String?
   milestone_1_title  String?
   milestone_1_desc   String?
@@ -182,49 +202,46 @@ model AboutPage {
 }
 
 ///////////////////////////////////////////////////////////////////////////
-// CONTACT PAGE DATA
+// CONTACT PAGE
 ///////////////////////////////////////////////////////////////////////////
 model ContactPage {
-  id         Int     @id @default(autoincrement())
+  id              Int     @id @default(autoincrement())
 
-  hero_badge    String?
-  hero_title    String?
-  hero_subtitle String?
+  hero_badge      String?
+  hero_title      String?
+  hero_subtitle   String?
 
-  card_1_icon  String?
-  card_1_title String?
-  card_1_line1 String?
-  card_1_line2 String?
+  card_1_icon     String?
+  card_1_title    String?
+  card_1_line1    String?
+  card_1_line2    String?
 
-  card_2_icon  String?
-  card_2_title String?
-  card_2_line1 String?
-  card_2_line2 String?
+  card_2_icon     String?
+  card_2_title    String?
+  card_2_line1    String?
+  card_2_line2    String?
 
-  card_3_icon  String?
-  card_3_title String?
-  card_3_line1 String?
-  card_3_line2 String?
+  card_3_icon     String?
+  card_3_title    String?
+  card_3_line1    String?
+  card_3_line2    String?
 
-  card_4_icon  String?
-  card_4_title String?
-  card_4_line1 String?
-  card_4_line2 String?
+  card_4_icon     String?
+  card_4_title    String?
+  card_4_line1    String?
+  card_4_line2    String?
 
-  faq_1_q String?
-  faq_1_a String?
+  faq_1_q         String?
+  faq_1_a         String?
+  faq_2_q         String?
+  faq_2_a         String?
+  faq_3_q         String?
+  faq_3_a         String?
+  faq_4_q         String?
+  faq_4_a         String?
 
-  faq_2_q String?
-  faq_2_a String?
-
-  faq_3_q String?
-  faq_3_a String?
-
-  faq_4_q String?
-  faq_4_a String?
-
-  map_title   String?
-  map_address String?
+  map_title       String?
+  map_address     String?
 
   @@map("ContactPage")
 }
@@ -233,13 +250,13 @@ model ContactPage {
 // CONTACT MESSAGES
 ///////////////////////////////////////////////////////////////////////////
 model ContactMessage {
-  id        Int      @id @default(autoincrement())
-  name          String
-  email         String
-  subject       String
-  message       String
-  phone         String?      
-  productId     Int?         
-  productName   String?      
-  createdAt DateTime @default(now())
+  id          Int      @id @default(autoincrement())
+  name        String
+  email       String
+  subject     String
+  message     String
+  phone       String?
+  productId   Int?
+  productName String?
+  createdAt   DateTime @default(now())
 }

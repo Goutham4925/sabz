@@ -11,25 +11,27 @@ import {
   Shield,
   RotateCcw,
   MessageCircle,
+  ZoomIn,
 } from "lucide-react";
-import { useGlobalLoading } from "@/context/LoadingContext";
-import {
-  Dialog,
-  DialogContent,
-  DialogHeader,
-  DialogTitle,
-  DialogFooter,
-} from "@/components/ui/dialog";
+
+import { Dialog, DialogContent } from "@/components/ui/dialog";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
 import { useToast } from "@/hooks/use-toast";
+import { useGlobalLoading } from "@/context/LoadingContext";
 
 const API_URL = "http://localhost:5000/api";
 
-const ProductDetail = () => {
-  const { id } = useParams<{ id: string }>();
+export default function ProductDetail() {
+  const { id } = useParams();
   const [product, setProduct] = useState<any>(null);
   const [loading, setLoading] = useState(true);
+
+  const [selectedImage, setSelectedImage] = useState<string | null>(null);
+  const [zoomOpen, setZoomOpen] = useState(false);
+
+  const { toast } = useToast();
+  const { setLoading: setGlobalLoading } = useGlobalLoading();
 
   // enquiry modal
   const [open, setOpen] = useState(false);
@@ -40,67 +42,59 @@ const ProductDetail = () => {
     message: "",
   });
 
-  const { toast } = useToast();
-  const { setLoading: setGlobalLoading } = useGlobalLoading();
-
   // Load product
   useEffect(() => {
-    const loadProduct = async () => {
+    (async () => {
       setGlobalLoading(true);
-
       try {
         const res = await fetch(`${API_URL}/products/${id}`);
-        if (!res.ok) throw new Error();
-
         const data = await res.json();
         setProduct(data);
+
+        // choose default main image
+        if (data.images?.length) {
+          setSelectedImage(data.images[0].url);
+        } else {
+          setSelectedImage(data.image_url);
+        }
       } catch {
         setProduct(null);
       } finally {
         setLoading(false);
         setGlobalLoading(false);
       }
-    };
-
-    loadProduct();
+    })();
   }, [id]);
 
-  // Prevent flicker
   if (loading) return null;
-
-  // Product not found
-  if (!product) {
+  if (!product)
     return (
       <div className="min-h-screen">
         <Navbar />
-        <main className="pt-32 pb-24 text-center">
-          <h1 className="text-2xl font-bold mb-4">Product Not Found</h1>
+        <div className="pt-32 text-center">
+          <h2 className="text-xl font-bold">Product not found</h2>
           <Link to="/products">
-            <Button>Back to Products</Button>
+            <Button className="mt-4">Back to products</Button>
           </Link>
-        </main>
+        </div>
         <Footer />
       </div>
     );
-  }
 
-  // Helper — convert string → array
-  const parseList = (val: any): string[] => {
+  const parseList = (val: string | null) => {
     if (!val) return [];
-    if (typeof val === "string")
-      return val.split(",").map((s) => s.trim()).filter(Boolean);
-    return [];
+    return val.split(",").map((a) => a.trim()).filter(Boolean);
   };
 
   const highlights = parseList(product.highlights);
   const ingredients = parseList(product.ingredients);
 
-  // Send enquiry
+  // SEND ENQUIRY
   const sendEnquiry = async () => {
     if (!form.name || !form.email) {
       toast({
         title: "Missing fields",
-        description: "Please provide at least your name and email.",
+        description: "Please enter your name and email.",
         variant: "destructive",
       });
       return;
@@ -109,34 +103,23 @@ const ProductDetail = () => {
     const payload = {
       name: form.name,
       email: form.email,
+      phone: form.phone,
       subject: `Product Enquiry: ${product.name}`,
-      message:
-        (form.message || "Customer requested more details.") +
-        `\n\nProduct: ${product.name}\nPhone: ${form.phone || "N/A"}`,
+      message: (form.message || "") + `\n\nProduct: ${product.name}`,
     };
 
     try {
-      const res = await fetch(`${API_URL}/messages`, {
+      await fetch(`${API_URL}/messages`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify(payload),
       });
 
-      if (!res.ok) throw new Error();
-
-      toast({
-        title: "Enquiry Sent",
-        description: "The admin will contact you shortly.",
-      });
-
-      setForm({ name: "", email: "", phone: "", message: "" });
+      toast({ title: "Enquiry sent successfully" });
       setOpen(false);
+      setForm({ name: "", email: "", phone: "", message: "" });
     } catch {
-      toast({
-        title: "Error",
-        description: "Failed to send enquiry.",
-        variant: "destructive",
-      });
+      toast({ title: "Error sending enquiry", variant: "destructive" });
     }
   };
 
@@ -146,167 +129,149 @@ const ProductDetail = () => {
 
       <main className="pt-32 pb-24">
         <div className="container mx-auto px-4 md:px-8">
-          {/* Back Button */}
-          <Link
-            to="/products"
-            className="inline-flex items-center gap-2 text-muted-foreground hover:text-primary mb-8"
-          >
-            <ArrowLeft className="w-4 h-4" />
-            Back to Products
+          <Link to="/products" className="flex items-center gap-2 mb-8 text-muted-foreground hover:text-primary">
+            <ArrowLeft className="w-4 h-4" /> Back to Products
           </Link>
 
           <div className="grid grid-cols-1 lg:grid-cols-2 gap-12">
-            {/* IMAGE */}
+            {/* LEFT COLUMN - MAIN IMAGE + GALLERY */}
             <div>
-              <div className="aspect-square rounded-3xl overflow-hidden shadow-elevated">
+              {/* MAIN IMAGE */}
+              <div className="relative aspect-square rounded-3xl overflow-hidden shadow-lg group">
                 <img
-                  src={product.image_url || "/placeholder.svg"}
-                  alt={product.name}
+                  src={selectedImage || product.image_url}
                   className="w-full h-full object-cover"
+                  onClick={() => setZoomOpen(true)}
                 />
+
+                <button
+                  className="absolute bottom-3 right-3 bg-white p-2 rounded-full shadow-md opacity-70 hover:opacity-100"
+                  onClick={() => setZoomOpen(true)}
+                >
+                  <ZoomIn className="w-5 h-5" />
+                </button>
               </div>
+
+              {/* THUMBNAILS */}
+              {(product.images?.length > 0 || product.image_url) && (
+                <div className="flex gap-3 mt-4 overflow-x-auto pb-2">
+                  {product.images?.map((img: any) => (
+                    <img
+                      key={img.id}
+                      src={img.url}
+                      onClick={() => setSelectedImage(img.url)}
+                      className={`h-20 w-20 object-cover rounded-xl cursor-pointer border-2 ${
+                        selectedImage === img.url ? "border-primary" : "border-transparent"
+                      }`}
+                    />
+                  ))}
+
+                  {/* Main image thumbnail at the end */}
+                  {product.image_url && (
+                    <img
+                      src={product.image_url}
+                      onClick={() => setSelectedImage(product.image_url)}
+                      className={`h-20 w-20 object-cover rounded-xl cursor-pointer border-2 ${
+                        selectedImage === product.image_url ? "border-primary" : "border-transparent"
+                      }`}
+                    />
+                  )}
+                </div>
+              )}
             </div>
 
-            {/* PRODUCT INFO */}
-            <div className="flex flex-col">
-              {/* Rating Display */}
-              <div className="flex items-center gap-2 mb-4">
-                {[...Array(5)].map((_, i) => (
-                  <Star
-                    key={i}
-                    className={`w-5 h-5 ${
-                      i < 4 ? "fill-golden text-golden" : "text-muted"
-                    }`}
-                  />
+            {/* RIGHT COLUMN - DETAILS */}
+            <div>
+              {/* Stars */}
+              <div className="flex items-center gap-1 mb-3">
+                {[1, 2, 3, 4, 5].map((i) => (
+                  <Star key={i} className={`w-5 h-5 ${i <= 4 ? "fill-golden text-golden" : "text-gray-400"}`} />
                 ))}
-                <span className="text-muted-foreground text-sm">
-                  4.8 (120 reviews)
+                <span className="text-sm text-muted-foreground ml-1">
+                  4.8 (120)
                 </span>
               </div>
 
-              <h1 className="font-display text-4xl md:text-5xl font-bold mb-4">
-                {product.name}
-              </h1>
+              <h1 className="font-display text-5xl font-bold mb-3">{product.name}</h1>
 
-              <p className="text-muted-foreground text-lg mb-6 leading-relaxed">
-                {product.description}
-              </p>
+              <p className="text-muted-foreground text-lg mb-4">{product.description}</p>
 
-              <div className="font-display text-4xl font-bold text-primary mb-8">
-                {product.price ? `₹${product.price.toFixed(2)}` : "—"}
+              <div className="text-4xl font-bold text-primary mb-6">
+                {product.price ? `₹${product.price}` : "—"}
               </div>
 
-              {/* ACTION BUTTONS */}
-              <div className="flex flex-col sm:flex-row gap-4 mb-10">
-                <Button variant="hero" size="xl" className="flex-1" onClick={() => setOpen(true)}>
-                  <MessageCircle className="w-5 h-5" />
+              <div className="flex gap-4 mb-10">
+                <Button variant="hero" size="lg" className="flex-1" onClick={() => setOpen(true)}>
+                  <MessageCircle className="w-5 h-5 mr-2" />
                   Send Enquiry
                 </Button>
 
-                <Button variant="outline" size="xl">
+                <Button variant="outline" size="lg">
                   <Heart className="w-5 h-5" />
                 </Button>
               </div>
 
-              {/* FEATURES */}
-              <div className="grid grid-cols-3 gap-4 py-8 border-t border-border">
-                <div className="text-center">
-                  <Truck className="w-6 h-6 text-primary mx-auto mb-2" />
-                  <p className="text-sm text-muted-foreground">Free Shipping</p>
-                </div>
-
-                <div className="text-center">
-                  <Shield className="w-6 h-6 text-primary mx-auto mb-2" />
-                  <p className="text-sm text-muted-foreground">
-                    Quality Guaranteed
-                  </p>
-                </div>
-
-                <div className="text-center">
-                  <RotateCcw className="w-6 h-6 text-primary mx-auto mb-2" />
-                  <p className="text-sm text-muted-foreground">Easy Returns</p>
-                </div>
-              </div>
-
-              {/* HIGHLIGHTS */}
+              {/* Highlights */}
               {highlights.length > 0 && (
-                <div className="py-6">
-                  <h3 className="font-display text-xl font-semibold mb-3">
-                    Highlights
-                  </h3>
+                <section className="mb-8">
+                  <h3 className="text-xl font-semibold mb-2">Highlights</h3>
                   <div className="flex flex-wrap gap-2">
                     {highlights.map((h) => (
-                      <span
-                        key={h}
-                        className="bg-secondary px-3 py-1 rounded-full text-sm"
-                      >
+                      <span key={h} className="px-3 py-1 rounded-full bg-secondary text-sm">
                         {h}
                       </span>
                     ))}
                   </div>
-                </div>
+                </section>
               )}
 
-              {/* INGREDIENTS */}
+              {/* Ingredients */}
               {ingredients.length > 0 && (
-                <div className="py-6 border-t border-border">
-                  <h3 className="font-display text-xl font-semibold mb-4">
-                    Ingredients
-                  </h3>
+                <section className="mb-8">
+                  <h3 className="text-xl font-semibold mb-2">Ingredients</h3>
                   <div className="flex flex-wrap gap-2">
                     {ingredients.map((ing) => (
-                      <span
-                        key={ing}
-                        className="bg-secondary text-secondary-foreground px-4 py-2 rounded-full text-sm"
-                      >
+                      <span key={ing} className="px-3 py-1 rounded-full bg-secondary text-sm">
                         {ing}
                       </span>
                     ))}
                   </div>
-                </div>
+                </section>
               )}
 
-              {/* NUTRITION INFO */}
+              {/* Nutrition info */}
               {product.nutrition_info && (
-                <div className="py-6 border-t border-border">
-                  <h3 className="font-display text-xl font-semibold mb-3">
-                    Nutrition Information
-                  </h3>
+                <section className="mb-8">
+                  <h3 className="text-xl font-semibold mb-2">Nutrition Info</h3>
                   <p className="text-muted-foreground whitespace-pre-wrap">
                     {product.nutrition_info}
                   </p>
-                </div>
+                </section>
               )}
 
-              {/* EXTRA DETAILS */}
-              <div className="py-6 border-t border-border grid grid-cols-1 md:grid-cols-3 gap-4">
+              {/* Extra fields */}
+              <section className="grid grid-cols-2 md:grid-cols-3 gap-4">
                 {product.shelf_life && (
                   <div>
                     <strong>Shelf Life</strong>
-                    <div className="text-muted-foreground">
-                      {product.shelf_life}
-                    </div>
+                    <p className="text-muted-foreground">{product.shelf_life}</p>
                   </div>
                 )}
 
                 {product.weight && (
                   <div>
                     <strong>Weight</strong>
-                    <div className="text-muted-foreground">
-                      {product.weight}
-                    </div>
+                    <p className="text-muted-foreground">{product.weight}</p>
                   </div>
                 )}
 
                 {product.package_type && (
                   <div>
                     <strong>Package Type</strong>
-                    <div className="text-muted-foreground">
-                      {product.package_type}
-                    </div>
+                    <p className="text-muted-foreground">{product.package_type}</p>
                   </div>
                 )}
-              </div>
+              </section>
             </div>
           </div>
         </div>
@@ -314,16 +279,21 @@ const ProductDetail = () => {
 
       <Footer />
 
+      {/* ZOOM MODAL */}
+      <Dialog open={zoomOpen} onOpenChange={setZoomOpen}>
+        <DialogContent className="max-w-4xl p-0 overflow-hidden">
+          <img src={selectedImage!} className="w-full h-full object-contain" />
+        </DialogContent>
+      </Dialog>
+
       {/* ENQUIRY MODAL */}
       <Dialog open={open} onOpenChange={setOpen}>
         <DialogContent className="max-w-lg">
-          <DialogHeader>
-            <DialogTitle>Enquire about {product.name}</DialogTitle>
-          </DialogHeader>
+          <h2 className="text-xl font-semibold">Enquire about {product.name}</h2>
 
-          <div className="space-y-3">
+          <div className="space-y-3 mt-4">
             <Input
-              placeholder="Your name"
+              placeholder="Name"
               value={form.name}
               onChange={(e) => setForm({ ...form, name: e.target.value })}
             />
@@ -333,30 +303,28 @@ const ProductDetail = () => {
               onChange={(e) => setForm({ ...form, email: e.target.value })}
             />
             <Input
-              placeholder="Phone (optional)"
+              placeholder="Phone"
               value={form.phone}
               onChange={(e) => setForm({ ...form, phone: e.target.value })}
             />
             <Textarea
-              placeholder="Message (optional)"
+              placeholder="Message"
               rows={4}
               value={form.message}
               onChange={(e) => setForm({ ...form, message: e.target.value })}
             />
           </div>
 
-          <DialogFooter>
+          <div className="flex justify-end gap-2 mt-6">
             <Button variant="outline" onClick={() => setOpen(false)}>
               Cancel
             </Button>
             <Button variant="hero" onClick={sendEnquiry}>
               Send Enquiry
             </Button>
-          </DialogFooter>
+          </div>
         </DialogContent>
       </Dialog>
     </div>
   );
-};
-
-export default ProductDetail;
+}
