@@ -1,32 +1,31 @@
 import { useEffect, useState } from "react";
-import { useAuth } from "@/hooks/useAuth";
 import ProtectedRoute from "@/components/admin/ProtectedRoute";
 import AdminLayout from "@/components/admin/AdminLayout";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { API_URL } from "@/config/api";
 
-// const API_URL = "http://localhost:5000/api/admin";
-
 export default function UserManagement() {
   const [users, setUsers] = useState([]);
 
   const loadUsers = async () => {
-    const r = await fetch(API_URL + "/users", {
+    const res = await fetch(`${API_URL}/admin/users`, {
       headers: { Authorization: `Bearer ${localStorage.getItem("token")}` },
     });
-    setUsers(await r.json());
+
+    setUsers(await res.json());
   };
 
   useEffect(() => {
     loadUsers();
   }, []);
 
-  const action = async (url: string, method = "PUT") => {
-    await fetch(url, {
+  const action = async (path: string, method = "PUT") => {
+    await fetch(`${API_URL}/admin${path}`, {
       method,
       headers: { Authorization: `Bearer ${localStorage.getItem("token")}` },
     });
+
     loadUsers();
   };
 
@@ -50,17 +49,14 @@ export default function UserManagement() {
                     {u.isApproved ? "Approved" : "Pending"}
                   </Badge>
 
-                  <Badge variant="outline">
-                    Role: {u.role?.toUpperCase()}
-                  </Badge>
+                  <Badge variant="outline">Role: {u.role?.toUpperCase()}</Badge>
                 </div>
               </div>
 
               {/* Actions */}
               <div className="flex gap-2">
-                
                 {!u.isApproved && (
-                  <Button onClick={() => action(`${API_URL}/approve/${u.id}`)}>
+                  <Button onClick={() => action(`/approve/${u.id}`)}>
                     Approve
                   </Button>
                 )}
@@ -68,7 +64,7 @@ export default function UserManagement() {
                 {!u.isApproved && (
                   <Button
                     variant="destructive"
-                    onClick={() => action(`${API_URL}/reject/${u.id}`, "DELETE")}
+                    onClick={() => action(`/reject/${u.id}`, "DELETE")}
                   >
                     Reject
                   </Button>
@@ -77,7 +73,7 @@ export default function UserManagement() {
                 {u.role === "user" && u.isApproved && (
                   <Button
                     variant="secondary"
-                    onClick={() => action(`${API_URL}/promote/${u.id}`)}
+                    onClick={() => action(`/promote/${u.id}`)}
                   >
                     Promote to Admin
                   </Button>
@@ -86,7 +82,7 @@ export default function UserManagement() {
                 {u.role === "admin" && (
                   <Button
                     variant="outline"
-                    onClick={() => action(`${API_URL}/demote/${u.id}`)}
+                    onClick={() => action(`/demote/${u.id}`)}
                   >
                     Demote Admin
                   </Button>
@@ -94,7 +90,7 @@ export default function UserManagement() {
 
                 <Button
                   variant="destructive"
-                  onClick={() => action(`${API_URL}/delete/${u.id}`, "DELETE")}
+                  onClick={() => action(`/delete/${u.id}`, "DELETE")}
                 >
                   Delete
                 </Button>

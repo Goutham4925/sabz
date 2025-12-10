@@ -1,102 +1,112 @@
 📘 Gobbly Treat – Full-Stack Product Showcase Platform
 
-A fully featured, modern product-showcase website built with React, Express.js, Prisma, PostgreSQL, JWT Authentication, and a secure Admin CMS Dashboard.
+A fully featured, modern product-showcase and CMS platform built with React, Express.js, Prisma, PostgreSQL, Multer image uploads, JWT Authentication, and a secure Admin Dashboard.
 
-This platform allows customers to browse products, read information about the brand, and contact the business — while providing administrators with a robust control panel to manage products, pages, users, and messages.
+This platform allows customers to explore products, learn about the brand, and submit enquiries—while giving administrators a complete CMS to manage products, pages, users, and messages.
 
 🚀 Features Overview
 🛍️ Frontend (Customer Facing)
 
-Beautiful modern UI built in React + Tailwind
+Modern UI with React + Tailwind + ShadCN
 
-Product listing + product detail page
+Product listing + product detail pages
 
-About page with dynamic content
+Fully dynamic About Page
 
-Contact page with dynamic fields + form submission
+Fully dynamic Contact Page
 
-FAQ area
-
-Mobile-responsive layout
+Contact + Product Enquiry forms
 
 Image rendering from backend /uploads
 
+FAQ sections
+
+Fully mobile responsive design
+
 🔐 Authentication System
 
-Email + Password login
+Email + password login
 
-JWT-based authentication (stored securely in localStorage)
+JWT-based authentication (token stored in localStorage)
 
-Role-based access:
+Role-based access
 
-admin — full platform access
+admin — full control panel
 
 user — restricted
 
-Account approval workflow:
+✔ Account Approval Workflow
 
-Newly registered users = isApproved: false
+New users → isApproved: false
 
-Admin must review & approve inside Admin Panel
+Admin must approve user
 
-Pending users cannot log in
+Unapproved users cannot log in
 
-Optional signup disable switch to restrict new accounts
+Optional “Disable Signup” switch for restricted access
 
 🧑‍💼 Admin Dashboard Features
 1. Product Management
 
 Add, edit, delete products
 
-Upload product images via the /api/upload endpoint
+Upload product images via /api/upload
 
-View product list with images
+Multiple gallery images
 
 Full CRUD
 
 2. About Page CMS
 
-Edit heading, description
+Edit hero section
 
-Edit team members, images, and icons
+Edit story paragraphs
 
-All content stored dynamically in DB
+Edit highlights
+
+Edit team members
+
+Upload images or icons
+
+Fully dynamic DB-driven page
 
 3. Contact Page CMS
 
-Edit hero title, badge, subtitle
+Edit hero, subtitle
 
-Edit contact cards (icon, title, line1, line2)
+Edit contact cards (icon, title, lines)
 
-Edit FAQ questions and answers
+Edit FAQ questions & answers
 
-Edit map details
+Edit map title & address
 
 4. Messages Inbox
 
-All contact messages are stored in database
+View customer enquiries
 
-Admin can read and delete messages
+Product enquiries automatically include product name
 
-Securely accessible only to approved admins
+Mark message as read
 
-5. User Management System
+Delete messages
 
-View all users (approved + pending)
+5. User Management
 
-Approve or reject new accounts
+Approve new users
 
-Promote to admin / Demote admin
+Promote/demote admin
 
-Delete user accounts permanently
+Delete users
+
+See pending + approved accounts
 
 6. Upload Management
 
-Upload images into /public/uploads
+All images stored in /public/uploads
 
-Returns usable URL stored in DB
+Returns usable image URL to store in DB
 
-Preview image before saving
+Replaces old images automatically
 
 🏗️ Tech Stack
 Frontend
@@ -105,13 +115,15 @@ React (Vite)
 
 React Router
 
-Tailwind CSS / ShadCN components
+Tailwind CSS / ShadCN
 
 Lucide Icons
 
+Toast + Sonner
+
 React Query
 
-Toast + Sonner notifications
+Axios / Fetch API
 
 Backend
 
@@ -125,7 +137,7 @@ Multer for image uploads
 
 JWT Authentication
 
-Bcrypt password hashing
+Bcrypt for password hashing
 
 Role-based Access Control (RBAC)
 
@@ -145,9 +157,8 @@ root/
 │   │   ├── contactPage.js
 │   │   └── contactMessages.js
 │   ├── middleware/
-│   │   ├── auth.js
-│   ├── public/
-│   │   └── uploads/ (image storage)
+│   │   └── auth.js
+│   ├── public/uploads/     (image storage)
 │   ├── server.js
 │   ├── package.json
 │   └── .env
@@ -155,69 +166,71 @@ root/
 ├── frontend/
 │   ├── src/
 │   │   ├── pages/
+│   │   ├── components/
 │   │   ├── hooks/
 │   │   │   └── useAuth.tsx
-│   │   ├── components/
 │   │   └── App.tsx
 │   ├── package.json
 │   └── vite.config.js
 │
 └── README.md
 
-🧩 Prisma Schema (Key Models)
+🧩 Core Prisma Models (Simplified)
+User
 model User {
   id         String   @id @default(uuid())
   email      String   @unique
   password   String
-  role       String   @default("user")
+  role       String   @default("USER")
   isApproved Boolean  @default(false)
   createdAt  DateTime @default(now())
 }
 
+Product
 model Product {
-  id          String   @id @default(uuid())
-  title       String
-  description String
-  price       Float
-  image       String?
+  id          Int      @id @default(autoincrement())
+  name        String
+  description String?
+  price       Float?
+  image_url   String?
+  gallery     Json?
+  images      ProductImage[]
+  created_at  DateTime @default(now())
+}
+
+Contact Message
+model ContactMessage {
+  id          Int      @id @default(autoincrement())
+  name        String
+  email       String
+  subject     String
+  message     String
+  phone       String?
+  productId   Int?
+  productName String?
+  is_read     Boolean  @default(false)
   createdAt   DateTime @default(now())
 }
 
-model Message {
-  id        String   @id @default(uuid())
-  name      String
-  email     String
-  subject   String
-  message   String
-  createdAt DateTime @default(now())
-}
-
-🔐 Authentication Flow Overview
+🔐 Authentication Flow
 1. Signup
+
 POST /api/auth/register
 
+Creates user with isApproved = false
 
-Creates user
+2. Admin Approves
 
-isApproved = false
-
-User cannot login yet
-
-2. Admin approves user
 PUT /api/admin/approve/:id
 
-
-Now they can log in.
-
 3. Login
+
 POST /api/auth/login
-
-
-Response includes:
+Returns:
 
 {
-  "token": "<jwt>",
-  "user": { "id": "...", "email": "...", "role": "admin" }
+  "token": "jwt-token",
+  "user": { "email": "x", "role": "admin" }
 }
 
 4. Protected Requests
@@ -226,70 +239,52 @@ Frontend sends:
 
 Authorization: Bearer <token>
 
-
-Backend verifies token + admin permissions.
-
 🗃️ Image Upload Workflow
-1. Admin selects image
-
-React component sends:
-
+1️⃣ React sends:
 POST /api/upload
 Content-Type: multipart/form-data
 
-2. Backend stores file
+2️⃣ Backend saves image in /public/uploads
+3️⃣ Backend returns:
+https://yourdomain.com/uploads/filename.png
 
-Saved in /public/uploads
+4️⃣ URL stored in DB
+📨 Contact + Product Enquiry Workflow
+1. User submits form
 
-Returns file URL like:
-
-http://localhost:5000/uploads/abc123.png
-
-3. URL stored in DB
-
-This URL is shown everywhere automatically.
-
-📨 Contact Form Workflow
-1. User submits contact form
 POST /api/messages
 
-2. Message saved in DB
-3. Admin views messages in dashboard
-4. Admin can delete message
-DELETE /api/messages/:id
+2. Backend stores it
 
-🧑‍💼 Admin CMS Details
-Admin Controls:
-Module	Actions
-Products	Add / Edit / Delete / Upload images
-About Page	Edit content + team members
-Contact Page	Edit hero, cards, FAQ, map
-Messages	View + Delete
-Users	Approve / Reject / Promote / Demote / Delete
+Includes product name if productId passed
+
+3. Admin sees messages in dashboard
+4. Admin can:
+
+Mark as read
+
+Delete
+
 🔒 ProtectedRoute Logic (Frontend)
 
 Admin pages require:
 
-Valid JWT
+✔ Valid JWT
+✔ role = admin
+✔ isApproved = true
 
-User role = admin
-
-isApproved = true
-
-Non-admins cannot access admin area.
-
-If unauthorized, user is redirected to:
-
-/admin/login
+Unauthorized users → redirected to /admin/login.
 
 🧪 Environment Variables
+Backend .env
+DATABASE_URL="postgresql://user:password@host:5432/gobblytreat"
+JWT_SECRET="your-secret"
+PORT=5000
 
-Create backend .env:
+Frontend .env
+VITE_API_URL="https://your-backend.onrender.com/api"
 
-DATABASE_URL="postgresql://user:pass@localhost:5432/gobblytreat"
-JWT_SECRET="yoursecret"
-
-🚀 How to Run Project Locally
+🚀 Run Project Locally
 Backend
 cd backend
 npm install
@@ -301,13 +296,34 @@ cd frontend
 npm install
 npm run dev
 
-🎯 Planned Enhancements
+🟣 Deployment (Render.com)
+Backend
+
+Build Command: npm install
+
+Start Command: node server.js
+
+Add environment variables (DATABASE_URL, JWT_SECRET)
+
+Enable Static Directory: /public
+
+Frontend
+
+Build Command: npm install && npm run build
+
+Publish Directory: dist
+
+Add frontend .env with:
+
+VITE_API_URL="https://your-backend-url.onrender.com/api"
+
+🎯 Future Enhancements
 
 Product categories
 
-Order or inquiry system
+Order system / Cart
 
-Email notifications for user registration
+Email notifications
 
 Image optimization CDN
 
@@ -315,16 +331,18 @@ Admin activity logs
 
 🏁 Conclusion
 
-Gobbly Treat is a robust full-stack CMS-driven product showcase platform with:
+Gobbly Treat is a complete full-stack CMS-driven product showcase system featuring:
 
 Secure authentication
 
-Admin approval system
+CMS for About + Contact pages
 
-Complete CMS
+Full product management
 
-Elegant frontend
+Message inbox
+
+Dynamic frontend
 
 Extendable backend architecture
 
-This README fully documents how the system works internally and externally.
+This README fully documents the system’s structure and workflow.
