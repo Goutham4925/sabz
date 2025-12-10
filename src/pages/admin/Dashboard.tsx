@@ -101,7 +101,7 @@ export default function Dashboard() {
     { title: "Categories", value: stats.categories, icon: Eye },
     {
       title: "Avg Price",
-      value: `$${stats.averagePrice.toFixed(2)}`,
+      value: `₹${stats.averagePrice.toFixed(2)}`,
       icon: DollarSign,
     },
 
