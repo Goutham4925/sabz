@@ -3,25 +3,21 @@ import { Navbar } from "@/components/layout/Navbar";
 import { Footer } from "@/components/layout/Footer";
 import { Award, Heart, Leaf, Users, Cookie } from "lucide-react";
 import { useGlobalLoading } from "@/context/LoadingContext";
-import { API_URL } from "@/config/api"; 
-
-// const API_URL = "http://localhost:5000/api/about";
+import { API_URL } from "@/config/api";
 
 const iconMap: any = {
   Heart,
   Leaf,
   Award,
-  Users
+  Users,
 };
 
 const About = () => {
   const [about, setAbout] = useState<any>(null);
   const [loading, setLoading] = useState(true);
-
   const { setLoading: setGlobalLoading } = useGlobalLoading();
 
   useEffect(() => {
-    // Start universal loader
     setGlobalLoading(true);
 
     fetch(`${API_URL}/about?v=${Date.now()}`, { cache: "no-store" })
@@ -29,7 +25,6 @@ const About = () => {
       .then((d) => {
         setAbout(d);
         setLoading(false);
-        // Stop loader when page content is ready
         setGlobalLoading(false);
       })
       .catch(() => {
@@ -38,7 +33,6 @@ const About = () => {
       });
   }, []);
 
-  // Prevent rendering while fetching
   if (loading || !about) return null;
 
   return (
@@ -57,7 +51,9 @@ const About = () => {
 
               <h1 className="section-title mb-6 animate-fade-up stagger-1">
                 {about.hero_title || (
-                  <>A Legacy of <span className="text-gradient">Baking Excellence</span></>
+                  <>
+                    A Legacy of <span className="text-gradient">Baking Excellence</span>
+                  </>
                 )}
               </h1>
 
@@ -73,10 +69,12 @@ const About = () => {
             {/* RIGHT HERO IMAGE */}
             <div className="relative animate-fade-up stagger-4">
               <div className="relative rounded-3xl overflow-hidden shadow-elevated">
-                <img
-                  src={about.hero_image_url}
-                  className="w-full h-[500px] object-cover"
-                />
+                {about.hero_image_url && (
+                  <img
+                    src={about.hero_image_url}
+                    className="w-full h-[500px] object-cover"
+                  />
+                )}
               </div>
 
               <div className="absolute -bottom-6 -left-6 glass-card p-6 shadow-elevated golden-glow">
@@ -100,9 +98,12 @@ const About = () => {
 
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-8">
               {[1, 2, 3, 4].map((i) => {
-                const iconVal = about[`value_${i}_icon`];
-                const isImage = iconVal && iconVal.startsWith("http");
-                const Icon = iconMap[iconVal] || Heart;
+                const iconVal = about[`value_${i}_icon`] ?? "";
+                const isImage = typeof iconVal === "string" && iconVal.startsWith("http");
+                const Icon =
+                  typeof iconVal === "string" && iconMap[iconVal]
+                    ? iconMap[iconVal]
+                    : Heart;
 
                 return (
                   <div key={i} className="glass-card p-8 text-center">
@@ -135,19 +136,22 @@ const About = () => {
           <div className="container mx-auto px-4 md:px-8 max-w-4xl">
             <div className="text-center max-w-2xl mx-auto mb-16">
               <h2 className="section-title mb-4">
-                {about.timeline_heading || "Our Journey"}
+                {about.timeline_heading?.trim() || "Our Journey"}
               </h2>
               <p className="section-subtitle">
-                {about.timeline_subheading || "How our story evolved through the years"}
+                {about.timeline_subheading?.trim() ||
+                  "How our story evolved through the years"}
               </p>
             </div>
 
             {[1, 2, 3, 4, 5].map((i, index) => (
               <div
                 key={i}
-                className={`flex gap-8 mb-12 last:mb-0 ${index % 2 ? "flex-row-reverse" : "flex-row"}`}
+                className={`flex gap-8 mb-12 last:mb-0 ${
+                  index % 2 ? "flex-row-reverse" : "flex-row"
+                }`}
               >
-                {/* LEFT or RIGHT TEXT */}
+                {/* LEFT OR RIGHT TEXT */}
                 <div className="flex-1 text-right">
                   {index % 2 === 0 && (
                     <>
@@ -169,7 +173,7 @@ const About = () => {
                   <div className="w-4 h-4 bg-primary rounded-full" />
                 </div>
 
-                {/* MIRROR SIDE TEXT */}
+                {/* MIRROR SIDE */}
                 <div className="flex-1">
                   {index % 2 !== 0 && (
                     <>
@@ -200,10 +204,12 @@ const About = () => {
               {[1, 2, 3].map((i) => (
                 <div key={i} className="group text-center">
                   <div className="relative w-48 h-48 mx-auto mb-6 rounded-full overflow-hidden shadow-card">
-                    <img
-                      src={about[`team_${i}_image`]}
-                      className="w-full h-full object-cover"
-                    />
+                    {about[`team_${i}_image`] && (
+                      <img
+                        src={about[`team_${i}_image`]}
+                        className="w-full h-full object-cover"
+                      />
+                    )}
                   </div>
 
                   <h3 className="font-display text-xl font-semibold">
@@ -223,22 +229,30 @@ const About = () => {
         <section className="py-24 bg-chocolate text-cream">
           <div className="container mx-auto px-4 md:px-8 grid grid-cols-2 md:grid-cols-4 gap-8 text-center">
             <div>
-              <p className="font-display text-5xl font-bold text-golden">{about.stat_years}</p>
+              <p className="font-display text-5xl font-bold text-golden">
+                {about.stat_years}
+              </p>
               <p>Years of Excellence</p>
             </div>
 
             <div>
-              <p className="font-display text-5xl font-bold text-golden">{about.stat_flavors}</p>
+              <p className="font-display text-5xl font-bold text-golden">
+                {about.stat_flavors}
+              </p>
               <p>Unique Flavors</p>
             </div>
 
             <div>
-              <p className="font-display text-5xl font-bold text-golden">{about.stat_countries}</p>
+              <p className="font-display text-5xl font-bold text-golden">
+                {about.stat_countries}
+              </p>
               <p>Countries Served</p>
             </div>
 
             <div>
-              <p className="font-display text-5xl font-bold text-golden">{about.stat_customers}</p>
+              <p className="font-display text-5xl font-bold text-golden">
+                {about.stat_customers}
+              </p>
               <p>Happy Customers</p>
             </div>
           </div>

@@ -10,8 +10,6 @@ import { Loader2, Save, Upload } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
 import { API_URL } from "@/config/api";
 
-// const API_URL = "http://localhost:5000/api/contact-page";
-
 export default function ContactPageAdmin() {
   const [data, setData] = useState<any>(null);
   const [loading, setLoading] = useState(true);
@@ -25,7 +23,6 @@ export default function ContactPageAdmin() {
     const form = new FormData();
     form.append("image", file);
 
-    // Send old image URL for deletion
     if (data[field]) {
       form.append("oldImage", data[field]);
     }
@@ -40,12 +37,12 @@ export default function ContactPageAdmin() {
 
       setData((prev: any) => ({
         ...prev,
-        [field]: out.url, // save new url
+        [field]: out.url,
       }));
 
       toast({
         title: "Image Updated!",
-        description: "Old image deleted automatically.",
+        description: "Old image replaced successfully.",
       });
     } catch {
       toast({
@@ -56,7 +53,9 @@ export default function ContactPageAdmin() {
     }
   };
 
-
+  // -----------------------------
+  // FETCH CONTACT PAGE
+  // -----------------------------
   useEffect(() => {
     fetch(`${API_URL}/contact-page`)
       .then((res) => res.json())
@@ -109,16 +108,32 @@ export default function ContactPageAdmin() {
   const handle = (f: string, v: any) =>
     setData((prev: any) => ({ ...prev, [f]: v }));
 
+  // -----------------------------
+  // SAVE CONTACT PAGE
+  // -----------------------------
   const save = async () => {
     setSaving(true);
+    const token = localStorage.getItem("token");
 
-    await fetch(`${API_URL}/${data.id}`, {
-      method: "PUT",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify(data),
-    });
+    try {
+      await fetch(`${API_URL}/contact-page/${data.id}`, {
+        method: "PUT",
+        headers: {
+          "Content-Type": "application/json",
+          Authorization: `Bearer ${token}`, // FIXED
+        },
+        body: JSON.stringify(data),
+      });
 
-    toast({ title: "Saved", description: "Contact page updated!" });
+      toast({ title: "Saved", description: "Contact Page updated successfully!" });
+    } catch {
+      toast({
+        title: "Save Failed",
+        description: "Could not update contact page.",
+        variant: "destructive",
+      });
+    }
+
     setSaving(false);
   };
 
@@ -170,9 +185,7 @@ export default function ContactPageAdmin() {
                   <Input
                     value={data[`card_${i}_icon`]}
                     placeholder="MapPin / Phone / http://image.png"
-                    onChange={(e) =>
-                      handle(`card_${i}_icon`, e.target.value)
-                    }
+                    onChange={(e) => handle(`card_${i}_icon`, e.target.value)}
                   />
 
                   <input
@@ -195,7 +208,6 @@ export default function ContactPageAdmin() {
                   </Button>
                 </div>
 
-                {/* Preview */}
                 {data[`card_${i}_icon`]?.startsWith("http") && (
                   <img
                     src={data[`card_${i}_icon`]}
@@ -206,25 +218,19 @@ export default function ContactPageAdmin() {
                 <Label>Title</Label>
                 <Input
                   value={data[`card_${i}_title`]}
-                  onChange={(e) =>
-                    handle(`card_${i}_title`, e.target.value)
-                  }
+                  onChange={(e) => handle(`card_${i}_title`, e.target.value)}
                 />
 
                 <Label>Line 1</Label>
                 <Input
                   value={data[`card_${i}_line1`]}
-                  onChange={(e) =>
-                    handle(`card_${i}_line1`, e.target.value)
-                  }
+                  onChange={(e) => handle(`card_${i}_line1`, e.target.value)}
                 />
 
                 <Label>Line 2</Label>
                 <Input
                   value={data[`card_${i}_line2`]}
-                  onChange={(e) =>
-                    handle(`card_${i}_line2`, e.target.value)
-                  }
+                  onChange={(e) => handle(`card_${i}_line2`, e.target.value)}
                 />
               </div>
             ))}
@@ -271,10 +277,9 @@ export default function ContactPageAdmin() {
                 <Loader2 className="animate-spin w-4 h-4" />
               ) : (
                 <>
-                  <Save className="w-4 h-4 mr-2" />
+                  <Save className="w-4 h-4 mr-2" /> Save Changes
                 </>
               )}
-              Save Changes
             </Button>
           </CardContent>
         </Card>
