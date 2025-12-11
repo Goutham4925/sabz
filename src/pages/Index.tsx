@@ -1,4 +1,4 @@
-import { useEffect } from "react";
+import { useEffect, useState } from "react";
 import { Navbar } from "@/components/layout/Navbar";
 import { Footer } from "@/components/layout/Footer";
 import { HeroSection } from "@/components/home/HeroSection";
@@ -10,30 +10,48 @@ import { useGlobalLoading } from "@/context/LoadingContext";
 
 const Index = () => {
   const { setLoading } = useGlobalLoading();
+  const [ready, setReady] = useState(false);
 
   useEffect(() => {
-    // Start global loading as soon as homepage loads
+    let mounted = true;
     setLoading(true);
 
-    // Homepage loads multiple components:
-    // HeroSection (fetch settings), ProductsSection (fetch products)
-    // We wait a bit to allow all main content to load
-    const timer = setTimeout(() => {
-      setLoading(false);
-    }, 800); // Adjustable timing (800ms is smooth)
+    async function loadAll() {
+      // Wait for all homepage section fetches to resolve
+      await Promise.all([
+        HeroSection.preload?.(),
+        ProductsSection.preload?.(),
+        AboutSection.preload?.(),
+      ]);
 
-    return () => clearTimeout(timer);
-  }, [setLoading]);
+      // Safety check
+      if (mounted) {
+        setReady(true);
+        setLoading(false);
+      }
+    }
+
+    loadAll();
+
+    return () => {
+      mounted = false;
+    };
+  }, []);
+
+  // ❌ Prevent rendering until ALL sections have loaded
+  if (!ready) return null;
 
   return (
     <div className="min-h-screen">
       <Navbar />
+
       <main>
         <HeroSection />
         <ProductsSection />
         <AboutSection />
         <CTASection />
       </main>
+
       <Footer />
     </div>
   );
