@@ -134,65 +134,73 @@ const About = () => {
         {/* TIMELINE SECTION */}
         <section className="py-24">
           <div className="container mx-auto px-4 md:px-8 max-w-4xl">
+            
+            {/* Heading */}
             <div className="text-center max-w-2xl mx-auto mb-16">
               <h2 className="section-title mb-4">
                 {about.timeline_heading?.trim() || "Our Journey"}
               </h2>
+
               <p className="section-subtitle">
                 {about.timeline_subheading?.trim() ||
-                  "How our story evolved through the years"}
+                  "From humble beginnings to international recognition"}
               </p>
             </div>
 
-            {[1, 2, 3, 4, 5].map((i, index) => (
-              <div
-                key={i}
-                className={`flex gap-8 mb-12 last:mb-0 ${
-                  index % 2 ? "flex-row-reverse" : "flex-row"
-                }`}
-              >
-                {/* LEFT OR RIGHT TEXT */}
-                <div className="flex-1 text-right">
-                  {index % 2 === 0 && (
-                    <>
-                      <span className="font-display text-4xl font-bold text-primary">
-                        {about[`milestone_${i}_year`]}
-                      </span>
-                      <h3 className="font-display text-xl font-semibold mt-2 mb-2">
-                        {about[`milestone_${i}_title`]}
-                      </h3>
-                      <p className="text-muted-foreground">
-                        {about[`milestone_${i}_desc`]}
-                      </p>
-                    </>
-                  )}
-                </div>
+            {/* Timeline Wrapper */}
+            <div className="relative">
 
-                {/* DOT */}
-                <div className="relative">
-                  <div className="w-4 h-4 bg-primary rounded-full" />
-                </div>
+              {/* Vertical Line */}
+              <div className="absolute left-1/2 top-0 bottom-0 w-1 bg-border transform -translate-x-1/2" />
 
-                {/* MIRROR SIDE */}
-                <div className="flex-1">
-                  {index % 2 !== 0 && (
-                    <>
-                      <span className="font-display text-4xl font-bold text-primary">
-                        {about[`milestone_${i}_year`]}
+              {/* Timeline Items */}
+              {[1, 2, 3, 4, 5].map((i, index) => {
+                const year = about[`milestone_${i}_year`];
+                const title = about[`milestone_${i}_title`];
+                const desc = about[`milestone_${i}_desc`];
+
+                if (!year && !title && !desc) return null;
+
+                const isLeft = index % 2 === 0;
+
+                return (
+                  <div
+                    key={i}
+                    className={`relative flex items-start mb-16 last:mb-0 ${
+                      isLeft ? "flex-row" : "flex-row-reverse"
+                    }`}
+                  >
+                    {/* TEXT BLOCK */}
+                    <div
+                      className={`w-1/2 px-6 ${
+                        isLeft ? "text-right" : "text-left"
+                      }`}
+                    >
+                      <span className="font-display text-4xl font-bold text-primary block">
+                        {year}
                       </span>
+
                       <h3 className="font-display text-xl font-semibold mt-2 mb-2">
-                        {about[`milestone_${i}_title`]}
+                        {title}
                       </h3>
-                      <p className="text-muted-foreground">
-                        {about[`milestone_${i}_desc`]}
-                      </p>
-                    </>
-                  )}
-                </div>
-              </div>
-            ))}
+
+                      <p className="text-muted-foreground">{desc}</p>
+                    </div>
+
+                    {/* DOT */}
+                    <div className="relative flex items-center justify-center w-12">
+                      <div className="w-4 h-4 bg-primary rounded-full shadow-md" />
+                    </div>
+
+                    {/* EMPTY SPACER TO BALANCE GRID */}
+                    <div className="w-1/2 px-6" />
+                  </div>
+                );
+              })}
+            </div>
           </div>
         </section>
+
 
         {/* TEAM SECTION */}
         <section className="py-24 bg-secondary/30">
