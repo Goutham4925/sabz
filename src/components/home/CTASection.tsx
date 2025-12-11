@@ -5,33 +5,39 @@ import { Link } from "react-router-dom";
 import { useSiteSettings } from "@/hooks/useSiteSettings";
 
 export function CTASection() {
-  const { settings } = useSiteSettings();
-
-  // Hooks MUST ALWAYS come first — before any returns
+  const { settings, loading } = useSiteSettings();
   const [visible, setVisible] = useState(false);
-  const ref = useRef<HTMLElement | null>(null);
+  const ref = useRef<HTMLDivElement>(null);
 
-  // Attach intersection observer only once
+  // Prevent hydration mismatch
+  const didRun = useRef(false);
+
   useEffect(() => {
-    if (!ref.current) return;
-    const element = ref.current;
+    if (!settings) return;
+    if (didRun.current) return;
+    didRun.current = true;
+
+    const el = ref.current;
+    if (!el) return;
 
     const observer = new IntersectionObserver(
-      ([entry]) => {
-        if (entry.isIntersecting) {
-          setVisible(true);
-          observer.disconnect(); // run one time only
+      (entries) => {
+        if (entries[0].isIntersecting) {
+          // Run AFTER React finishes paint
+          requestAnimationFrame(() => {
+            setVisible(true);
+          });
+          observer.disconnect();
         }
       },
       { threshold: 0.3 }
     );
 
-    observer.observe(element);
+    observer.observe(el);
     return () => observer.disconnect();
-  }, []);
+  }, [settings]);
 
-  // SAFE — we can return early AFTER all hooks were declared
-  if (!settings) return null;
+  if (loading || !settings) return null;
 
   return (
     <section ref={ref} className="py-24 bg-chocolate relative overflow-hidden">
@@ -45,8 +51,9 @@ export function CTASection() {
 
         {/* Badge */}
         <div
-          className={`inline-flex items-center gap-2 bg-cream/10 border border-cream/20 text-cream px-4 py-2 rounded-full text-sm mb-8 transition-all duration-700 
-            ${visible ? "opacity-100 translate-y-0" : "opacity-0 translate-y-10"}`}
+          className={`inline-flex items-center gap-2 bg-cream/10 border border-cream/20 text-cream px-4 py-2 rounded-full text-sm mb-8 transition-all duration-700 ${
+            visible ? "opacity-100 translate-y-0" : "opacity-0 translate-y-10"
+          }`}
         >
           <Gift className="w-4 h-4" />
           <span>{settings.cta_badge_text || "Perfect for Gifting"}</span>
@@ -54,8 +61,9 @@ export function CTASection() {
 
         {/* Title */}
         <h2
-          className={`font-display text-4xl md:text-5xl lg:text-6xl font-bold text-cream mb-6 transition-all duration-700 delay-100 
-            ${visible ? "opacity-100 translate-y-0" : "opacity-0 translate-y-10"}`}
+          className={`font-display text-4xl md:text-5xl lg:text-6xl font-bold text-cream mb-6 transition-all duration-700 delay-100 ${
+            visible ? "opacity-100 translate-y-0" : "opacity-0 translate-y-10"
+          }`}
           dangerouslySetInnerHTML={{
             __html:
               settings.cta_title ||
@@ -65,8 +73,9 @@ export function CTASection() {
 
         {/* Subtitle */}
         <p
-          className={`text-cream/70 text-lg md:text-xl max-w-2xl mx-auto mb-10 transition-all duration-700 delay-200 
-            ${visible ? "opacity-100 translate-y-0" : "opacity-0 translate-y-10"}`}
+          className={`text-cream/70 text-lg md:text-xl max-w-2xl mx-auto mb-10 transition-all duration-700 delay-200 ${
+            visible ? "opacity-100 translate-y-0" : "opacity-0 translate-y-10"
+          }`}
         >
           {settings.cta_subtitle ||
             "Order our premium biscuits today and discover why customers love us."}
@@ -74,8 +83,9 @@ export function CTASection() {
 
         {/* Buttons */}
         <div
-          className={`flex flex-col sm:flex-row items-center justify-center gap-4 transition-all duration-700 delay-300 
-            ${visible ? "opacity-100 translate-y-0" : "opacity-0 translate-y-10"}`}
+          className={`flex flex-col sm:flex-row items-center justify-center gap-4 transition-all duration-700 delay-300 ${
+            visible ? "opacity-100 translate-y-0" : "opacity-0 translate-y-10"
+          }`}
         >
           <Link to={settings.cta_primary_href || "/products"}>
             <Button
