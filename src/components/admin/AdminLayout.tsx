@@ -15,6 +15,7 @@ import {
   MessageCircle,
   Users,
   Tags,
+  BookOpen,
 } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import { API_URL } from "@/config/api";
@@ -27,8 +28,8 @@ const navItems = [
   { path: '/admin/dashboard', label: 'Dashboard', icon: LayoutDashboard },
   { path: '/admin/products', label: 'Products', icon: Package },
   { path: '/admin/categories', label: 'Categories', icon: Tags },
-  { path: '/admin/settings', label: 'Settings', icon: Settings },
-  { path: '/admin/about', label: 'About Page', icon: Home },
+  { path: '/admin/settings', label: 'Homepage', icon: Home },
+  { path: '/admin/about', label: 'About Page', icon:  BookOpen },
   { path: '/admin/contact', label: 'Contact Page', icon: Mail },
   { path: '/admin/messages', label: 'Messages', icon: MessageCircle },
   { path: '/admin/users', label: 'Users', icon: Users },
