@@ -42,7 +42,7 @@ export default function ContactPageAdmin() {
 
       toast({
         title: "Image Updated!",
-        description: "Old image replaced successfully.",
+        description: "Image replaced successfully.",
       });
     } catch {
       toast({
@@ -100,13 +100,14 @@ export default function ContactPageAdmin() {
 
         const cleaned: any = { id: d.id };
         fields.forEach((f) => (cleaned[f] = d[f] ?? ""));
+
         setData(cleaned);
         setLoading(false);
       });
   }, []);
 
-  const handle = (f: string, v: any) =>
-    setData((prev: any) => ({ ...prev, [f]: v }));
+  const handle = (field: string, value: any) =>
+    setData((prev: any) => ({ ...prev, [field]: value }));
 
   // -----------------------------
   // SAVE CONTACT PAGE
@@ -116,16 +117,21 @@ export default function ContactPageAdmin() {
     const token = localStorage.getItem("token");
 
     try {
-      await fetch(`${API_URL}/contact-page/${data.id}`, {
+      const res = await fetch(`${API_URL}/contact-page/${data.id}`, {
         method: "PUT",
         headers: {
           "Content-Type": "application/json",
-          Authorization: `Bearer ${token}`, // FIXED
+          Authorization: `Bearer ${token}`,
         },
         body: JSON.stringify(data),
       });
 
-      toast({ title: "Saved", description: "Contact Page updated successfully!" });
+      if (!res.ok) throw new Error("Save failed");
+
+      toast({
+        title: "Saved!",
+        description: "Contact Page updated successfully!",
+      });
     } catch {
       toast({
         title: "Save Failed",
@@ -137,7 +143,12 @@ export default function ContactPageAdmin() {
     setSaving(false);
   };
 
-  if (loading) return <Loader2 className="animate-spin" />;
+  if (loading)
+    return (
+      <div className="flex justify-center items-center py-20">
+        <Loader2 className="animate-spin h-8 w-8" />
+      </div>
+    );
 
   return (
     <ProtectedRoute>
@@ -147,8 +158,8 @@ export default function ContactPageAdmin() {
             <CardTitle>Contact Page Settings</CardTitle>
           </CardHeader>
 
-          <CardContent className="space-y-6">
-            {/* HERO */}
+          <CardContent className="space-y-8">
+            {/* HERO SECTION */}
             <div>
               <Label>Hero Badge</Label>
               <Input
@@ -176,15 +187,14 @@ export default function ContactPageAdmin() {
 
             {/* CONTACT CARDS */}
             {[1, 2, 3, 4].map((i) => (
-              <div key={i} className="border p-4 rounded-lg space-y-3">
-                <h3 className="font-semibold">Contact Card {i}</h3>
+              <div key={i} className="border p-4 rounded-xl space-y-3">
+                <h3 className="font-semibold text-lg">Contact Card {i}</h3>
 
-                <Label>Card Icon (upload OR icon name)</Label>
-
+                <Label>Card Icon (icon name or upload)</Label>
                 <div className="flex items-center gap-3">
                   <Input
                     value={data[`card_${i}_icon`]}
-                    placeholder="MapPin / Phone / http://image.png"
+                    placeholder="MapPin / Phone / https://..."
                     onChange={(e) => handle(`card_${i}_icon`, e.target.value)}
                   />
 
@@ -199,11 +209,7 @@ export default function ContactPageAdmin() {
                     }
                   />
 
-                  <Button
-                    onClick={() =>
-                      document.getElementById(`uploadCard${i}`)?.click()
-                    }
-                  >
+                  <Button onClick={() => document.getElementById(`uploadCard${i}`)?.click()}>
                     <Upload className="w-4 h-4 mr-2" /> Upload
                   </Button>
                 </div>
@@ -211,7 +217,7 @@ export default function ContactPageAdmin() {
                 {data[`card_${i}_icon`]?.startsWith("http") && (
                   <img
                     src={data[`card_${i}_icon`]}
-                    className="w-12 h-12 object-cover rounded-lg mt-2"
+                    className="w-14 h-14 object-cover rounded-lg mt-2"
                   />
                 )}
 
@@ -272,9 +278,12 @@ export default function ContactPageAdmin() {
             </div>
 
             {/* SAVE BUTTON */}
-            <Button onClick={save} disabled={saving}>
+            <Button onClick={save} disabled={saving} className="w-full">
               {saving ? (
-                <Loader2 className="animate-spin w-4 h-4" />
+                <>
+                  <Loader2 className="animate-spin w-4 h-4 mr-2" />
+                  Saving...
+                </>
               ) : (
                 <>
                   <Save className="w-4 h-4 mr-2" /> Save Changes

@@ -16,48 +16,37 @@ export default function AboutPageAdmin() {
   const [saving, setSaving] = useState(false);
   const { toast } = useToast();
 
-  // -----------------------------
-  // GENERIC IMAGE UPLOADER
-  // -----------------------------
+  // -----------------------------------------
+  // UNIVERSAL IMAGE UPLOADER
+  // -----------------------------------------
   const uploadImage = async (file: File, field: string) => {
     const form = new FormData();
     form.append("image", file);
 
-    // Send old image for deletion
     if (data[field]) form.append("oldImage", data[field]);
 
     try {
-      const res = await fetch(`${API_URL}/upload`, {
-        method: "POST",
-        body: form,
-      });
+      const r = await fetch(`${API_URL}/upload`, { method: "POST", body: form });
+      const out = await r.json();
 
-      const out = await res.json();
+      setData((prev: any) => ({ ...prev, [field]: out.url }));
 
-      setData((prev: any) => ({
-        ...prev,
-        [field]: out.url,
-      }));
-
-      toast({
-        title: "Image Updated!",
-        description: "Old image deleted successfully.",
-      });
+      toast({ title: "Image Updated", description: "Image replaced successfully." });
     } catch {
       toast({
         title: "Upload Failed",
-        description: "Could not upload the image.",
+        description: "Image upload failed",
         variant: "destructive",
       });
     }
   };
 
-  // -----------------------------
-  // FETCH ABOUT PAGE
-  // -----------------------------
+  // -----------------------------------------
+  // FETCH ABOUT PAGE DATA
+  // -----------------------------------------
   useEffect(() => {
     fetch(`${API_URL}/about`)
-      .then((res) => res.json())
+      .then((r) => r.json())
       .then((d) => {
         const fields = [
           "hero_badge",
@@ -122,18 +111,18 @@ export default function AboutPageAdmin() {
       });
   }, []);
 
-  const handle = (field: string, value: any) =>
-    setData((prev: any) => ({ ...prev, [field]: value }));
+  const handleChange = (key: string, value: any) =>
+    setData((prev: any) => ({ ...prev, [key]: value }));
 
-  // -----------------------------
-  // SAVE UPDATED DATA
-  // -----------------------------
+  // -----------------------------------------
+  // SAVE CHANGES
+  // -----------------------------------------
   const save = async () => {
     setSaving(true);
     const token = localStorage.getItem("token");
 
     try {
-      await fetch(`${API_URL}/about/${data.id}`, {
+      const r = await fetch(`${API_URL}/about/${data.id}`, {
         method: "PUT",
         headers: {
           "Content-Type": "application/json",
@@ -142,14 +131,16 @@ export default function AboutPageAdmin() {
         body: JSON.stringify(data),
       });
 
+      if (!r.ok) throw new Error("Save failed");
+
       toast({
         title: "Saved!",
-        description: "About Page updated successfully.",
+        description: "About page updated successfully",
       });
-    } catch {
+    } catch (err) {
       toast({
-        title: "Save Failed",
-        description: "Could not save About Page.",
+        title: "Save Error",
+        description: "Could not save About Page",
         variant: "destructive",
       });
     }
@@ -161,7 +152,7 @@ export default function AboutPageAdmin() {
     return (
       <ProtectedRoute>
         <AdminLayout>
-          <Loader2 className="animate-spin w-6 h-6" />
+          <Loader2 className="animate-spin w-10 h-10" />
         </AdminLayout>
       </ProtectedRoute>
     );
@@ -169,7 +160,7 @@ export default function AboutPageAdmin() {
   return (
     <ProtectedRoute>
       <AdminLayout>
-        {/* HERO SECTION */}
+        {/* ===================== HERO SECTION ===================== */}
         <Card className="mb-8">
           <CardHeader>
             <CardTitle>Hero Section</CardTitle>
@@ -177,61 +168,50 @@ export default function AboutPageAdmin() {
 
           <CardContent className="space-y-6">
             <Label>Hero Badge</Label>
-            <Input
-              value={data.hero_badge}
-              onChange={(e) => handle("hero_badge", e.target.value)}
-            />
+            <Input value={data.hero_badge} onChange={(e) => handleChange("hero_badge", e.target.value)} />
 
             <Label>Hero Title</Label>
-            <Input
-              value={data.hero_title}
-              onChange={(e) => handle("hero_title", e.target.value)}
-            />
+            <Input value={data.hero_title} onChange={(e) => handleChange("hero_title", e.target.value)} />
 
             <Label>Paragraph 1</Label>
             <Textarea
               rows={3}
               value={data.hero_paragraph1}
-              onChange={(e) => handle("hero_paragraph1", e.target.value)}
+              onChange={(e) => handleChange("hero_paragraph1", e.target.value)}
             />
 
             <Label>Paragraph 2</Label>
             <Textarea
               rows={3}
               value={data.hero_paragraph2}
-              onChange={(e) => handle("hero_paragraph2", e.target.value)}
+              onChange={(e) => handleChange("hero_paragraph2", e.target.value)}
             />
 
             <Label>Hero Image</Label>
             <div className="flex items-center gap-4">
               <Input
                 value={data.hero_image_url}
-                onChange={(e) => handle("hero_image_url", e.target.value)}
+                onChange={(e) => handleChange("hero_image_url", e.target.value)}
               />
 
               <input
-                id="uploadHero"
+                id="heroImageUpload"
                 type="file"
-                className="hidden"
                 accept="image/*"
-                onChange={(e) =>
-                  e.target.files &&
-                  uploadImage(e.target.files[0], "hero_image_url")
-                }
+                className="hidden"
+                onChange={(e) => e.target.files && uploadImage(e.target.files[0], "hero_image_url")}
               />
 
-              <Button onClick={() => document.getElementById("uploadHero")!.click()}>
+              <Button onClick={() => document.getElementById("heroImageUpload")!.click()}>
                 <Upload className="w-4 h-4 mr-2" /> Upload
               </Button>
             </div>
 
-            {data.hero_image_url && (
-              <img src={data.hero_image_url} className="w-40 rounded-xl mt-3" />
-            )}
+            {data.hero_image_url && <img src={data.hero_image_url} className="w-40 rounded-xl mt-4" />}
           </CardContent>
         </Card>
 
-        {/* VALUES SECTION */}
+        {/* ===================== VALUES SECTION ===================== */}
         <Card className="mb-8">
           <CardHeader>
             <CardTitle>Values</CardTitle>
@@ -242,82 +222,66 @@ export default function AboutPageAdmin() {
               <div key={i} className="border p-4 rounded-xl space-y-3">
                 <h3 className="font-semibold">Value {i}</h3>
 
-                <Label>Icon (Image or Icon Name)</Label>
+                <Label>Icon (Name or Image URL)</Label>
                 <div className="flex items-center gap-4">
                   <Input
                     value={data[`value_${i}_icon`]}
-                    onChange={(e) =>
-                      handle(`value_${i}_icon`, e.target.value)
-                    }
+                    onChange={(e) => handleChange(`value_${i}_icon`, e.target.value)}
                   />
 
                   <input
-                    id={`uploadValue${i}`}
+                    id={`valueUpload${i}`}
                     type="file"
-                    className="hidden"
                     accept="image/*"
+                    className="hidden"
                     onChange={(e) =>
-                      e.target.files &&
-                      uploadImage(e.target.files[0], `value_${i}_icon`)
+                      e.target.files && uploadImage(e.target.files[0], `value_${i}_icon`)
                     }
                   />
 
-                  <Button
-                    onClick={() =>
-                      document.getElementById(`uploadValue${i}`)!.click()
-                    }
-                  >
+                  <Button onClick={() => document.getElementById(`valueUpload${i}`)!.click()}>
                     <Upload className="w-4 h-4 mr-2" /> Upload
                   </Button>
                 </div>
 
                 {data[`value_${i}_icon`]?.startsWith("http") && (
-                  <img
-                    src={data[`value_${i}_icon`]}
-                    className="w-20 rounded-xl mt-2"
-                  />
+                  <img src={data[`value_${i}_icon`]} className="w-20 rounded-xl mt-2" />
                 )}
 
                 <Label>Title</Label>
                 <Input
                   value={data[`value_${i}_title`]}
-                  onChange={(e) =>
-                    handle(`value_${i}_title`, e.target.value)
-                  }
+                  onChange={(e) => handleChange(`value_${i}_title`, e.target.value)}
                 />
 
                 <Label>Description</Label>
                 <Textarea
                   rows={2}
                   value={data[`value_${i}_desc`]}
-                  onChange={(e) =>
-                    handle(`value_${i}_desc`, e.target.value)
-                  }
+                  onChange={(e) => handleChange(`value_${i}_desc`, e.target.value)}
                 />
               </div>
             ))}
           </CardContent>
         </Card>
 
-        {/* TIMELINE SECTION */}
+        {/* ===================== TIMELINE SECTION ===================== */}
         <Card className="mb-8">
           <CardHeader>
             <CardTitle>Timeline</CardTitle>
           </CardHeader>
 
-          <CardContent className="space-y-6">
+          <CardContent className="space-y-8">
             <Label>Timeline Heading</Label>
             <Input
               value={data.timeline_heading}
-              onChange={(e) => handle("timeline_heading", e.target.value)}
+              onChange={(e) => handleChange("timeline_heading", e.target.value)}
             />
 
             <Label>Timeline Subheading</Label>
             <Input
               value={data.timeline_subheading}
-              onChange={(e) =>
-                handle("timeline_subheading", e.target.value)
-              }
+              onChange={(e) => handleChange("timeline_subheading", e.target.value)}
             />
 
             {[1, 2, 3, 4, 5].map((i) => (
@@ -327,33 +291,27 @@ export default function AboutPageAdmin() {
                 <Label>Year</Label>
                 <Input
                   value={data[`milestone_${i}_year`]}
-                  onChange={(e) =>
-                    handle(`milestone_${i}_year`, e.target.value)
-                  }
+                  onChange={(e) => handleChange(`milestone_${i}_year`, e.target.value)}
                 />
 
                 <Label>Title</Label>
                 <Input
                   value={data[`milestone_${i}_title`]}
-                  onChange={(e) =>
-                    handle(`milestone_${i}_title`, e.target.value)
-                  }
+                  onChange={(e) => handleChange(`milestone_${i}_title`, e.target.value)}
                 />
 
                 <Label>Description</Label>
                 <Textarea
                   rows={2}
                   value={data[`milestone_${i}_desc`]}
-                  onChange={(e) =>
-                    handle(`milestone_${i}_desc`, e.target.value)
-                  }
+                  onChange={(e) => handleChange(`milestone_${i}_desc`, e.target.value)}
                 />
               </div>
             ))}
           </CardContent>
         </Card>
 
-        {/* TEAM SECTION */}
+        {/* ===================== TEAM SECTION ===================== */}
         <Card className="mb-8">
           <CardHeader>
             <CardTitle>Team Members</CardTitle>
@@ -367,17 +325,13 @@ export default function AboutPageAdmin() {
                 <Label>Name</Label>
                 <Input
                   value={data[`team_${i}_name`]}
-                  onChange={(e) =>
-                    handle(`team_${i}_name`, e.target.value)
-                  }
+                  onChange={(e) => handleChange(`team_${i}_name`, e.target.value)}
                 />
 
                 <Label>Role</Label>
                 <Input
                   value={data[`team_${i}_role`]}
-                  onChange={(e) =>
-                    handle(`team_${i}_role`, e.target.value)
-                  }
+                  onChange={(e) => handleChange(`team_${i}_role`, e.target.value)}
                 />
 
                 <Label>Image</Label>
@@ -385,73 +339,56 @@ export default function AboutPageAdmin() {
                   <Input
                     value={data[`team_${i}_image`]}
                     onChange={(e) =>
-                      handle(`team_${i}_image`, e.target.value)
+                      handleChange(`team_${i}_image`, e.target.value)
                     }
                   />
 
                   <input
-                    id={`uploadTeam${i}`}
+                    id={`teamUpload${i}`}
                     type="file"
-                    className="hidden"
                     accept="image/*"
+                    className="hidden"
                     onChange={(e) =>
-                      e.target.files &&
-                      uploadImage(e.target.files[0], `team_${i}_image`)
+                      e.target.files && uploadImage(e.target.files[0], `team_${i}_image`)
                     }
                   />
 
-                  <Button
-                    onClick={() =>
-                      document.getElementById(`uploadTeam${i}`)!.click()
-                    }
-                  >
+                  <Button onClick={() => document.getElementById(`teamUpload${i}`)!.click()}>
                     <Upload className="w-4 h-4 mr-2" /> Upload
                   </Button>
                 </div>
 
                 {data[`team_${i}_image`]?.startsWith("http") && (
-                  <img
-                    src={data[`team_${i}_image`]}
-                    className="w-24 rounded-xl mt-2"
-                  />
+                  <img src={data[`team_${i}_image`]} className="w-24 rounded-xl mt-2" />
                 )}
               </div>
             ))}
           </CardContent>
         </Card>
 
-        {/* STATS SECTION */}
+        {/* ===================== STATS SECTION ===================== */}
         <Card className="mb-8">
           <CardHeader>
             <CardTitle>Stats</CardTitle>
           </CardHeader>
 
           <CardContent className="grid grid-cols-1 md:grid-cols-4 gap-6">
-            {["stat_years", "stat_flavors", "stat_countries", "stat_customers"].map(
-              (field) => (
-                <div key={field}>
-                  <Label>{field.replace("stat_", "").toUpperCase()}</Label>
-                  <Input
-                    value={data[field]}
-                    onChange={(e) => handle(field, e.target.value)}
-                  />
-                </div>
-              )
-            )}
+            {["stat_years", "stat_flavors", "stat_countries", "stat_customers"].map((field) => (
+              <div key={field}>
+                <Label>{field.replace("stat_", "").toUpperCase()}</Label>
+                <Input
+                  value={data[field]}
+                  onChange={(e) => handleChange(field, e.target.value)}
+                />
+              </div>
+            ))}
           </CardContent>
         </Card>
 
         {/* SAVE BUTTON */}
-        <Button onClick={save} disabled={saving} className="mt-6">
-          {saving ? (
-            <>
-              <Loader2 className="animate-spin w-4 h-4 mr-2" /> Saving...
-            </>
-          ) : (
-            <>
-              <Save className="w-4 h-4 mr-2" /> Save All Changes
-            </>
-          )}
+        <Button onClick={save} disabled={saving} className="mt-4">
+          {saving ? <Loader2 className="animate-spin w-4 h-4 mr-2" /> : <Save className="w-4 h-4 mr-2" />}
+          Save All Changes
         </Button>
       </AdminLayout>
     </ProtectedRoute>
