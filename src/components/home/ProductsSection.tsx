@@ -3,18 +3,14 @@ import { ProductCard } from "./ProductCard";
 import { Button } from "@/components/ui/button";
 import { Link } from "react-router-dom";
 import { ArrowRight } from "lucide-react";
-
-// Swiper Imports
 import { Swiper, SwiperSlide } from "swiper/react";
 import { Pagination } from "swiper/modules";
 import "swiper/css";
 import "swiper/css/pagination";
 import { API_URL } from "@/config/api";
 
-// const API_URL = "http://localhost:5000/api";
-
 export function ProductsSection() {
-  const [products, setProducts] = useState([]);
+  const [products, setProducts] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
   const [isVisible, setIsVisible] = useState(false);
   const sectionRef = useRef<HTMLElement>(null);
@@ -25,41 +21,45 @@ export function ProductsSection() {
         const res = await fetch(`${API_URL}/products/featured`);
         const data = await res.json();
 
-        // FEATURED FIRST → then fallback
-        const featured = data.filter((p) => p.is_featured === true);
+        const featured = data.filter((p) => p.is_featured);
         const nonFeatured = data.filter((p) => !p.is_featured);
 
-        // Combine and take only 4 for home
-        const finalList = [...featured, ...nonFeatured].slice(0, 4);
-
-        setProducts(finalList);
+        setProducts([...featured, ...nonFeatured].slice(0, 4));
       } catch (err) {
         console.error("Failed to load products:", err);
       }
+
       setLoading(false);
     };
 
     loadProducts();
   }, []);
 
-  // Fade-in animation on scroll
+  // Scroll fade-in
   useEffect(() => {
-    const observer = new IntersectionObserver(
+    const obs = new IntersectionObserver(
       ([entry]) => entry.isIntersecting && setIsVisible(true),
       { threshold: 0.1 }
     );
-
-    if (sectionRef.current) observer.observe(sectionRef.current);
-    return () => observer.disconnect();
+    if (sectionRef.current) obs.observe(sectionRef.current);
+    return () => obs.disconnect();
   }, []);
 
-  return (
-    <section
-      ref={sectionRef}
-      className="py-24 bg-background relative overflow-hidden"
-    >
-      <div className="container mx-auto px-4 md:px-8 relative z-10">
+  // ⭐ PREVENT LAYOUT SHIFT — return a fixed-height skeleton
+  if (loading) {
+    return (
+      <section ref={sectionRef} className="py-24 bg-background">
+        <div className="container mx-auto px-4 md:px-8">
+          <div className="h-[400px] animate-pulse bg-muted/20 rounded-xl" />
+        </div>
+      </section>
+    );
+  }
 
+  return (
+    <section ref={sectionRef} className="py-24 bg-background relative overflow-hidden">
+      <div className="container mx-auto px-4 md:px-8 relative z-10">
+        
         {/* Header */}
         <div className="text-center max-w-3xl mx-auto mb-16">
           <span
@@ -87,17 +87,7 @@ export function ProductsSection() {
           </p>
         </div>
 
-        {/* Loading */}
-        {loading && (
-          <p className="text-center text-muted-foreground">Loading products...</p>
-        )}
-
-        {/* Empty */}
-        {!loading && products.length === 0 && (
-          <p className="text-center text-muted-foreground">No products available.</p>
-        )}
-
-        {/* DESKTOP GRID */}
+        {/* Desktop Grid */}
         <div className="hidden md:grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-8 mb-12">
           {products.map((p, i) => (
             <div
@@ -112,7 +102,7 @@ export function ProductsSection() {
           ))}
         </div>
 
-        {/* MOBILE SWIPER */}
+        {/* Mobile Swiper */}
         <div className="md:hidden mb-12">
           <Swiper
             modules={[Pagination]}
@@ -147,3 +137,16 @@ export function ProductsSection() {
     </section>
   );
 }
+
+/* -----------------------------------
+   ⭐ PRELOAD FUNCTION
+   Used by homepage for zero layout shift
+-------------------------------------*/
+ProductsSection.preload = async () => {
+  try {
+    const res = await fetch(`${API_URL}/products/featured`);
+    return await res.json();
+  } catch {
+    return [];
+  }
+};

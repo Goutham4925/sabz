@@ -8,18 +8,22 @@ export function AboutSection() {
   const sectionRef = useRef<HTMLElement>(null);
   const [isVisible, setIsVisible] = useState(false);
 
-  // FETCH ABOUT SETTINGS
+  // Load settings
   useEffect(() => {
     async function load() {
-      const res = await fetch(`${API_URL}/settings`);
-      const json = await res.json();
-      setSettings(json);
+      try {
+        const res = await fetch(`${API_URL}/settings`);
+        const json = await res.json();
+        setSettings(json);
+      } catch (e) {
+        console.error("About load error:", e);
+      }
       setLoading(false);
     }
     load();
   }, []);
 
-  // ANIMATION OBSERVER
+  // Scroll animation
   useEffect(() => {
     const observer = new IntersectionObserver(
       ([entry]) => entry.isIntersecting && setIsVisible(true),
@@ -30,7 +34,18 @@ export function AboutSection() {
     return () => observer.disconnect();
   }, []);
 
-  if (loading || !settings) return null;
+  /* ⭐ FIX: SKELETON WITH FIXED HEIGHT (Stops layout shift) */
+  if (loading) {
+    return (
+      <section ref={sectionRef} className="py-24 bg-secondary/30">
+        <div className="container mx-auto px-4 md:px-8">
+          <div className="h-[550px] bg-muted/20 rounded-xl animate-pulse" />
+        </div>
+      </section>
+    );
+  }
+
+  if (!settings) return null;
 
   const highlights = [
     {
@@ -56,7 +71,12 @@ export function AboutSection() {
   ];
 
   return (
-    <section ref={sectionRef} className="py-24 bg-secondary/30 relative overflow-hidden">
+    <section
+      ref={sectionRef}
+      className={`py-24 bg-secondary/30 relative overflow-hidden transition-all duration-700 ${
+        isVisible ? "opacity-100 translate-y-0" : "opacity-0 translate-y-10"
+      }`}
+    >
       <div className="container mx-auto px-4 md:px-8 relative z-10">
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-16 items-center">
 
@@ -70,7 +90,6 @@ export function AboutSection() {
               {settings.about_title || "A Legacy of Delicious Moments"}
             </h2>
 
-            {/* Paragraphs */}
             <p className="text-muted-foreground text-lg leading-relaxed mb-4 whitespace-pre-wrap">
               {settings.about_paragraph1}
             </p>
@@ -79,7 +98,6 @@ export function AboutSection() {
               {settings.about_paragraph2}
             </p>
 
-            {/* Highlights */}
             <div className="grid grid-cols-2 gap-4">
               {highlights.map((item, index) =>
                 item.title ? (
@@ -113,3 +131,13 @@ export function AboutSection() {
     </section>
   );
 }
+
+/* ⭐ PRELOAD FUNCTION FOR HOMEPAGE (stops layout shift globally) */
+AboutSection.preload = async () => {
+  try {
+    const res = await fetch(`${API_URL}/settings`);
+    return await res.json();
+  } catch {
+    return null;
+  }
+};

@@ -22,7 +22,18 @@ export function HeroSection() {
     loadSettings();
   }, []);
 
-  if (!settings) return null;
+  // ⭐ DO NOT RETURN NULL — prevents layout collapse
+  const heroHeight = "min-h-screen flex items-center justify-center";
+
+  if (!settings) {
+    return (
+      <section className={`relative ${heroHeight} bg-black/10`}>
+        <div className="animate-pulse text-center text-white opacity-40">
+          Loading Hero…
+        </div>
+      </section>
+    );
+  }
 
   return (
     <section className="relative min-h-screen flex items-center justify-center overflow-hidden">
@@ -48,7 +59,6 @@ export function HeroSection() {
       {/* Content */}
       <div className="container mx-auto px-4 md:px-8 relative z-10">
         <div className="max-w-4xl mx-auto text-center">
-
           {/* Badge */}
           <div
             className={`inline-flex items-center gap-2 bg-cream/10 border border-cream/20 text-cream px-4 py-2 rounded-full text-sm mb-8 transition-all duration-700 ${
@@ -102,3 +112,15 @@ export function HeroSection() {
     </section>
   );
 }
+
+/* -----------------------------------
+   ⭐ PRELOAD FUNCTION FOR Index.jsx 
+-------------------------------------*/
+HeroSection.preload = async () => {
+  try {
+    const res = await fetch(`${API_URL}/settings`);
+    return await res.json();
+  } catch {
+    return null;
+  }
+};

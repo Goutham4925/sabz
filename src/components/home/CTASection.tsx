@@ -11,11 +11,23 @@ export function CTASection() {
   const ref = useRef<HTMLElement>(null);
   const observerRef = useRef<IntersectionObserver | null>(null);
 
+  // ⭐ FIX 1: SKELETON WHILE LOADING — prevents layout shift
+  if (!settings) {
+    return (
+      <section className="py-24 bg-chocolate">
+        <div className="container mx-auto px-4 md:px-8">
+          <div className="h-[320px] w-full rounded-xl bg-white/10 animate-pulse" />
+        </div>
+      </section>
+    );
+  }
+
   // ---- RE-TRIGGER animation when settings load ----
   useEffect(() => {
-    if (!settings) return; // wait until loaded
-    setVisible(false); // reset animation
-    setTimeout(() => attachObserver(), 50); // give DOM time to render
+    if (!settings) return;
+
+    setVisible(false); 
+    setTimeout(() => attachObserver(), 50);
   }, [settings]);
 
   const attachObserver = () => {
@@ -29,7 +41,7 @@ export function CTASection() {
       ([entry]) => {
         if (entry.isIntersecting) {
           setVisible(true);
-          observerRef.current?.disconnect(); // ensure one-time trigger
+          observerRef.current?.disconnect();
         }
       },
       { threshold: 0.3 }
@@ -38,14 +50,12 @@ export function CTASection() {
     observerRef.current.observe(ref.current);
   };
 
-  if (!settings) return null;
-
   return (
     <section
       ref={ref}
       className="py-24 bg-chocolate relative overflow-hidden"
     >
-      {/* Background Blur Balls */}
+      {/* Background Blobs */}
       <div className="absolute inset-0 pointer-events-none">
         <div className="absolute top-1/4 left-1/4 w-64 h-64 bg-golden opacity-10 rounded-full blur-3xl" />
         <div className="absolute bottom-1/4 right-1/4 w-80 h-80 bg-primary opacity-10 rounded-full blur-3xl" />
