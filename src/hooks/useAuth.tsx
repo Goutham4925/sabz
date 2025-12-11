@@ -1,4 +1,5 @@
 import { useState, useEffect, createContext, useContext } from "react";
+import { API_URL } from "@/config/api";
 
 interface User {
   id: string;
@@ -18,14 +19,14 @@ interface AuthContextType {
 const AuthContext = createContext<AuthContextType | undefined>(undefined);
 
 // UNIVERSAL SIGNUP SWITCH
-const ALLOW_SIGNUP = true; // Set to false to disable signups
+const ALLOW_SIGNUP = true;
 
 export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
   const [user, setUser] = useState<User | null>(null);
   const [loading, setLoading] = useState(true);
   const [isAdmin, setIsAdmin] = useState(false);
 
-  // Load user from token
+  // LOAD USER FROM TOKEN
   const fetchUser = async () => {
     const token = localStorage.getItem("token");
     if (!token) {
@@ -36,8 +37,10 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
     }
 
     try {
-      const res = await fetch("http://localhost:5000/api/auth/me", {
-        headers: { Authorization: `Bearer ${token}` },
+      const res = await fetch(`${API_URL}/auth/me`, {
+        headers: {
+          Authorization: `Bearer ${token}`,
+        },
       });
 
       if (!res.ok) throw new Error("Invalid token");
@@ -45,7 +48,6 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
       const data = await res.json();
       setUser(data);
       setIsAdmin(data.role === "admin");
-
     } catch {
       setUser(null);
       setIsAdmin(false);
@@ -61,7 +63,7 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
   // LOGIN
   const signIn = async (email: string, password: string) => {
     try {
-      const res = await fetch("http://localhost:5000/api/auth/login", {
+      const res = await fetch(`${API_URL}/auth/login`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ email, password }),
@@ -82,14 +84,12 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
     }
   };
 
-  // SIGNUP WITH GLOBAL SWITCH
+  // SIGNUP
   const signUp = async (email: string, password: string) => {
-    if (!ALLOW_SIGNUP) {
-      return { error: "Signup is disabled" };
-    }
+    if (!ALLOW_SIGNUP) return { error: "Signup is disabled" };
 
     try {
-      const res = await fetch("http://localhost:5000/api/auth/register", {
+      const res = await fetch(`${API_URL}/auth/register`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ email, password }),
@@ -97,12 +97,9 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
 
       const data = await res.json();
 
-      if (!res.ok) {
-        return { error: data.message || "Registration failed" };
-      }
+      if (!res.ok) return { error: data.message || "Registration failed" };
 
       return { error: null };
-
     } catch {
       return { error: "Network error" };
     }
