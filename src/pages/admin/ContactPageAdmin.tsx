@@ -9,7 +9,6 @@ import { Button } from "@/components/ui/button";
 import { Loader2, Save, Upload } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
 
-
 const BASE = import.meta.env.VITE_API_URL || "http://localhost:5000/api";
 
 export default function ContactPageAdmin() {
@@ -143,156 +142,169 @@ export default function ContactPageAdmin() {
     setSaving(false);
   };
 
-
-  if (loading)
-    return (
-      <div className="flex justify-center items-center py-20">
-        <Loader2 className="animate-spin h-8 w-8" />
-      </div>
-    );
+  // --------------------------------
+  // NO MORE FULL PAGE RETURN HERE!
+  // --------------------------------
 
   return (
     <ProtectedRoute>
       <AdminLayout>
-        <Card>
-          <CardHeader>
-            <CardTitle>Contact Page Settings</CardTitle>
-          </CardHeader>
+        {/* Loader INSIDE AdminLayout so layout stays fixed */}
+        {loading ? (
+          <div className="flex justify-center items-center py-20">
+            <Loader2 className="animate-spin h-8 w-8" />
+          </div>
+        ) : (
+          <Card>
+            <CardHeader>
+              <CardTitle>Contact Page Settings</CardTitle>
+            </CardHeader>
 
-          <CardContent className="space-y-8">
-            {/* HERO SECTION */}
-            <div>
-              <Label>Hero Badge</Label>
-              <Input
-                value={data.hero_badge}
-                onChange={(e) => handle("hero_badge", e.target.value)}
-              />
-            </div>
+            <CardContent className="space-y-8">
+              {/* HERO SECTION */}
+              <div>
+                <Label>Hero Badge</Label>
+                <Input
+                  value={data.hero_badge}
+                  onChange={(e) => handle("hero_badge", e.target.value)}
+                />
+              </div>
 
-            <div>
-              <Label>Hero Title</Label>
-              <Input
-                value={data.hero_title}
-                onChange={(e) => handle("hero_title", e.target.value)}
-              />
-            </div>
+              <div>
+                <Label>Hero Title</Label>
+                <Input
+                  value={data.hero_title}
+                  onChange={(e) => handle("hero_title", e.target.value)}
+                />
+              </div>
 
-            <div>
-              <Label>Hero Subtitle</Label>
-              <Textarea
-                rows={2}
-                value={data.hero_subtitle}
-                onChange={(e) => handle("hero_subtitle", e.target.value)}
-              />
-            </div>
+              <div>
+                <Label>Hero Subtitle</Label>
+                <Textarea
+                  rows={2}
+                  value={data.hero_subtitle}
+                  onChange={(e) => handle("hero_subtitle", e.target.value)}
+                />
+              </div>
 
-            {/* CONTACT CARDS */}
-            {[1, 2, 3, 4].map((i) => (
-              <div key={i} className="border p-4 rounded-xl space-y-3">
-                <h3 className="font-semibold text-lg">Contact Card {i}</h3>
+              {/* CONTACT CARDS */}
+              {[1, 2, 3, 4].map((i) => (
+                <div key={i} className="border p-4 rounded-xl space-y-3">
+                  <h3 className="font-semibold text-lg">Contact Card {i}</h3>
 
-                <Label>Card Icon (icon name or upload)</Label>
-                <div className="flex items-center gap-3">
+                  <Label>Card Icon (icon name or upload)</Label>
+                  <div className="flex items-center gap-3">
+                    <Input
+                      value={data[`card_${i}_icon`]}
+                      placeholder="MapPin / Phone / https://..."
+                      onChange={(e) => handle(`card_${i}_icon`, e.target.value)}
+                    />
+
+                    <input
+                      type="file"
+                      accept="image/*"
+                      id={`uploadCard${i}`}
+                      className="hidden"
+                      onChange={(e) =>
+                        e.target.files &&
+                        uploadImage(e.target.files[0], `card_${i}_icon`)
+                      }
+                    />
+
+                    <Button
+                      onClick={() =>
+                        document.getElementById(`uploadCard${i}`)?.click()
+                      }
+                    >
+                      <Upload className="w-4 h-4 mr-2" /> Upload
+                    </Button>
+                  </div>
+
+                  {data[`card_${i}_icon`]?.startsWith("http") && (
+                    <img
+                      src={data[`card_${i}_icon`]}
+                      className="w-14 h-14 object-cover rounded-lg mt-2"
+                    />
+                  )}
+
+                  <Label>Title</Label>
                   <Input
-                    value={data[`card_${i}_icon`]}
-                    placeholder="MapPin / Phone / https://..."
-                    onChange={(e) => handle(`card_${i}_icon`, e.target.value)}
-                  />
-
-                  <input
-                    type="file"
-                    accept="image/*"
-                    id={`uploadCard${i}`}
-                    className="hidden"
+                    value={data[`card_${i}_title`]}
                     onChange={(e) =>
-                      e.target.files &&
-                      uploadImage(e.target.files[0], `card_${i}_icon`)
+                      handle(`card_${i}_title`, e.target.value)
                     }
                   />
 
-                  <Button onClick={() => document.getElementById(`uploadCard${i}`)?.click()}>
-                    <Upload className="w-4 h-4 mr-2" /> Upload
-                  </Button>
-                </div>
-
-                {data[`card_${i}_icon`]?.startsWith("http") && (
-                  <img
-                    src={data[`card_${i}_icon`]}
-                    className="w-14 h-14 object-cover rounded-lg mt-2"
+                  <Label>Line 1</Label>
+                  <Input
+                    value={data[`card_${i}_line1`]}
+                    onChange={(e) =>
+                      handle(`card_${i}_line1`, e.target.value)
+                    }
                   />
-                )}
 
-                <Label>Title</Label>
-                <Input
-                  value={data[`card_${i}_title`]}
-                  onChange={(e) => handle(`card_${i}_title`, e.target.value)}
-                />
+                  <Label>Line 2</Label>
+                  <Input
+                    value={data[`card_${i}_line2`]}
+                    onChange={(e) =>
+                      handle(`card_${i}_line2`, e.target.value)
+                    }
+                  />
+                </div>
+              ))}
 
-                <Label>Line 1</Label>
-                <Input
-                  value={data[`card_${i}_line1`]}
-                  onChange={(e) => handle(`card_${i}_line1`, e.target.value)}
-                />
+              {/* FAQ */}
+              {[1, 2, 3, 4].map((i) => (
+                <div key={i} className="border p-4 rounded-lg space-y-3">
+                  <Label>FAQ {i} – Question</Label>
+                  <Input
+                    value={data[`faq_${i}_q`]}
+                    onChange={(e) => handle(`faq_${i}_q`, e.target.value)}
+                  />
 
-                <Label>Line 2</Label>
+                  <Label>FAQ {i} – Answer</Label>
+                  <Textarea
+                    rows={2}
+                    value={data[`faq_${i}_a`]}
+                    onChange={(e) => handle(`faq_${i}_a`, e.target.value)}
+                  />
+                </div>
+              ))}
+
+              {/* MAP */}
+              <div>
+                <Label>Map Title</Label>
                 <Input
-                  value={data[`card_${i}_line2`]}
-                  onChange={(e) => handle(`card_${i}_line2`, e.target.value)}
+                  value={data.map_title}
+                  onChange={(e) => handle("map_title", e.target.value)}
                 />
               </div>
-            ))}
 
-            {/* FAQ */}
-            {[1, 2, 3, 4].map((i) => (
-              <div key={i} className="border p-4 rounded-lg space-y-3">
-                <Label>FAQ {i} – Question</Label>
-                <Input
-                  value={data[`faq_${i}_q`]}
-                  onChange={(e) => handle(`faq_${i}_q`, e.target.value)}
-                />
-
-                <Label>FAQ {i} – Answer</Label>
+              <div>
+                <Label>Map Address</Label>
                 <Textarea
                   rows={2}
-                  value={data[`faq_${i}_a`]}
-                  onChange={(e) => handle(`faq_${i}_a`, e.target.value)}
+                  value={data.map_address}
+                  onChange={(e) => handle("map_address", e.target.value)}
                 />
               </div>
-            ))}
 
-            {/* MAP */}
-            <div>
-              <Label>Map Title</Label>
-              <Input
-                value={data.map_title}
-                onChange={(e) => handle("map_title", e.target.value)}
-              />
-            </div>
-
-            <div>
-              <Label>Map Address</Label>
-              <Textarea
-                rows={2}
-                value={data.map_address}
-                onChange={(e) => handle("map_address", e.target.value)}
-              />
-            </div>
-
-            {/* SAVE BUTTON */}
-            <Button onClick={save} disabled={saving} className="w-full">
-              {saving ? (
-                <>
-                  <Loader2 className="animate-spin w-4 h-4 mr-2" />
-                  Saving...
-                </>
-              ) : (
-                <>
-                  <Save className="w-4 h-4 mr-2" /> Save Changes
-                </>
-              )}
-            </Button>
-          </CardContent>
-        </Card>
+              {/* SAVE BUTTON */}
+              <Button onClick={save} disabled={saving} className="w-full">
+                {saving ? (
+                  <>
+                    <Loader2 className="animate-spin w-4 h-4 mr-2" />
+                    Saving...
+                  </>
+                ) : (
+                  <>
+                    <Save className="w-4 h-4 mr-2" /> Save Changes
+                  </>
+                )}
+              </Button>
+            </CardContent>
+          </Card>
+        )}
       </AdminLayout>
     </ProtectedRoute>
   );
