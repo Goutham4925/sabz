@@ -1,22 +1,23 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { Link, useLocation, useNavigate } from 'react-router-dom';
 import { useAuth } from '@/hooks/useAuth';
 import { Button } from '@/components/ui/button';
-import { 
-  Cookie, 
-  LayoutDashboard, 
-  Package, 
-  Settings, 
-  LogOut, 
-  Menu, 
+import {
+  Cookie,
+  LayoutDashboard,
+  Package,
+  Settings,
+  LogOut,
+  Menu,
   X,
   Home,
   Mail,
   MessageCircle,
   Users,
-  Tags,     //  ICON FOR CATEGORIES
+  Tags,
 } from 'lucide-react';
 import { cn } from '@/lib/utils';
+import { API_URL } from "@/config/api";
 
 interface AdminLayoutProps {
   children: React.ReactNode;
@@ -24,36 +25,43 @@ interface AdminLayoutProps {
 
 const navItems = [
   { path: '/admin/dashboard', label: 'Dashboard', icon: LayoutDashboard },
-
-  // PRODUCTS + CATEGORIES GROUP
   { path: '/admin/products', label: 'Products', icon: Package },
-
-  //  CATEGORY PAGE
   { path: '/admin/categories', label: 'Categories', icon: Tags },
-
   { path: '/admin/settings', label: 'Settings', icon: Settings },
   { path: '/admin/about', label: 'About Page', icon: Home },
-
-  // CONTACT PAGE
   { path: '/admin/contact', label: 'Contact Page', icon: Mail },
-
-  // MESSAGES PAGE
   { path: '/admin/messages', label: 'Messages', icon: MessageCircle },
-
-  // USERS PAGE
   { path: '/admin/users', label: 'Users', icon: Users },
 ];
 
 const AdminLayout = ({ children }: AdminLayoutProps) => {
   const [sidebarOpen, setSidebarOpen] = useState(false);
+  const [settings, setSettings] = useState<any>(null);
   const { signOut } = useAuth();
   const location = useLocation();
   const navigate = useNavigate();
+
+  // Load site settings (logo + brand image)
+  useEffect(() => {
+    const loadSettings = async () => {
+      try {
+        const r = await fetch(`${API_URL}/settings`);
+        const data = await r.json();
+        setSettings(data);
+      } catch (err) {
+        console.error("Failed to load settings:", err);
+      }
+    };
+    loadSettings();
+  }, []);
 
   const handleSignOut = async () => {
     await signOut();
     navigate('/admin/login');
   };
+
+  const logo = settings?.navbar_logo;
+  const brandImage = settings?.navbar_brand_image;
 
   return (
     <div className="min-h-screen bg-muted/30">
@@ -61,7 +69,11 @@ const AdminLayout = ({ children }: AdminLayoutProps) => {
       {/* MOBILE HEADER */}
       <div className="lg:hidden fixed top-0 left-0 right-0 z-50 bg-background border-b border-border px-4 py-3 flex items-center justify-between">
         <div className="flex items-center gap-2">
-          <Cookie className="h-6 w-6 text-primary" />
+          {logo ? (
+            <img src={logo} className="h-8 w-auto object-contain" />
+          ) : (
+            <Cookie className="h-6 w-6 text-primary" />
+          )}
           <span className="font-display text-lg text-chocolate">Admin</span>
         </div>
 
@@ -83,20 +95,43 @@ const AdminLayout = ({ children }: AdminLayoutProps) => {
       >
         <div className="flex flex-col h-full">
           
-          {/* Logo */}
+          {/* LOGO BLOCK */}
           <div className="p-6 border-b border-border">
             <Link to="/" className="flex items-center gap-3">
-              <div className="w-10 h-10 bg-primary/10 rounded-full flex items-center justify-center">
-                <Cookie className="h-5 w-5 text-primary" />
+
+              {/* MAIN LOGO */}
+              <div className="w-12 h-12 rounded-full flex items-center justify-center overflow-hidden">
+                {logo ? (
+                  <img
+                    src={logo}
+                    className="object-contain w-full h-full"
+                    alt="Admin Logo"
+                  />
+                ) : (
+                  <Cookie className="h-6 w-6 text-primary" />
+                )}
               </div>
+
+              {/* BRAND AREA */}
               <div>
-                <span className="font-display text-lg text-chocolate block">Gobbly Treat</span>
+                {brandImage && (
+                  <img
+                    src={brandImage}
+                    className="h-6 w-auto object-contain mb-1"
+                    alt="Brand"
+                  />
+                )}
+
+                <span className="font-display text-lg text-chocolate block">
+                  Gobbly Treat
+                </span>
                 <span className="text-xs text-muted-foreground">Admin Panel</span>
               </div>
+
             </Link>
           </div>
 
-          {/* Navigation */}
+          {/* NAVIGATION */}
           <nav className="flex-1 p-4 space-y-1">
             {navItems.map((item) => {
               const isActive = location.pathname === item.path;
@@ -119,7 +154,7 @@ const AdminLayout = ({ children }: AdminLayoutProps) => {
             })}
           </nav>
 
-          {/* Footer */}
+          {/* FOOTER LINKS */}
           <div className="p-4 border-t border-border space-y-2">
             <Link
               to="/"
@@ -138,7 +173,6 @@ const AdminLayout = ({ children }: AdminLayoutProps) => {
               Sign Out
             </Button>
           </div>
-
         </div>
       </aside>
 
@@ -152,9 +186,7 @@ const AdminLayout = ({ children }: AdminLayoutProps) => {
 
       {/* MAIN CONTENT */}
       <main className="lg:ml-64 min-h-screen pt-16 lg:pt-0">
-        <div className="p-6 lg:p-8">
-          {children}
-        </div>
+        <div className="p-6 lg:p-8">{children}</div>
       </main>
 
     </div>
