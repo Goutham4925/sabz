@@ -122,7 +122,7 @@ export default function AboutPageAdmin() {
     const token = localStorage.getItem("token");
 
     try {
-      const r = await fetch(`${API_URL}/about/${data.id}`, {
+      const r = await fetch(`${API_URL}/about`, {
         method: "PUT",
         headers: {
           "Content-Type": "application/json",

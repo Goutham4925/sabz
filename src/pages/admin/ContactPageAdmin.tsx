@@ -117,7 +117,7 @@ export default function ContactPageAdmin() {
     const token = localStorage.getItem("token");
 
     try {
-      const res = await fetch(`${API_URL}/contact-page/${data.id}`, {
+      const res = await fetch(`${API_URL}/contact-page`, {
         method: "PUT",
         headers: {
           "Content-Type": "application/json",
