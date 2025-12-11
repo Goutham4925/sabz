@@ -8,7 +8,9 @@ import { Textarea } from "@/components/ui/textarea";
 import { Card, CardHeader, CardTitle, CardContent } from "@/components/ui/card";
 import { Loader2, Save, Upload } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
-import { API_URL } from "@/config/api";
+
+
+const BASE = import.meta.env.VITE_API_URL || "http://localhost:5000/api";
 
 export default function AboutPageAdmin() {
   const [data, setData] = useState<any>(null);
@@ -26,7 +28,7 @@ export default function AboutPageAdmin() {
     if (data[field]) form.append("oldImage", data[field]);
 
     try {
-      const r = await fetch(`${API_URL}/upload`, { method: "POST", body: form });
+      const r = await fetch(`${BASE}/upload`, { method: "POST", body: form });
       const out = await r.json();
 
       setData((prev: any) => ({ ...prev, [field]: out.url }));
@@ -45,7 +47,7 @@ export default function AboutPageAdmin() {
   // FETCH ABOUT PAGE DATA
   // -----------------------------------------
   useEffect(() => {
-    fetch(`${API_URL}/about`)
+    fetch(`${BASE}/about`)
       .then((r) => r.json())
       .then((d) => {
         const fields = [
@@ -122,7 +124,7 @@ export default function AboutPageAdmin() {
     const token = localStorage.getItem("token");
 
     try {
-      const r = await fetch(`${API_URL}/about`, {
+      await fetch(`${BASE}/about/${data.id}`, {
         method: "PUT",
         headers: {
           "Content-Type": "application/json",
@@ -131,22 +133,21 @@ export default function AboutPageAdmin() {
         body: JSON.stringify(data),
       });
 
-      if (!r.ok) throw new Error("Save failed");
-
       toast({
         title: "Saved!",
-        description: "About page updated successfully",
+        description: "About Page updated successfully.",
       });
-    } catch (err) {
+    } catch {
       toast({
-        title: "Save Error",
-        description: "Could not save About Page",
+        title: "Save Failed",
+        description: "Could not save About Page.",
         variant: "destructive",
       });
     }
 
     setSaving(false);
   };
+
 
   if (loading)
     return (

@@ -8,7 +8,9 @@ import { Textarea } from "@/components/ui/textarea";
 import { Button } from "@/components/ui/button";
 import { Loader2, Save, Upload } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
-import { API_URL } from "@/config/api";
+
+
+const BASE = import.meta.env.VITE_API_URL || "http://localhost:5000/api";
 
 export default function ContactPageAdmin() {
   const [data, setData] = useState<any>(null);
@@ -28,7 +30,7 @@ export default function ContactPageAdmin() {
     }
 
     try {
-      const res = await fetch(`${API_URL}/upload`, {
+      const res = await fetch(`${BASE}/upload`, {
         method: "POST",
         body: form,
       });
@@ -57,7 +59,7 @@ export default function ContactPageAdmin() {
   // FETCH CONTACT PAGE
   // -----------------------------
   useEffect(() => {
-    fetch(`${API_URL}/contact-page`)
+    fetch(`${BASE}/contact-page`)
       .then((res) => res.json())
       .then((d) => {
         const fields = [
@@ -117,7 +119,7 @@ export default function ContactPageAdmin() {
     const token = localStorage.getItem("token");
 
     try {
-      const res = await fetch(`${API_URL}/contact-page`, {
+      await fetch(`${BASE}/contact-page/${data.id}`, {
         method: "PUT",
         headers: {
           "Content-Type": "application/json",
@@ -126,10 +128,8 @@ export default function ContactPageAdmin() {
         body: JSON.stringify(data),
       });
 
-      if (!res.ok) throw new Error("Save failed");
-
       toast({
-        title: "Saved!",
+        title: "Saved",
         description: "Contact Page updated successfully!",
       });
     } catch {
@@ -142,6 +142,7 @@ export default function ContactPageAdmin() {
 
     setSaving(false);
   };
+
 
   if (loading)
     return (
