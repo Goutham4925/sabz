@@ -1,73 +1,92 @@
 // routes/upload.js
 const express = require("express");
 const multer = require("multer");
-const path = require("path");
-const fs = require("fs");
+const { Readable } = require("stream");
+const { v4: uuid } = require("uuid");
+const cloudinary = require("cloudinary").v2;
 
 const router = express.Router();
 
-// Ensure uploads directory exists
-const UPLOAD_DIR = path.join(__dirname, "..", "public", "uploads");
-if (!fs.existsSync(UPLOAD_DIR)) {
-  fs.mkdirSync(UPLOAD_DIR, { recursive: true });
+// -------------------------------
+// CLOUDINARY CONFIG
+// -------------------------------
+cloudinary.config({
+  cloud_name: process.env.CLOUDINARY_CLOUD_NAME,
+  api_key: process.env.CLOUDINARY_API_KEY,
+  api_secret: process.env.CLOUDINARY_API_SECRET,
+});
+
+// -------------------------------
+// MULTER — memory storage
+// -------------------------------
+const storage = multer.memoryStorage();
+const upload = multer({ storage });
+
+// -------------------------------
+// Helper: Upload buffer to Cloudinary
+// -------------------------------
+function uploadToCloudinary(buffer, folder = "gobbly_treat") {
+  return new Promise((resolve, reject) => {
+    const uploadStream = cloudinary.uploader.upload_stream(
+      {
+        folder,
+        public_id: uuid(),
+        resource_type: "image",
+      },
+      (err, result) => {
+        if (err) return reject(err);
+        resolve(result);
+      }
+    );
+
+    Readable.from(buffer).pipe(uploadStream);
+  });
 }
 
 // -------------------------------
-// STORAGE CONFIG
+// Helper: Extract Cloudinary public_id
 // -------------------------------
-const storage = multer.diskStorage({
-  destination: (req, file, cb) => cb(null, UPLOAD_DIR),
-  filename: (req, file, cb) => {
-    const name = Date.now() + "-" + Math.round(Math.random() * 1e9);
-    cb(null, name + path.extname(file.originalname));
-  },
-});
+function extractPublicId(imageUrl) {
+  if (!imageUrl) return null;
 
-const upload = multer({ storage });
-
-/**
- * Helper: build absolute file URL from request (works with proxies)
- */
-function buildFileUrl(req, filename) {
-  // prefer x-forwarded-proto when behind proxies (e.g. Render)
-  const proto = (req.headers["x-forwarded-proto"] || req.protocol || "http").split(",")[0].trim();
-  const host = req.get("host");
-  return `${proto}://${host}/uploads/${filename}`;
+  try {
+    const parts = imageUrl.split("/");
+    const filename = parts.pop(); // name.ext
+    const folder = parts.pop(); // folder name
+    return `${folder}/${filename.split(".")[0]}`;
+  } catch {
+    return null;
+  }
 }
 
 /* ============================================================
-   1️⃣ UPLOAD MAIN PRODUCT IMAGE (with delete old)
-   Endpoint: POST /api/upload
-   form field: image
-   optional body: oldImage (full URL or relative /uploads/filename)
+   1️⃣ UPLOAD MAIN IMAGE (and delete old one)
+   POST /api/upload
+   field: image
+   optional body: oldImage
 ============================================================ */
-router.post("/", upload.single("image"), (req, res) => {
+router.post("/", upload.single("image"), async (req, res) => {
   try {
-    if (!req.file) return res.status(400).json({ error: "No file uploaded" });
+    if (!req.file)
+      return res.status(400).json({ error: "No file uploaded" });
 
-    const oldImage = req.body.oldImage;
+    // Upload new image to Cloudinary
+    const result = await uploadToCloudinary(req.file.buffer);
 
-    // Delete old main image if provided (accept full URL or just filename)
-    if (oldImage) {
+    // Delete old image if requested
+    if (req.body.oldImage) {
       try {
-        const base = path.basename(oldImage);
-        const filepath = path.join(UPLOAD_DIR, base);
-
-        if (fs.existsSync(filepath)) {
-          fs.unlinkSync(filepath);
-          console.log("Deleted old file:", filepath);
-        }
+        const publicId = extractPublicId(req.body.oldImage);
+        if (publicId) await cloudinary.uploader.destroy(publicId);
       } catch (err) {
-        console.log("Error deleting old image:", err);
+        console.log("Error deleting old Cloudinary image:", err);
       }
     }
 
-    const fileUrl = buildFileUrl(req, req.file.filename);
-
-    res.json({
-      url: fileUrl,
-      relative: `/uploads/${req.file.filename}`,
-      filename: req.file.filename,
+    return res.json({
+      url: result.secure_url,
+      relative: result.secure_url, // kept for compatibility
+      filename: result.public_id,  // Cloudinary ID saved as filename
     });
   } catch (err) {
     console.error("UPLOAD ERROR:", err);
@@ -76,45 +95,45 @@ router.post("/", upload.single("image"), (req, res) => {
 });
 
 /* ============================================================
-   2️⃣ UPLOAD GALLERY IMAGE (no old delete)
-   Endpoint: POST /api/upload/gallery
-   form field: image
+   2️⃣ UPLOAD GALLERY IMAGE (no delete)
+   POST /api/upload/gallery
 ============================================================ */
-router.post("/gallery", upload.single("image"), (req, res) => {
+router.post("/gallery", upload.single("image"), async (req, res) => {
   try {
-    if (!req.file) return res.status(400).json({ error: "No file uploaded" });
+    if (!req.file)
+      return res.status(400).json({ error: "No file uploaded" });
 
-    const fileUrl = buildFileUrl(req, req.file.filename);
+    const result = await uploadToCloudinary(req.file.buffer, "gobbly_gallery");
 
-    res.json({
-      url: fileUrl,
-      relative: `/uploads/${req.file.filename}`,
-      filename: req.file.filename,
+    return res.json({
+      url: result.secure_url,
+      relative: result.secure_url,
+      filename: result.public_id,
     });
   } catch (err) {
     console.error("GALLERY UPLOAD ERROR:", err);
-    res.status(500).json({ error: "Upload failed" });
+    res.status(500).json({ error: "Gallery upload failed" });
   }
 });
 
 /* ============================================================
-   3️⃣ DELETE FILE FROM SERVER
-   Endpoint: DELETE /api/upload/file?filename=<filename>
-   Pass just the filename (not full URL), e.g. filename=167xxx.png
+   3️⃣ DELETE IMAGE (Cloudinary version)
+   DELETE /api/upload/file?filename=<public_id>
 ============================================================ */
 router.delete("/file", async (req, res) => {
   try {
-    const filename = req.query.filename;
-    if (!filename) return res.status(400).json({ error: "Filename missing" });
+    const publicId = req.query.filename;
 
-    const filepath = path.join(UPLOAD_DIR, String(filename));
+    if (!publicId)
+      return res.status(400).json({ error: "filename (public_id) missing" });
 
-    if (fs.existsSync(filepath)) {
-      fs.unlinkSync(filepath);
-      return res.json({ success: true, deleted: filename });
+    const result = await cloudinary.uploader.destroy(publicId);
+
+    if (result.result === "not found") {
+      return res.status(404).json({ error: "File not found on Cloudinary" });
     }
 
-    res.status(404).json({ error: "File not found" });
+    res.json({ success: true, deleted: publicId });
   } catch (err) {
     console.error("DELETE FILE ERROR:", err);
     res.status(500).json({ error: "Failed to delete file" });
