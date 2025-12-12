@@ -57,48 +57,33 @@ export function Navbar() {
 
           {/* LOGO + BRAND */}
           <Link to="/" className="flex items-center gap-3 md:gap-4">
-
-            {/* MAIN LOGO */}
             <div
               className="
                 relative 
-                h-14 w-24                /* Mobile */
-                sm:h-16 sm:w-28          /* Small Tablets */
-                md:h-20 md:w-32          /* Tablet / Laptop */
-                lg:h-24 lg:w-40          /* Desktop */
+                h-14 w-24
+                sm:h-16 sm:w-28
+                md:h-20 md:w-32
+                lg:h-24 lg:w-40
                 overflow-hidden 
                 flex items-end justify-center
               "
             >
               {logo ? (
-                <img
-                  src={logo}
-                  className="object-contain w-full h-full"
-                  alt="Logo"
-                />
+                <img src={logo} className="object-contain w-full h-full" alt="Logo" />
               ) : (
                 <Cookie className="w-8 h-8 text-primary" />
               )}
             </div>
 
-            {/* BRAND TEXT + BRAND IMAGE */}
             <div className="flex flex-col justify-center">
-
-              {/* BRAND IMAGE */}
               {brandImage && (
                 <img
                   src={brandImage}
-                  className="
-                    h-10 w-auto            /* Mobile */
-                    sm:h-12                /* Tablets */
-                    md:h-14                /* Larger screens */
-                    object-contain
-                  "
+                  className="h-10 w-auto sm:h-12 md:h-14 object-contain"
                   alt="Brand"
                 />
               )}
 
-              {/* OPTIONALLY SHOW COMPANY TEXT */}
               {showText && (
                 <div className="leading-tight">
                   <span className="font-display text-lg md:text-xl font-bold text-foreground">
@@ -110,7 +95,6 @@ export function Navbar() {
                 </div>
               )}
             </div>
-
           </Link>
 
           {/* DESKTOP NAVIGATION */}
@@ -127,10 +111,20 @@ export function Navbar() {
                 {l.name}
               </Link>
             ))}
-            <Button className="bg-gradient-to-r from-golden to-accent text-chocolate px-4 py-2  font-semibold hover:opacity-90 transition" variant="default" size="sm">Order Now</Button>
+
+            {/* 🚀 FIX: Order Now Button with Link */}
+            <Link to="/products">
+              <Button
+                className="bg-gradient-to-r from-golden to-accent text-chocolate px-4 py-2 font-semibold hover:opacity-90 transition"
+                variant="default"
+                size="sm"
+              >
+                Order Now
+              </Button>
+            </Link>
           </div>
 
-          {/* MOBILE TOGGLE BUTTON */}
+          {/* MOBILE MENU BUTTON */}
           <button
             className="md:hidden p-2"
             onClick={() => setIsMobileMenuOpen(!isMobileMenuOpen)}
@@ -161,7 +155,11 @@ export function Navbar() {
                 {l.name}
               </Link>
             ))}
-            <Button className="mt-4">Order Now</Button>
+
+            {/* 🚀 FIX: Order Now Button in Mobile Menu */}
+            <Link to="/products">
+              <Button className="mt-4 w-full">Order Now</Button>
+            </Link>
           </div>
         </div>
 

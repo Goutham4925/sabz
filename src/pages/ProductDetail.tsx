@@ -222,9 +222,9 @@ export default function ProductDetail() {
                   Send Enquiry
                 </Button>
 
-                <Button variant="outline" size="lg">
+                {/* <Button variant="outline" size="lg">
                   <Heart className="w-5 h-5" />
-                </Button>
+                </Button> */}
               </div>
 
               {/* Highlights */}

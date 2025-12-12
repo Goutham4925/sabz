@@ -5,8 +5,22 @@ import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { API_URL } from "@/config/api";
 
+// 🔐 Decode JWT to get logged-in user ID
+function getCurrentUser() {
+  const token = localStorage.getItem("token");
+  if (!token) return null;
+
+  try {
+    const payload = JSON.parse(atob(token.split(".")[1])); 
+    return payload; // must include id, email, role
+  } catch {
+    return null;
+  }
+}
+
 export default function UserManagement() {
   const [users, setUsers] = useState([]);
+  const currentUser = getCurrentUser(); // ⭐ Logged-in user
 
   const loadUsers = async () => {
     const res = await fetch(`${API_URL}/admin/users`, {
@@ -25,7 +39,6 @@ export default function UserManagement() {
       method,
       headers: { Authorization: `Bearer ${localStorage.getItem("token")}` },
     });
-
     loadUsers();
   };
 
@@ -40,7 +53,7 @@ export default function UserManagement() {
               key={u.id}
               className="border p-4 rounded-xl flex justify-between items-center"
             >
-              {/* User info */}
+              {/* User Info */}
               <div>
                 <p className="font-semibold text-lg">{u.email}</p>
 
@@ -55,6 +68,8 @@ export default function UserManagement() {
 
               {/* Actions */}
               <div className="flex gap-2">
+
+                {/* Approve / Reject */}
                 {!u.isApproved && (
                   <Button onClick={() => action(`/approve/${u.id}`)}>
                     Approve
@@ -70,6 +85,7 @@ export default function UserManagement() {
                   </Button>
                 )}
 
+                {/* Promote user → admin */}
                 {u.role === "user" && u.isApproved && (
                   <Button
                     variant="secondary"
@@ -79,7 +95,10 @@ export default function UserManagement() {
                   </Button>
                 )}
 
-                {u.role === "admin" && (
+                {/* Demote admin → user
+                    🚫 Prevent demoting yourself
+                */}
+                {u.role === "admin" && u.id !== currentUser?.id && (
                   <Button
                     variant="outline"
                     onClick={() => action(`/demote/${u.id}`)}
@@ -88,12 +107,17 @@ export default function UserManagement() {
                   </Button>
                 )}
 
-                <Button
-                  variant="destructive"
-                  onClick={() => action(`/delete/${u.id}`, "DELETE")}
-                >
-                  Delete
-                </Button>
+                {/* Delete User
+                    🚫 Prevent deleting yourself (super important)
+                */}
+                {u.id !== currentUser?.id && (
+                  <Button
+                    variant="destructive"
+                    onClick={() => action(`/delete/${u.id}`, "DELETE")}
+                  >
+                    Delete
+                  </Button>
+                )}
               </div>
             </div>
           ))}

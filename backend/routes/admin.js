@@ -23,10 +23,18 @@ router.get("/users", async (req, res) => {
 // ---------------------------------------------
 router.put("/approve/:id", async (req, res) => {
   try {
+    const userId = req.params.id;
+
+    // Prevent self-action (optional safety)
+    if (req.user.id === userId) {
+      return res.status(400).json({ message: "You cannot approve yourself." });
+    }
+
     const user = await prisma.user.update({
-      where: { id: req.params.id },  // <-- STRING ID
+      where: { id: userId },
       data: { isApproved: true },
     });
+
     res.json(user);
   } catch (err) {
     console.error("APPROVE ERROR:", err);
@@ -39,9 +47,17 @@ router.put("/approve/:id", async (req, res) => {
 // ---------------------------------------------
 router.delete("/reject/:id", async (req, res) => {
   try {
+    const userId = req.params.id;
+
+    // ❌ Prevent deleting yourself
+    if (req.user.id === userId) {
+      return res.status(400).json({ message: "You cannot reject yourself." });
+    }
+
     await prisma.user.delete({
-      where: { id: req.params.id },
+      where: { id: userId },
     });
+
     res.json({ message: "User deleted" });
   } catch (err) {
     console.error("REJECT ERROR:", err);
@@ -54,10 +70,13 @@ router.delete("/reject/:id", async (req, res) => {
 // ---------------------------------------------
 router.put("/promote/:id", async (req, res) => {
   try {
+    const userId = req.params.id;
+
     const user = await prisma.user.update({
-      where: { id: req.params.id },
+      where: { id: userId },
       data: { role: "admin" },
     });
+
     res.json(user);
   } catch (err) {
     console.error("PROMOTE ERROR:", err);
@@ -70,10 +89,18 @@ router.put("/promote/:id", async (req, res) => {
 // ---------------------------------------------
 router.put("/demote/:id", async (req, res) => {
   try {
+    const userId = req.params.id;
+
+    // ❌ Prevent demoting yourself
+    if (req.user.id === userId) {
+      return res.status(400).json({ message: "You cannot demote yourself." });
+    }
+
     const user = await prisma.user.update({
-      where: { id: req.params.id },
+      where: { id: userId },
       data: { role: "user" },
     });
+
     res.json(user);
   } catch (err) {
     console.error("DEMOTE ERROR:", err);
@@ -86,9 +113,17 @@ router.put("/demote/:id", async (req, res) => {
 // ---------------------------------------------
 router.delete("/delete/:id", async (req, res) => {
   try {
+    const userId = req.params.id;
+
+    // ❌ Prevent deleting your own account
+    if (req.user.id === userId) {
+      return res.status(400).json({ message: "You cannot delete your own admin account." });
+    }
+
     await prisma.user.delete({
-      where: { id: req.params.id },
+      where: { id: userId },
     });
+
     res.json({ message: "User removed" });
   } catch (err) {
     console.error("DELETE ERROR:", err);
