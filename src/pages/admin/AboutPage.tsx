@@ -171,8 +171,42 @@ export default function AboutPageAdmin() {
             <Label>Hero Badge</Label>
             <Input value={data.hero_badge} onChange={(e) => handleChange("hero_badge", e.target.value)} />
 
-            <Label>Hero Title</Label>
-            <Input value={data.hero_title} onChange={(e) => handleChange("hero_title", e.target.value)} />
+            {/* HERO TITLE — Supports <span> formatting */}
+            <Label>Hero Title (supports &lt;span&gt; formatting)</Label>
+
+            <Textarea
+              rows={3}
+              value={data.hero_title}
+              onChange={(e) => handleChange("hero_title", e.target.value)}
+            />
+
+            <div className="flex items-center gap-2 mt-2">
+              <Input
+                placeholder="Word to highlight (e.g., Tradition)"
+                id="heroHighlightWord"
+                className="w-48"
+              />
+
+              <Button
+                type="button"
+                onClick={() => {
+                  const field = document.getElementById("heroHighlightWord") as HTMLInputElement;
+                  const word = field?.value.trim();
+                  if (!word) return;
+
+                  const colored = `<span class='text-[#e4a95c]'>${word}</span>`;
+
+                  setData((prev: any) => ({
+                    ...prev,
+                    hero_title: prev.hero_title?.replace(word, colored) ?? "",
+                  }));
+
+                  field.value = "";
+                }}
+              >
+                Highlight Word
+              </Button>
+            </div>
 
             <Label>Paragraph 1</Label>
             <Textarea
@@ -273,11 +307,46 @@ export default function AboutPageAdmin() {
           </CardHeader>
 
           <CardContent className="space-y-8">
-            <Label>Timeline Heading</Label>
-            <Input
+            <Label>Timeline Heading (supports &lt;span&gt; formatting)</Label>
+
+            <Textarea
+              rows={2}
               value={data.timeline_heading}
               onChange={(e) => handleChange("timeline_heading", e.target.value)}
             />
+
+            {/* Highlight Word Tool */}
+            <div className="flex items-center gap-2 mt-1">
+              <Input
+                placeholder="Word to highlight (e.g., Journey)"
+                id="timelineHeadingWord"
+                className="w-48"
+              />
+
+              <Button
+                type="button"
+                onClick={() => {
+                  const field = document.getElementById(
+                    "timelineHeadingWord"
+                  ) as HTMLInputElement;
+
+                  const word = field?.value.trim();
+                  if (!word) return;
+
+                  const colored = `<span class='text-[#e4a95c]'>${word}</span>`;
+
+                  setData((prev: any) => ({
+                    ...prev,
+                    timeline_heading:
+                      prev.timeline_heading?.replace(word, colored) ?? "",
+                  }));
+
+                  field.value = "";
+                }}
+              >
+                Highlight Word
+              </Button>
+            </div>
 
             <Label>Timeline Subheading</Label>
             <Input

@@ -89,7 +89,6 @@ const Contact = () => {
   const handleChange = (e: any) =>
     setFormData((prev) => ({ ...prev, [e.target.name]: e.target.value }));
 
-  // Avoid flicker while loading
   if (loading || !page) return null;
 
   return (
@@ -104,13 +103,17 @@ const Contact = () => {
               {page.hero_badge}
             </span>
 
-            <h1 className="section-title mb-4 animate-fade-up stagger-1">
-              {page.hero_title}
-            </h1>
+            {/* ⭐ HERO TITLE WITH HTML SUPPORT */}
+            <h1 
+              className="section-title mb-4 animate-fade-up stagger-1"
+              dangerouslySetInnerHTML={{ __html: page.hero_title }}
+            />
 
-            <p className="section-subtitle animate-fade-up stagger-2">
-              {page.hero_subtitle}
-            </p>
+            {/* ⭐ HERO SUBTITLE WITH HTML SUPPORT */}
+            <p
+              className="section-subtitle animate-fade-up stagger-2"
+              dangerouslySetInnerHTML={{ __html: page.hero_subtitle }}
+            />
           </div>
 
           <div className="grid grid-cols-1 lg:grid-cols-2 gap-16">
@@ -190,19 +193,16 @@ const Contact = () => {
 
               <div className="grid grid-cols-1 sm:grid-cols-2 gap-6 mb-12">
                 {[1, 2, 3, 4].map((i) => {
-                  const iconVal = page[`card_${i}_icon`] ?? "";
-                  const isImage = typeof iconVal === "string" && iconVal.startsWith("http");
-                  const Icon =
-                    typeof iconVal === "string" && iconMap[iconVal]
-                      ? iconMap[iconVal]
-                      : MapPin;
+                  const icon = page[`card_${i}_icon`];
+                  const isImage = icon?.startsWith("http");
+                  const Icon = iconMap[icon] || MapPin;
 
                   return (
                     <div key={i} className="glass-card p-6 hover:shadow-elevated">
                       <div className="w-12 h-12 rounded-xl flex items-center justify-center mb-4 bg-gradient-to-br from-primary to-accent">
                         {isImage ? (
                           <img
-                            src={iconVal}
+                            src={icon}
                             className="w-full h-full object-cover rounded-xl"
                           />
                         ) : (
@@ -227,12 +227,10 @@ const Contact = () => {
 
               {/* MAP SECTION */}
               <div className="rounded-2xl overflow-hidden shadow-card h-64 bg-secondary">
-                <div className="w-full h-full flex items-center justify-center">
-                  <div className="text-center text-muted-foreground">
-                    <MapPin className="w-12 h-12 mx-auto mb-4 text-primary" />
-                    <p className="font-medium">{page.map_title}</p>
-                    <p className="text-sm">{page.map_address}</p>
-                  </div>
+                <div className="w-full h-full flex items-center justify-center text-center text-muted-foreground">
+                  <MapPin className="w-12 h-12 mx-auto mb-4 text-primary" />
+                  <p className="font-medium">{page.map_title}</p>
+                  <p className="text-sm">{page.map_address}</p>
                 </div>
               </div>
             </div>

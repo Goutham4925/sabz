@@ -170,13 +170,50 @@ export default function ContactPageAdmin() {
                 />
               </div>
 
+              {/* HERO TITLE — supports <span> formatting */}
               <div>
-                <Label>Hero Title</Label>
-                <Input
+                <Label>Hero Title (supports &lt;span&gt; formatting)</Label>
+
+                <Textarea
+                  rows={3}
                   value={data.hero_title}
                   onChange={(e) => handle("hero_title", e.target.value)}
                 />
+
+                {/* Highlight Word Helper */}
+                <div className="flex items-center gap-2 mt-2">
+                  <Input
+                    placeholder="Word to highlight (e.g., Contact)"
+                    id="highlightHeroWord"
+                    className="w-48"
+                  />
+
+                  <Button
+                    type="button"
+                    onClick={() => {
+                      const input = document.getElementById(
+                        "highlightHeroWord"
+                      ) as HTMLInputElement;
+
+                      const word = input?.value.trim();
+                      if (!word) return;
+
+                      const spanTag = `<span class='text-[#e4a95c]'>${word}</span>`;
+
+                      setData((prev: any) => ({
+                        ...prev,
+                        hero_title: prev.hero_title?.replace(word, spanTag) ?? ""
+                      }));
+
+                      input.value = "";
+                    }}
+                  >
+                    Highlight Word
+                  </Button>
+                </div>
+
               </div>
+
 
               <div>
                 <Label>Hero Subtitle</Label>

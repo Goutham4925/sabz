@@ -1,6 +1,7 @@
 import { useEffect, useState } from "react";
 import { Navbar } from "@/components/layout/Navbar";
 import { Footer } from "@/components/layout/Footer";
+
 import { HeroSection } from "@/components/home/HeroSection";
 import { ProductsSection } from "@/components/home/ProductsSection";
 import { AboutSection } from "@/components/home/AboutSection";
@@ -17,15 +18,27 @@ const Index = () => {
     setLoading(true);
 
     async function loadAll() {
-      // Wait for all homepage section fetches to resolve
-      await Promise.all([
-        HeroSection.preload?.(),
-        ProductsSection.preload?.(),
-        AboutSection.preload?.(),
-      ]);
+      try {
+        // ⭐ Preload everything needed BEFORE rendering
+        const [heroData, productBundle, aboutData] = await Promise.all([
+          HeroSection.preload?.(),          // settings only
+          ProductsSection.preload?.(),      // products + settings bundle
+          AboutSection.preload?.(),         // settings only
+        ]);
 
-      // Safety check
-      if (mounted) {
+        if (!mounted) return;
+
+        // Attach preload data globally so components can read instantly
+        (window as any).__PRELOADED__ = {
+          hero: heroData,
+          productsBundle: productBundle,   // contains products + settings
+          about: aboutData,
+        };
+
+        setReady(true);
+        setLoading(false);
+      } catch (err) {
+        console.error("Homepage preload error:", err);
         setReady(true);
         setLoading(false);
       }
@@ -38,7 +51,7 @@ const Index = () => {
     };
   }, []);
 
-  // ❌ Prevent rendering until ALL sections have loaded
+  // Prevent flash while preloading
   if (!ready) return null;
 
   return (

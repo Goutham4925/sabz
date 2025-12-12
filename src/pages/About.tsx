@@ -40,22 +40,26 @@ const About = () => {
       <Navbar />
 
       <main className="pt-32 pb-24">
-        {/* HERO SECTION */}
+
+        {/* ================= HERO SECTION ================= */}
         <section className="container mx-auto px-4 md:px-8 mb-24">
           <div className="grid grid-cols-1 lg:grid-cols-2 gap-16 items-center">
+
             {/* LEFT */}
             <div>
               <span className="badge-premium mb-4 inline-block animate-fade-up">
                 {about.hero_badge || "Our Story"}
               </span>
 
-              <h1 className="section-title mb-6 animate-fade-up stagger-1">
-                {about.hero_title || (
-                  <>
-                    A Legacy of <span className="text-gradient">Baking Excellence</span>
-                  </>
-                )}
-              </h1>
+              {/* ⭐ Render HTML-formatted title */}
+              <h1
+                className="section-title mb-6 animate-fade-up stagger-1"
+                dangerouslySetInnerHTML={{
+                  __html:
+                    about.hero_title ||
+                    `A Legacy of <span class='text-gradient'>Baking Excellence</span>`
+                }}
+              />
 
               <p className="text-muted-foreground text-lg leading-relaxed mb-6">
                 {about.hero_paragraph1}
@@ -87,7 +91,7 @@ const About = () => {
           </div>
         </section>
 
-        {/* VALUES SECTION */}
+        {/* ================= VALUES SECTION ================= */}
         <section className="py-24 bg-secondary/30">
           <div className="container mx-auto px-4 md:px-8">
             <div className="text-center max-w-3xl mx-auto mb-16">
@@ -131,15 +135,18 @@ const About = () => {
           </div>
         </section>
 
-        {/* TIMELINE SECTION */}
+        {/* ================= TIMELINE SECTION ================= */}
         <section className="py-24">
           <div className="container mx-auto px-4 md:px-8 max-w-4xl">
-            
-            {/* Heading */}
+
+            {/* ⭐ Timeline Heading with HTML support */}
             <div className="text-center max-w-2xl mx-auto mb-16">
-              <h2 className="section-title mb-4">
-                {about.timeline_heading?.trim() || "Our Journey"}
-              </h2>
+              <h2
+                className="section-title mb-4"
+                dangerouslySetInnerHTML={{
+                  __html: about.timeline_heading?.trim() || "Our Journey",
+                }}
+              />
 
               <p className="section-subtitle">
                 {about.timeline_subheading?.trim() ||
@@ -149,11 +156,8 @@ const About = () => {
 
             {/* Timeline Wrapper */}
             <div className="relative">
-
-              {/* Vertical Line */}
               <div className="absolute left-1/2 top-0 bottom-0 w-1 bg-border transform -translate-x-1/2" />
 
-              {/* Timeline Items */}
               {[1, 2, 3, 4, 5].map((i, index) => {
                 const year = about[`milestone_${i}_year`];
                 const title = about[`milestone_${i}_title`];
@@ -170,12 +174,7 @@ const About = () => {
                       isLeft ? "flex-row" : "flex-row-reverse"
                     }`}
                   >
-                    {/* TEXT BLOCK */}
-                    <div
-                      className={`w-1/2 px-6 ${
-                        isLeft ? "text-right" : "text-left"
-                      }`}
-                    >
+                    <div className={`w-1/2 px-6 ${isLeft ? "text-right" : "text-left"}`}>
                       <span className="font-display text-4xl font-bold text-primary block">
                         {year}
                       </span>
@@ -187,12 +186,10 @@ const About = () => {
                       <p className="text-muted-foreground">{desc}</p>
                     </div>
 
-                    {/* DOT */}
                     <div className="relative flex items-center justify-center w-12">
                       <div className="w-4 h-4 bg-primary rounded-full shadow-md" />
                     </div>
 
-                    {/* EMPTY SPACER TO BALANCE GRID */}
                     <div className="w-1/2 px-6" />
                   </div>
                 );
@@ -201,8 +198,7 @@ const About = () => {
           </div>
         </section>
 
-
-        {/* TEAM SECTION */}
+        {/* ================= TEAM SECTION ================= */}
         <section className="py-24 bg-secondary/30">
           <div className="container mx-auto px-4 md:px-8 text-center">
             <h2 className="section-title mb-4">Meet the Team</h2>
@@ -233,7 +229,7 @@ const About = () => {
           </div>
         </section>
 
-        {/* STATS SECTION */}
+        {/* ================= STATS SECTION ================= */}
         <section className="py-24 bg-chocolate text-cream">
           <div className="container mx-auto px-4 md:px-8 grid grid-cols-2 md:grid-cols-4 gap-8 text-center">
             <div>
@@ -265,6 +261,7 @@ const About = () => {
             </div>
           </div>
         </section>
+
       </main>
 
       <Footer />

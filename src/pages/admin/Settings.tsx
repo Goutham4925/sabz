@@ -99,9 +99,6 @@ export default function Settings() {
         </Button>
       </div>
 
-      <p className="text-xs text-muted-foreground mt-1">
-        Supports HTML: &lt;span class='text-[#e4a95c]'&gt;word&lt;/span&gt;
-      </p>
     </div>
   );
 
