@@ -2,8 +2,8 @@
 const express = require("express");
 const multer = require("multer");
 const { Readable } = require("stream");
-const { v4: uuid } = require("uuid");
 const cloudinary = require("cloudinary").v2;
+const { randomUUID } = require("crypto");
 
 const router = express.Router();
 
@@ -19,8 +19,7 @@ cloudinary.config({
 // -------------------------------
 // MULTER — memory storage
 // -------------------------------
-const storage = multer.memoryStorage();
-const upload = multer({ storage });
+const upload = multer({ storage: multer.memoryStorage() });
 
 // -------------------------------
 // Helper: Upload buffer to Cloudinary
@@ -30,7 +29,7 @@ function uploadToCloudinary(buffer, folder = "gobbly_treat") {
     const uploadStream = cloudinary.uploader.upload_stream(
       {
         folder,
-        public_id: uuid(),
+        public_id: randomUUID(), // FIXED — built-in unique ID
         resource_type: "image",
       },
       (err, result) => {
@@ -46,13 +45,13 @@ function uploadToCloudinary(buffer, folder = "gobbly_treat") {
 // -------------------------------
 // Helper: Extract Cloudinary public_id
 // -------------------------------
-function extractPublicId(imageUrl) {
-  if (!imageUrl) return null;
+function extractPublicId(url) {
+  if (!url) return null;
 
   try {
-    const parts = imageUrl.split("/");
-    const filename = parts.pop(); // name.ext
-    const folder = parts.pop(); // folder name
+    const parts = url.split("/");
+    const filename = parts.pop(); // xx.png
+    const folder = parts.pop();   // gobbly_treat
     return `${folder}/${filename.split(".")[0]}`;
   } catch {
     return null;
@@ -60,33 +59,32 @@ function extractPublicId(imageUrl) {
 }
 
 /* ============================================================
-   1️⃣ UPLOAD MAIN IMAGE (and delete old one)
-   POST /api/upload
-   field: image
-   optional body: oldImage
+   1️⃣ UPLOAD MAIN IMAGE (delete old)
 ============================================================ */
 router.post("/", upload.single("image"), async (req, res) => {
   try {
     if (!req.file)
       return res.status(400).json({ error: "No file uploaded" });
 
-    // Upload new image to Cloudinary
+    // Upload new
     const result = await uploadToCloudinary(req.file.buffer);
 
-    // Delete old image if requested
+    // Delete old image if exists
     if (req.body.oldImage) {
-      try {
-        const publicId = extractPublicId(req.body.oldImage);
-        if (publicId) await cloudinary.uploader.destroy(publicId);
-      } catch (err) {
-        console.log("Error deleting old Cloudinary image:", err);
+      const publicId = extractPublicId(req.body.oldImage);
+      if (publicId) {
+        try {
+          await cloudinary.uploader.destroy(publicId);
+        } catch (err) {
+          console.log("Failed to delete old image:", err);
+        }
       }
     }
 
-    return res.json({
+    res.json({
       url: result.secure_url,
-      relative: result.secure_url, // kept for compatibility
-      filename: result.public_id,  // Cloudinary ID saved as filename
+      relative: result.secure_url,
+      filename: result.public_id,
     });
   } catch (err) {
     console.error("UPLOAD ERROR:", err);
@@ -95,8 +93,7 @@ router.post("/", upload.single("image"), async (req, res) => {
 });
 
 /* ============================================================
-   2️⃣ UPLOAD GALLERY IMAGE (no delete)
-   POST /api/upload/gallery
+   2️⃣ GALLERY UPLOAD (no delete)
 ============================================================ */
 router.post("/gallery", upload.single("image"), async (req, res) => {
   try {
@@ -105,7 +102,7 @@ router.post("/gallery", upload.single("image"), async (req, res) => {
 
     const result = await uploadToCloudinary(req.file.buffer, "gobbly_gallery");
 
-    return res.json({
+    res.json({
       url: result.secure_url,
       relative: result.secure_url,
       filename: result.public_id,
@@ -117,25 +114,23 @@ router.post("/gallery", upload.single("image"), async (req, res) => {
 });
 
 /* ============================================================
-   3️⃣ DELETE IMAGE (Cloudinary version)
-   DELETE /api/upload/file?filename=<public_id>
+   3️⃣ DELETE IMAGE BY public_id
 ============================================================ */
 router.delete("/file", async (req, res) => {
   try {
     const publicId = req.query.filename;
 
     if (!publicId)
-      return res.status(400).json({ error: "filename (public_id) missing" });
+      return res.status(400).json({ error: "filename missing" });
 
     const result = await cloudinary.uploader.destroy(publicId);
 
-    if (result.result === "not found") {
-      return res.status(404).json({ error: "File not found on Cloudinary" });
-    }
+    if (result.result === "not found")
+      return res.status(404).json({ error: "File not found" });
 
     res.json({ success: true, deleted: publicId });
   } catch (err) {
-    console.error("DELETE FILE ERROR:", err);
+    console.error("DELETE ERROR:", err);
     res.status(500).json({ error: "Failed to delete file" });
   }
 });

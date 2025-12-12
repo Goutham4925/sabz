@@ -10,6 +10,9 @@ import { Loader2 } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
 import { API_URL } from "@/config/api";
 
+// -------------------------------------
+// SITE SETTINGS INTERFACE
+// -------------------------------------
 interface SiteSettings {
   id: number;
 
@@ -51,28 +54,69 @@ interface SiteSettings {
   footer_subtext: string | null;
 }
 
-// const API_URL = "http://localhost:5000/api";
-
+// --------------------------------------------------
+// MAIN SETTINGS PAGE COMPONENT
+// --------------------------------------------------
 export default function Settings() {
   const [settings, setSettings] = useState<SiteSettings | null>(null);
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
-
   const { toast } = useToast();
 
-  // ----------------------------
+  // -------------------------------------
+  // HIGHLIGHT TOOL (Reusable Everywhere)
+  // -------------------------------------
+  const highlightTool = (fieldKey: string) => (
+    <div className="mt-2">
+      <div className="flex items-center gap-2">
+        <Input
+          placeholder="Word to highlight"
+          id={`highlightWordInput_${fieldKey}`}
+          className="w-48"
+        />
+
+        <Button
+          type="button"
+          onClick={() => {
+            const input = document.getElementById(
+              `highlightWordInput_${fieldKey}`
+            ) as HTMLInputElement;
+
+            const word = input?.value.trim();
+            if (!word) return;
+
+            const colored = `<span class='text-[#e4a95c]'>${word}</span>`;
+
+            setSettings((prev: any) => ({
+              ...prev,
+              [fieldKey]: prev[fieldKey]?.replace(word, colored) ?? "",
+            }));
+
+            input.value = "";
+          }}
+        >
+          Highlight
+        </Button>
+      </div>
+
+      <p className="text-xs text-muted-foreground mt-1">
+        Supports HTML: &lt;span class='text-[#e4a95c]'&gt;word&lt;/span&gt;
+      </p>
+    </div>
+  );
+
+  // -------------------------------------
   // IMAGE UPLOAD HANDLER
-  // ----------------------------
+  // -------------------------------------
   const handleImageUpload = async (e: any, field: string) => {
     const file = e.target.files?.[0];
     if (!file) return;
 
-    const formData = new FormData(); // <-- This is correct (camelCase)
+    const formData = new FormData();
     formData.append("image", file);
 
-    // DELETE OLD IMAGE
-    if (settings[field]) {
-      formData.append("oldImage", settings[field]);
+    if (settings?.[field]) {
+      formData.append("oldImage", settings[field] as string);
     }
 
     try {
@@ -92,7 +136,7 @@ export default function Settings() {
         title: "Image Updated!",
         description: "Old image deleted successfully.",
       });
-    } catch (err) {
+    } catch {
       toast({
         title: "Upload Failed",
         description: "Unable to upload image.",
@@ -101,10 +145,9 @@ export default function Settings() {
     }
   };
 
-
-  // ----------------------------
+  // -------------------------------------
   // FETCH SETTINGS
-  // ----------------------------
+  // -------------------------------------
   useEffect(() => {
     (async () => {
       try {
@@ -128,9 +171,9 @@ export default function Settings() {
     })();
   }, []);
 
-  // ----------------------------
+  // -------------------------------------
   // SAVE SETTINGS
-  // ----------------------------
+  // -------------------------------------
   const handleSave = async () => {
     if (!settings) return;
 
@@ -162,6 +205,9 @@ export default function Settings() {
     setSaving(false);
   };
 
+  // -------------------------------------
+  // LOADING UI
+  // -------------------------------------
   if (loading || !settings) {
     return (
       <ProtectedRoute>
@@ -174,19 +220,21 @@ export default function Settings() {
     );
   }
 
+  // ------------------------------------------------------------
+  // RENDER MAIN PAGE
+  // ------------------------------------------------------------
   return (
     <ProtectedRoute>
       <AdminLayout>
         <div className="space-y-8 max-w-3xl">
 
-          {/* BRANDING SECTION */}
+          {/* ------------------------ BRANDING ------------------------ */}
           <Card>
             <CardHeader>
               <CardTitle>Branding (Navbar)</CardTitle>
             </CardHeader>
             <CardContent className="space-y-6">
-
-              {/* MAIN NAVBAR LOGO */}
+              {/* NAV LOGO */}
               <div>
                 <Label>Navbar Logo Image</Label>
                 <div className="flex items-center gap-3 mt-2">
@@ -218,9 +266,9 @@ export default function Settings() {
                 )}
               </div>
 
-              {/* BRAND NAME IMAGE */}
+              {/* BRAND IMAGE */}
               <div>
-                <Label>Brand Name Image (replaces text)</Label>
+                <Label>Brand Name Image</Label>
 
                 <div className="flex items-center gap-3 mt-2">
                   <Input
@@ -271,7 +319,7 @@ export default function Settings() {
             </CardContent>
           </Card>
 
-          {/* HERO SECTION */}
+          {/* ------------------------ HERO SECTION ------------------------ */}
           <Card>
             <CardHeader>
               <CardTitle>Hero Section</CardTitle>
@@ -285,13 +333,15 @@ export default function Settings() {
                 }
               />
 
-              <Label>Hero Title</Label>
-              <Input
+              <Label>Hero Title (supports &lt;span&gt;)</Label>
+              <Textarea
+                rows={3}
                 value={settings.hero_title || ""}
                 onChange={(e) =>
                   setSettings({ ...settings, hero_title: e.target.value })
                 }
               />
+              {highlightTool("hero_title")}
 
               <Label>Hero Subtitle</Label>
               <Textarea
@@ -329,7 +379,7 @@ export default function Settings() {
             </CardContent>
           </Card>
 
-          {/* ABOUT SECTION */}
+          {/* ------------------------ ABOUT SECTION ------------------------ */}
           <Card>
             <CardHeader>
               <CardTitle>About Section</CardTitle>
@@ -343,13 +393,14 @@ export default function Settings() {
                 }
               />
 
-              <Label>About Title</Label>
+              <Label>About Title (supports &lt;span&gt;)</Label>
               <Input
                 value={settings.about_title || ""}
                 onChange={(e) =>
                   setSettings({ ...settings, about_title: e.target.value })
                 }
               />
+              {highlightTool("about_title")}
 
               <Label>Paragraph 1</Label>
               <Textarea
@@ -395,7 +446,32 @@ export default function Settings() {
             </CardContent>
           </Card>
 
-          {/* CTA SECTION */}
+          {/* ------------------------ PRODUCTS SECTION ------------------------ */}
+          <Card>
+            <CardHeader>
+              <CardTitle>Products Section</CardTitle>
+            </CardHeader>
+            <CardContent className="space-y-4">
+              <Label>Products Title (supports &lt;span&gt;)</Label>
+              <Input
+                value={settings.products_title || ""}
+                onChange={(e) =>
+                  setSettings({ ...settings, products_title: e.target.value })
+                }
+              />
+              {highlightTool("products_title")}
+
+              <Label>Products Subtitle</Label>
+              <Textarea
+                value={settings.products_subtitle || ""}
+                onChange={(e) =>
+                  setSettings({ ...settings, products_subtitle: e.target.value })
+                }
+              />
+            </CardContent>
+          </Card>
+
+          {/* ------------------------ CTA SECTION ------------------------ */}
           <Card>
             <CardHeader>
               <CardTitle>CTA Section</CardTitle>
@@ -409,13 +485,14 @@ export default function Settings() {
                 }
               />
 
-              <Label>CTA Title</Label>
+              <Label>CTA Title (supports &lt;span&gt;)</Label>
               <Input
                 value={settings.cta_title || ""}
                 onChange={(e) =>
                   setSettings({ ...settings, cta_title: e.target.value })
                 }
               />
+              {highlightTool("cta_title")}
 
               <Label>CTA Subtitle</Label>
               <Textarea
@@ -453,7 +530,7 @@ export default function Settings() {
             </CardContent>
           </Card>
 
-          {/* SAVE BUTTON */}
+          {/* ------------------------ SAVE BUTTON ------------------------ */}
           <Button onClick={handleSave} disabled={saving} className="w-full">
             {saving ? "Saving..." : "Save All Changes"}
           </Button>

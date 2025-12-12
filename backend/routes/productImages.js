@@ -3,6 +3,7 @@ const express = require("express");
 const prisma = require("../prisma/client");
 const multer = require("multer");
 const { v2: cloudinary } = require("cloudinary");
+const { Readable } = require("stream");
 
 require("dotenv").config();
 
@@ -18,54 +19,68 @@ cloudinary.config({
 });
 
 /* =============================================================
-   MULTER: TEMP STORAGE ONLY (memory)
+   MULTER: In-Memory Storage
 ============================================================= */
-const storage = multer.memoryStorage();
-const upload = multer({ storage });
+const upload = multer({ storage: multer.memoryStorage() });
 
-/* Helper: extract Cloudinary public_id from URL */
-function getPublicIdFromUrl(url) {
+/* =============================================================
+   Helper: Upload buffer to Cloudinary (Promise wrapper)
+============================================================= */
+function uploadBufferToCloudinary(buffer, folder = "gobbly/gallery") {
+  return new Promise((resolve, reject) => {
+    const stream = cloudinary.uploader.upload_stream(
+      {
+        folder,
+        resource_type: "image",
+      },
+      (err, result) => {
+        if (err) return reject(err);
+        resolve(result);
+      }
+    );
+
+    Readable.from(buffer).pipe(stream);
+  });
+}
+
+/* =============================================================
+   Helper: Extract Cloudinary public_id
+============================================================= */
+function getPublicId(url) {
   try {
-    const parts = url.split("/upload/");
-    if (parts.length < 2) return null;
-    const filePart = parts[1].split(".")[0];
-    return filePart;
+    // Example:
+    // .../upload/v123456/gobbly/gallery/abc123.png
+    const afterUpload = url.split("/upload/")[1];
+    const noExtension = afterUpload.split(".")[0];
+    return noExtension; // -> gobbly/gallery/abc123
   } catch {
     return null;
   }
 }
 
 /* =============================================================
-   1️⃣ UPLOAD PRODUCT GALLERY IMAGE
+   1️⃣ UPLOAD GALLERY IMAGE FOR A PRODUCT
    POST /api/product-images/:productId
 ============================================================= */
 router.post("/:productId", upload.single("image"), async (req, res) => {
   try {
     const productId = Number(req.params.productId);
-    if (!req.file) return res.status(400).json({ error: "No file uploaded" });
+    if (!req.file) {
+      return res.status(400).json({ error: "No file uploaded" });
+    }
 
-    // Upload buffer to Cloudinary
-    const uploadResult = await cloudinary.uploader.upload_stream(
-      { folder: "gobbly/gallery" },
-      async (error, result) => {
-        if (error) {
-          console.error("Cloudinary upload error:", error);
-          return res.status(500).json({ error: "Upload failed" });
-        }
+    // Upload to Cloudinary
+    const result = await uploadBufferToCloudinary(req.file.buffer);
 
-        // Save URL to database
-        const img = await prisma.productImage.create({
-          data: {
-            productId,
-            url: result.secure_url,
-          },
-        });
+    // Save to DB
+    const img = await prisma.productImage.create({
+      data: {
+        productId,
+        url: result.secure_url,
+      },
+    });
 
-        return res.json(img);
-      }
-    );
-
-    uploadResult.end(req.file.buffer);
+    res.json(img);
   } catch (err) {
     console.error("POST /product-images error:", err);
     res.status(500).json({ error: "Failed to upload image" });
@@ -73,28 +88,30 @@ router.post("/:productId", upload.single("image"), async (req, res) => {
 });
 
 /* =============================================================
-   2️⃣ DELETE PRODUCT GALLERY IMAGE (Cloudinary + DB)
+   2️⃣ DELETE PRODUCT GALLERY IMAGE
    DELETE /api/product-images/:imageId
 ============================================================= */
 router.delete("/:imageId", async (req, res) => {
   try {
     const imageId = Number(req.params.imageId);
 
-    const img = await prisma.productImage.findUnique({
+    const image = await prisma.productImage.findUnique({
       where: { id: imageId },
     });
 
-    if (!img) return res.status(404).json({ error: "Image not found" });
+    if (!image) {
+      return res.status(404).json({ error: "Image not found" });
+    }
 
     // Extract Cloudinary public_id
-    const publicId = getPublicIdFromUrl(img.url);
+    const publicId = getPublicId(image.url);
 
     if (publicId) {
       await cloudinary.uploader.destroy(publicId);
-      console.log("Cloudinary image deleted:", publicId);
+      console.log("Deleted from Cloudinary:", publicId);
     }
 
-    // Delete database record
+    // Delete DB row
     await prisma.productImage.delete({ where: { id: imageId } });
 
     res.json({ success: true });

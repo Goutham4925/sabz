@@ -190,7 +190,7 @@ const Products = () => {
                           </TableCell>
 
                           <TableCell>
-                            ${Number(product.price).toFixed(2)}
+                            ₹{Number(product.price).toFixed(2)}
                           </TableCell>
 
                           <TableCell>

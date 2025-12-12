@@ -1,6 +1,7 @@
 import { useEffect, useState, useRef } from "react";
 import { Award, Heart, Leaf, Clock } from "lucide-react";
 import { API_URL } from "@/config/api";
+import DOMPurify from "dompurify";
 
 export function AboutSection() {
   const [settings, setSettings] = useState<any>(null);
@@ -34,7 +35,7 @@ export function AboutSection() {
     return () => observer.disconnect();
   }, []);
 
-  /* ⭐ FIX: SKELETON WITH FIXED HEIGHT (Stops layout shift) */
+  /* skeleton while loading */
   if (loading) {
     return (
       <section ref={sectionRef} className="py-24 bg-secondary/30">
@@ -70,6 +71,17 @@ export function AboutSection() {
     },
   ];
 
+  // Sanitize helper (allow only simple span with class)
+  const sanitize = (html: string | null) => {
+    if (!html) return "";
+    // Default DOMPurify is fine; we can restrict allowed tags/classes further if needed.
+    // Allow only <span> (and its class attribute) plus basic text
+    return DOMPurify.sanitize(html, {
+      ALLOWED_TAGS: ["span", "strong", "em", "b", "i"],
+      ALLOWED_ATTR: ["class", "style"], // style allowed if you expect inline style (optional)
+    });
+  };
+
   return (
     <section
       ref={sectionRef}
@@ -86,9 +98,14 @@ export function AboutSection() {
               {settings.about_badge || "Our Story"}
             </span>
 
-            <h2 className="section-title mb-6">
-              {settings.about_title || "A Legacy of Delicious Moments"}
-            </h2>
+            {/* Render title as HTML (sanitized) */}
+            <h2
+              className="section-title mb-6"
+              // if there is HTML content in settings.about_title we render it safely
+              dangerouslySetInnerHTML={{
+                __html: sanitize(settings.about_title) || "A Legacy of Delicious Moments",
+              }}
+            />
 
             <p className="text-muted-foreground text-lg leading-relaxed mb-4 whitespace-pre-wrap">
               {settings.about_paragraph1}
@@ -106,7 +123,11 @@ export function AboutSection() {
                       <item.icon className="w-5 h-5 text-primary-foreground" />
                     </div>
                     <div>
-                      <h4 className="font-display font-semibold">{item.title}</h4>
+                      {/* highlight title might also contain <span>; render sanitized HTML */}
+                      <h4
+                        className="font-display font-semibold"
+                        dangerouslySetInnerHTML={{ __html: sanitize(item.title) }}
+                      />
                       <p className="text-muted-foreground text-sm">{item.description}</p>
                     </div>
                   </div>
@@ -132,7 +153,7 @@ export function AboutSection() {
   );
 }
 
-/* ⭐ PRELOAD FUNCTION FOR HOMEPAGE (stops layout shift globally) */
+/* PRELOAD */
 AboutSection.preload = async () => {
   try {
     const res = await fetch(`${API_URL}/settings`);
