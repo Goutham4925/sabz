@@ -18,6 +18,7 @@ async function main() {
         email: "admin@example.com",
         password: hashed,
         role: "admin",
+        isApproved: true,
       },
     });
     console.log("Admin created: admin@example.com");
