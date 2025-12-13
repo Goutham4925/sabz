@@ -18,9 +18,35 @@ const quickLinks = [
   { name: "Contact", path: "/contact" },
 ];
 
+// --------------------------------------------------
+// ICON RENDERER — supports URL icons or Lucide icons
+// --------------------------------------------------
+const iconMap: any = {
+  MapPin,
+  Phone,
+  Mail,
+  Facebook,
+  Instagram,
+  Twitter,
+};
+
+function RenderIcon({ name, className }: { name: string; className?: string }) {
+  if (!name) return null;
+
+  // URL image icon
+  if (name.startsWith("http")) {
+    return <img src={name} className={className} />;
+  }
+
+  // Lucide icon
+  const Icon = iconMap[name];
+  return Icon ? <Icon className={className} /> : null;
+}
+
 export function Footer() {
   const [settings, setSettings] = useState<any>(null);
   const [categories, setCategories] = useState<any[]>([]);
+  const [contact, setContact] = useState<any>(null);
 
   // Load Site Settings
   useEffect(() => {
@@ -49,6 +75,21 @@ export function Footer() {
     };
 
     loadCategories();
+  }, []);
+
+  // Load Contact Page (for footer)
+  useEffect(() => {
+    const loadContact = async () => {
+      try {
+        const res = await fetch(`${API_URL}/contact-page`);
+        const data = await res.json();
+        setContact(data);
+      } catch (err) {
+        console.error("Failed to load contact page:", err);
+      }
+    };
+
+    loadContact();
   }, []);
 
   const logo = settings?.navbar_logo;
@@ -96,13 +137,14 @@ export function Footer() {
               </div>
             </Link>
 
+            {/* Footer Text */}
             <p className="text-cream/70 text-sm leading-relaxed mb-6">
-              {settings?.footer_text || 
+              {settings?.footer_text ||
                 "Crafting premium biscuits with love and tradition since 1980. Every bite tells a story of quality and craftsmanship."
               }
             </p>
 
-
+            {/* Social Icons */}
             <div className="flex gap-4">
               <a
                 href="https://www.google.com/"
@@ -178,40 +220,48 @@ export function Footer() {
           </div>
 
           {/* Contact Info */}
-          <div>
-            <h3 className="font-display text-lg font-semibold mb-6 text-cream">
-              Contact Us
-            </h3>
-
+          {contact ? (
             <ul className="space-y-4">
+
+              {/* LOCATION: card_1_line1 + card_1_line2 */}
               <li className="flex items-start gap-3">
-                <MapPin className="w-5 h-5 text-primary mt-0.5 flex-shrink-0" />
-                <span className="text-cream/70 text-sm">
-                  123 Baker Street, Biscuit Town, BT 12345
+                <RenderIcon
+                  name={contact.card_1_icon}
+                  className="w-5 h-5 text-primary mt-0.5 flex-shrink-0"
+                />
+                <span className="text-cream/70 text-sm whitespace-pre-line">
+                  {contact.card_1_line1}
+                  {contact.card_1_line2 && `\n${contact.card_1_line2}`}
                 </span>
               </li>
 
+              {/* PHONE: card_2_line1 */}
               <li className="flex items-center gap-3">
                 <Phone className="w-5 h-5 text-primary flex-shrink-0" />
                 <a
-                  href="tel:+1234567890"
+                  href={`tel:${contact.card_2_line1}`}
                   className="text-cream/70 hover:text-primary transition-colors text-sm"
                 >
-                  +1 (234) 567-890
+                  {contact.card_2_line1}
                 </a>
               </li>
 
+              {/* EMAIL: card_3_line1 */}
               <li className="flex items-center gap-3">
                 <Mail className="w-5 h-5 text-primary flex-shrink-0" />
                 <a
-                  href="mailto:hello@gobblytreat.com"
+                  href={`mailto:${contact.card_3_line1}`}
                   className="text-cream/70 hover:text-primary transition-colors text-sm"
                 >
-                  hello@gobblytreat.com
+                  {contact.card_3_line1}
                 </a>
               </li>
+
             </ul>
-          </div>
+          ) : (
+            <p className="text-cream/50 text-sm">Loading contact info...</p>
+          )}
+
 
         </div>
       </div>
