@@ -97,9 +97,11 @@ export function Footer() {
             </Link>
 
             <p className="text-cream/70 text-sm leading-relaxed mb-6">
-              Crafting premium biscuits with love and tradition since 1980.
-              Every bite tells a story of quality and craftsmanship.
+              {settings?.footer_text || 
+                "Crafting premium biscuits with love and tradition since 1980. Every bite tells a story of quality and craftsmanship."
+              }
             </p>
+
 
             <div className="flex gap-4">
               <a

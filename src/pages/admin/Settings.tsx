@@ -527,6 +527,22 @@ export default function Settings() {
             </CardContent>
           </Card>
 
+          <Card>
+            <CardHeader>
+              <CardTitle>Footer Section</CardTitle>
+            </CardHeader>
+            <CardContent className="space-y-4">
+              <Label>Footer Main Text</Label>
+              <Textarea
+                rows={3}
+                value={settings.footer_text || ""}
+                onChange={(e) =>
+                  setSettings({ ...settings, footer_text: e.target.value })
+                }
+              />
+            </CardContent>
+          </Card>
+
           {/* ------------------------ SAVE BUTTON ------------------------ */}
           <Button onClick={handleSave} disabled={saving} className="w-full">
             {saving ? "Saving..." : "Save All Changes"}
