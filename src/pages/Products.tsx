@@ -1,4 +1,6 @@
 import { useEffect, useState } from "react";
+import { useSearchParams } from "react-router-dom";
+
 import { Navbar } from "@/components/layout/Navbar";
 import { Footer } from "@/components/layout/Footer";
 import { ProductCard } from "@/components/home/ProductCard";
@@ -10,22 +12,31 @@ import { Pagination } from "swiper/modules";
 
 import "swiper/css";
 import "swiper/css/pagination";
+
 import { API_URL } from "@/config/api";
 
-// const API_URL = "http://localhost:5000/api";
+interface Category {
+  id: number | "all";
+  name: string;
+}
 
 const Products = () => {
-  const [products, setProducts] = useState([]);
-  const [categories, setCategories] = useState([{ id: "all", name: "All" }]);
-  const [activeCategory, setActiveCategory] = useState("all");
+  const [products, setProducts] = useState<any[]>([]);
+  const [categories, setCategories] = useState<Category[]>([
+    { id: "all", name: "All" },
+  ]);
   const [showPrices, setShowPrices] = useState(true);
   const [loading, setLoading] = useState(true);
 
   const { setLoading: setGlobalLoading } = useGlobalLoading();
 
-  // -----------------------------------------------
+  // URL PARAMS
+  const [searchParams, setSearchParams] = useSearchParams();
+  const activeCategoryId = searchParams.get("categoryId") || "all";
+
+  // ------------------------------------------------
   // FETCH PRODUCTS + CATEGORIES
-  // -----------------------------------------------
+  // ------------------------------------------------
   useEffect(() => {
     const load = async () => {
       setGlobalLoading(true);
@@ -40,27 +51,38 @@ const Products = () => {
         const categoryData = await catRes.json();
 
         setProducts(productsData);
-
-        // Add "all" category at the start
         setCategories([{ id: "all", name: "All" }, ...categoryData]);
       } catch (err) {
-        console.error("Failed to load:", err);
+        console.error("Failed to load products/categories:", err);
+      } finally {
+        setLoading(false);
+        setGlobalLoading(false);
       }
-
-      setLoading(false);
-      setGlobalLoading(false);
     };
 
     load();
   }, []);
 
-  // -----------------------------------------------
-  // FILTERED PRODUCTS
-  // -----------------------------------------------
+  // ------------------------------------------------
+  // FILTER PRODUCTS BASED ON URL CATEGORY
+  // ------------------------------------------------
   const filteredProducts =
-    activeCategory === "all"
+    activeCategoryId === "all"
       ? products
-      : products.filter((p) => p.categoryId === Number(activeCategory));
+      : products.filter(
+          (p) => String(p.categoryId) === String(activeCategoryId)
+        );
+
+  // ------------------------------------------------
+  // HANDLE CATEGORY CLICK (SYNC WITH URL)
+  // ------------------------------------------------
+  const handleCategoryClick = (id: string | number) => {
+    if (id === "all") {
+      setSearchParams({});
+    } else {
+      setSearchParams({ categoryId: String(id) });
+    }
+  };
 
   if (loading) return null;
 
@@ -70,7 +92,7 @@ const Products = () => {
 
       <main className="pt-32 pb-24">
         <div className="container mx-auto px-4 md:px-8">
-          
+
           {/* HEADER */}
           <div className="text-center max-w-3xl mx-auto mb-16">
             <span className="badge-premium mb-4 inline-block">
@@ -89,16 +111,21 @@ const Products = () => {
           {/* FILTER BUTTONS */}
           <div className="flex flex-col md:flex-row items-center justify-between gap-6 mb-12">
             <div className="flex flex-wrap items-center gap-2">
-              {categories.map((c) => (
-                <Button
-                  key={c.id}
-                  variant={String(activeCategory) === String(c.id) ? "default" : "secondary"}
-                  size="sm"
-                  onClick={() => setActiveCategory(String(c.id))}
-                >
-                  {c.name}
-                </Button>
-              ))}
+              {categories.map((c) => {
+                const isActive =
+                  String(activeCategoryId) === String(c.id);
+
+                return (
+                  <Button
+                    key={c.id}
+                    variant={isActive ? "default" : "secondary"}
+                    size="sm"
+                    onClick={() => handleCategoryClick(c.id)}
+                  >
+                    {c.name}
+                  </Button>
+                );
+              })}
             </div>
 
             <label className="flex items-center gap-2 text-sm text-muted-foreground">
