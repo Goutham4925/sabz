@@ -55,6 +55,8 @@ interface SiteSettings {
   social_facebook: string | null;
   social_instagram: string | null;
   social_twitter: string | null;
+  privacy_policy: string | null;
+  terms_conditions: string | null;
 }
 
 // --------------------------------------------------
@@ -582,6 +584,40 @@ export default function Settings() {
               </div>
             </CardContent>
           </Card>
+
+          {/* ------------------------ Legal SECTION ------------------------ */}
+          <Card>
+            <CardHeader>
+              <CardTitle>Legal Pages</CardTitle>
+            </CardHeader>
+
+            <CardContent className="space-y-6">
+              <div>
+                <Label>Privacy Policy (HTML allowed)</Label>
+                <Textarea
+                  rows={8}
+                  placeholder="<p>Your privacy policy...</p>"
+                  value={settings.privacy_policy || ""}
+                  onChange={(e) =>
+                    setSettings({ ...settings, privacy_policy: e.target.value })
+                  }
+                />
+              </div>
+
+              <div>
+                <Label>Terms & Conditions (HTML allowed)</Label>
+                <Textarea
+                  rows={8}
+                  placeholder="<p>Your terms & conditions...</p>"
+                  value={settings.terms_conditions || ""}
+                  onChange={(e) =>
+                    setSettings({ ...settings, terms_conditions: e.target.value })
+                  }
+                />
+              </div>
+            </CardContent>
+          </Card>
+
 
 
           {/* ------------------------ SAVE BUTTON ------------------------ */}

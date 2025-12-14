@@ -75,7 +75,9 @@ router.put("/:id", async (req, res) => {
       footer_text: true,
       footer_subtext: true,
 
-      // ✅ SOCIAL LINKS
+      privacy_policy: true,
+      terms_conditions: true,
+      
       social_facebook: true,
       social_instagram: true,
       social_twitter: true,

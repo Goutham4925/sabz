@@ -8,6 +8,7 @@ import {
   Facebook,
   Instagram,
   Twitter,
+  X,
 } from "lucide-react";
 import { API_URL } from "@/config/api";
 
@@ -19,7 +20,7 @@ const quickLinks = [
 ];
 
 // --------------------------------------------------
-// ICON RENDERER — supports URL icons or Lucide icons
+// ICON RENDERER
 // --------------------------------------------------
 const iconMap: any = {
   MapPin,
@@ -32,64 +33,87 @@ const iconMap: any = {
 
 function RenderIcon({ name, className }: { name: string; className?: string }) {
   if (!name) return null;
-
-  // URL image icon
   if (name.startsWith("http")) {
     return <img src={name} className={className} />;
   }
-
-  // Lucide icon
   const Icon = iconMap[name];
   return Icon ? <Icon className={className} /> : null;
 }
 
+// --------------------------------------------------
+// LEGAL MODAL
+// --------------------------------------------------
+function LegalModal({
+  open,
+  onClose,
+  title,
+  html,
+}: {
+  open: boolean;
+  onClose: () => void;
+  title: string;
+  html: string;
+}) {
+  if (!open) return null;
+
+  return (
+    <div className="fixed inset-0 z-50 bg-black/60 flex items-center justify-center px-4">
+      <div className="bg-white max-w-3xl w-full rounded-xl shadow-lg relative">
+        <button
+          onClick={onClose}
+          className="absolute right-4 top-4 text-gray-500 hover:text-black"
+        >
+          <X />
+        </button>
+
+        <div className="p-6 max-h-[80vh] overflow-y-auto">
+          <h2 className="text-2xl font-bold mb-4">{title}</h2>
+
+          <div
+            className="prose max-w-none"
+            dangerouslySetInnerHTML={{
+              __html: html || "<p>No content added yet.</p>",
+            }}
+          />
+        </div>
+      </div>
+    </div>
+  );
+}
+
+// --------------------------------------------------
+// FOOTER
+// --------------------------------------------------
 export function Footer() {
   const [settings, setSettings] = useState<any>(null);
   const [categories, setCategories] = useState<any[]>([]);
   const [contact, setContact] = useState<any>(null);
 
+  const [openPrivacy, setOpenPrivacy] = useState(false);
+  const [openTerms, setOpenTerms] = useState(false);
+
   // Load Site Settings
   useEffect(() => {
-    const load = async () => {
-      try {
-        const res = await fetch(`${API_URL}/settings`);
-        const data = await res.json();
-        setSettings(data);
-      } catch (err) {
-        console.error("Error loading settings:", err);
-      }
-    };
-    load();
+    fetch(`${API_URL}/settings`)
+      .then((res) => res.json())
+      .then(setSettings)
+      .catch(console.error);
   }, []);
 
   // Load Categories
   useEffect(() => {
-    const loadCategories = async () => {
-      try {
-        const res = await fetch(`${API_URL}/categories`);
-        const data = await res.json();
-        setCategories(data);
-      } catch (err) {
-        console.error("Failed to load categories:", err);
-      }
-    };
-
-    loadCategories();
+    fetch(`${API_URL}/categories`)
+      .then((res) => res.json())
+      .then(setCategories)
+      .catch(console.error);
   }, []);
 
-  // Load Contact Page (for footer)
+  // Load Contact Page
   useEffect(() => {
-    const loadContact = async () => {
-      try {
-        const res = await fetch(`${API_URL}/contact-page`);
-        const data = await res.json();
-        setContact(data);
-      } catch (err) {
-        console.error("Failed to load contact page:", err);
-      }
-    };
-
-    loadContact();
+    fetch(`${API_URL}/contact-page`)
+      .then((res) => res.json())
+      .then(setContact)
+      .catch(console.error);
   }, []);
 
   const logo = settings?.navbar_logo;
@@ -97,210 +121,158 @@ export function Footer() {
   const showText = settings?.show_company_text !== false;
 
   return (
-    <footer className="bg-chocolate text-cream">
+    <>
+      <footer className="bg-chocolate text-cream">
+        {/* Main Footer */}
+        <div className="container mx-auto px-4 md:px-8 py-16">
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-12">
 
-      {/* Main Footer */}
-      <div className="container mx-auto px-4 md:px-8 py-16">
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-12">
+            {/* Brand */}
+            <div>
+              <Link to="/" className="flex items-center gap-3 mb-6">
+                <div className="w-32 h-32 flex items-center justify-center">
+                  {logo ? (
+                    <img src={logo} className="object-contain w-full h-full" />
+                  ) : (
+                    <Cookie className="w-7 h-7" />
+                  )}
+                </div>
 
-          {/* Brand Section */}
-          <div className="lg:col-span-1">
-            <Link to="/" className="flex items-center gap-3 mb-6">
+                <div>
+                  {brandImage && (
+                    <img src={brandImage} className="h-10 mb-1" />
+                  )}
 
-              <div className="relative w-32 h-32 rounded-md overflow-hidden flex items-center justify-center">
-                {logo ? (
-                  <img src={logo} className="object-contain w-full h-full p-1" />
-                ) : (
-                  <Cookie className="w-7 h-7 text-primary-foreground" />
+                  {showText && (
+                    <>
+                      <span className="font-bold text-xl">Gobbly Treat</span>
+                      <div className="text-xs opacity-60 uppercase">
+                        Artisan Biscuits
+                      </div>
+                    </>
+                  )}
+                </div>
+              </Link>
+
+              <p className="text-sm opacity-70 mb-6">
+                {settings?.footer_text ||
+                  "Crafting premium biscuits with love and tradition since 1980."}
+              </p>
+
+              <div className="flex gap-4">
+                {settings?.social_facebook && (
+                  <a href={settings.social_facebook} target="_blank">
+                    <Facebook />
+                  </a>
+                )}
+                {settings?.social_instagram && (
+                  <a href={settings.social_instagram} target="_blank">
+                    <Instagram />
+                  </a>
+                )}
+                {settings?.social_twitter && (
+                  <a href={settings.social_twitter} target="_blank">
+                    <Twitter />
+                  </a>
                 )}
               </div>
-
-              <div className="flex flex-col">
-                {brandImage && (
-                  <img
-                    src={brandImage}
-                    className="h-10 w-auto object-contain mb-1"
-                    alt="Brand"
-                  />
-                )}
-
-                {showText && (
-                  <>
-                    <span className="font-display text-xl font-bold text-cream">
-                      Gobbly Treat
-                    </span>
-                    <span className="text-xs text-cream/60 tracking-widest uppercase">
-                      Artisan Biscuits
-                    </span>
-                  </>
-                )}
-              </div>
-            </Link>
-
-            {/* Footer Text */}
-            <p className="text-cream/70 text-sm leading-relaxed mb-6">
-              {settings?.footer_text ||
-                "Crafting premium biscuits with love and tradition since 1980. Every bite tells a story of quality and craftsmanship."
-              }
-            </p>
-
-            {/* Social Icons */}
-            <div className="flex gap-4">
-              {settings?.social_facebook && (
-                <a
-                  href={settings.social_facebook}
-                  target="_blank"
-                  rel="noopener noreferrer"
-                  className="w-10 h-10 bg-cream/10 rounded-full flex items-center justify-center hover:bg-primary transition"
-                >
-                  <Facebook className="w-5 h-5" />
-                </a>
-              )}
-
-              {settings?.social_instagram && (
-                <a
-                  href={settings.social_instagram}
-                  target="_blank"
-                  rel="noopener noreferrer"
-                  className="w-10 h-10 bg-cream/10 rounded-full flex items-center justify-center hover:bg-primary transition"
-                >
-                  <Instagram className="w-5 h-5" />
-                </a>
-              )}
-
-              {settings?.social_twitter && (
-                <a
-                  href={settings.social_twitter}
-                  target="_blank"
-                  rel="noopener noreferrer"
-                  className="w-10 h-10 bg-cream/10 rounded-full flex items-center justify-center hover:bg-primary transition"
-                >
-                  <Twitter className="w-5 h-5" />
-                </a>
-              )}
             </div>
 
-          </div>
+            {/* Quick Links */}
+            <div>
+              <h3 className="font-semibold mb-4">Quick Links</h3>
+              <ul className="space-y-2">
+                {quickLinks.map((l) => (
+                  <li key={l.path}>
+                    <Link to={l.path} className="opacity-70 hover:opacity-100">
+                      {l.name}
+                    </Link>
+                  </li>
+                ))}
+              </ul>
+            </div>
 
-          {/* Quick Links */}
-          <div>
-            <h3 className="font-display text-lg font-semibold mb-6 text-cream">
-              Quick Links
-            </h3>
-
-            <ul className="space-y-3">
-              {quickLinks.map((link) => (
-                <li key={link.path}>
-                  <Link
-                    to={link.path}
-                    className="text-cream/70 hover:text-primary transition-colors text-sm"
-                  >
-                    {link.name}
-                  </Link>
-                </li>
-              ))}
-            </ul>
-          </div>
-
-          {/* Products – Dynamic Categories */}
-          <div>
-            <h3 className="font-display text-lg font-semibold mb-6 text-cream">
-              Our Products
-            </h3>
-
-            {categories.length > 0 ? (
-              <ul className="space-y-3">
+            {/* Categories */}
+            <div>
+              <h3 className="font-semibold mb-4">Our Products</h3>
+              <ul className="space-y-2">
                 {categories.map((cat) => (
                   <li key={cat.id}>
                     <Link
                       to={`/products?categoryId=${cat.id}`}
-                      className="text-cream/70 hover:text-primary transition text-sm"
+                      className="opacity-70 hover:opacity-100"
                     >
                       {cat.name}
                     </Link>
                   </li>
                 ))}
               </ul>
-            ) : (
-              <p className="text-cream/50 text-sm">No categories added yet.</p>
+            </div>
+
+            {/* Contact */}
+            {contact && (
+              <ul className="space-y-3">
+                <li className="flex gap-2">
+                  <RenderIcon name={contact.card_1_icon} />
+                  <span>{contact.card_1_line1}</span>
+                </li>
+                <li className="flex gap-2">
+                  <Phone />
+                  <a href={`tel:${contact.card_2_line1}`}>
+                    {contact.card_2_line1}
+                  </a>
+                </li>
+                <li className="flex gap-2">
+                  <Mail />
+                  <a href={`mailto:${contact.card_3_line1}`}>
+                    {contact.card_3_line1}
+                  </a>
+                </li>
+              </ul>
             )}
           </div>
-
-          {/* Contact Info */}
-          {contact ? (
-            <ul className="space-y-4">
-
-              {/* LOCATION: card_1_line1 + card_1_line2 */}
-              <li className="flex items-start gap-3">
-                <RenderIcon
-                  name={contact.card_1_icon}
-                  className="w-5 h-5 text-primary mt-0.5 flex-shrink-0"
-                />
-                <span className="text-cream/70 text-sm whitespace-pre-line">
-                  {contact.card_1_line1}
-                  {contact.card_1_line2 && `\n${contact.card_1_line2}`}
-                </span>
-              </li>
-
-              {/* PHONE: card_2_line1 */}
-              <li className="flex items-center gap-3">
-                <Phone className="w-5 h-5 text-primary flex-shrink-0" />
-                <a
-                  href={`tel:${contact.card_2_line1}`}
-                  className="text-cream/70 hover:text-primary transition-colors text-sm"
-                >
-                  {contact.card_2_line1}
-                </a>
-              </li>
-
-              {/* EMAIL: card_3_line1 */}
-              <li className="flex items-center gap-3">
-                <Mail className="w-5 h-5 text-primary flex-shrink-0" />
-                <a
-                  href={`mailto:${contact.card_3_line1}`}
-                  className="text-cream/70 hover:text-primary transition-colors text-sm"
-                >
-                  {contact.card_3_line1}
-                </a>
-              </li>
-
-            </ul>
-          ) : (
-            <p className="text-cream/50 text-sm">Loading contact info...</p>
-          )}
-
-
         </div>
-      </div>
 
-      {/* Bottom Bar */}
-      <div className="border-t border-cream/10">
-        <div className="container mx-auto px-4 md:px-8 py-6">
-          <div className="flex flex-col md:flex-row items-center justify-between gap-4">
-
-            <p className="text-cream/50 text-sm">
+        {/* Bottom Bar */}
+        <div className="border-t border-white/10 py-6">
+          <div className="container mx-auto flex flex-col md:flex-row justify-between gap-4">
+            <p className="text-sm opacity-50">
               © {new Date().getFullYear()} Gobbly Treat. All rights reserved.
             </p>
 
             <div className="flex gap-6">
-              <Link
-                to="/privacy"
-                className="text-cream/50 hover:text-cream text-sm transition-colors"
+              <button
+                onClick={() => setOpenPrivacy(true)}
+                className="text-sm opacity-50 hover:opacity-100"
               >
                 Privacy Policy
-              </Link>
+              </button>
 
-              <Link
-                to="/terms"
-                className="text-cream/50 hover:text-cream text-sm transition-colors"
+              <button
+                onClick={() => setOpenTerms(true)}
+                className="text-sm opacity-50 hover:opacity-100"
               >
                 Terms of Service
-              </Link>
+              </button>
             </div>
-
           </div>
         </div>
-      </div>
-    </footer>
+      </footer>
+
+      {/* Modals */}
+      <LegalModal
+        open={openPrivacy}
+        onClose={() => setOpenPrivacy(false)}
+        title="Privacy Policy"
+        html={settings?.privacy_policy}
+      />
+
+      <LegalModal
+        open={openTerms}
+        onClose={() => setOpenTerms(false)}
+        title="Terms & Conditions"
+        html={settings?.terms_conditions}
+      />
+    </>
   );
 }
