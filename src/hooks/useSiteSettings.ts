@@ -40,6 +40,10 @@ export interface SiteSettings {
   footer_text: string | null;
   footer_subtext: string | null;
   navbar_logo: string | null;
+  social_facebook: string | null;
+  social_instagram: string | null;
+  social_twitter: string | null;
+
 }
 
 export function useSiteSettings() {

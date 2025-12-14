@@ -17,11 +17,13 @@ const PORT = process.env.PORT || 5000;
 // ----------------------------
 app.use(
   cors({
-    origin: "*",
-    methods: ["GET", "POST", "PUT", "DELETE"],
+    origin: ["http://localhost:8080", "https://gobbly-treat.onrender.com"],
+    methods: ["GET", "POST", "PUT", "DELETE", "OPTIONS"],
     allowedHeaders: ["Content-Type", "Authorization"],
   })
 );
+
+
 
 // 🔥 THIS LINE HANDLES OPTIONS SAFELY (NO CRASH)
 app.use((req, res, next) => {

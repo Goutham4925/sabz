@@ -146,33 +146,40 @@ export function Footer() {
 
             {/* Social Icons */}
             <div className="flex gap-4">
-              <a
-                href="https://www.google.com/"
-                target="_blank"
-                rel="noopener noreferrer"
-                className="w-10 h-10 bg-cream/10 rounded-full flex items-center justify-center hover:bg-primary transition-colors duration-300"
-              >
-                <Facebook className="w-5 h-5" />
-              </a>
+              {settings?.social_facebook && (
+                <a
+                  href={settings.social_facebook}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="w-10 h-10 bg-cream/10 rounded-full flex items-center justify-center hover:bg-primary transition"
+                >
+                  <Facebook className="w-5 h-5" />
+                </a>
+              )}
 
-              <a
-                href="https://instagram.com/yourpage"
-                target="_blank"
-                rel="noopener noreferrer"
-                className="w-10 h-10 bg-cream/10 rounded-full flex items-center justify-center hover:bg-primary transition-colors duration-300"
-              >
-                <Instagram className="w-5 h-5" />
-              </a>
+              {settings?.social_instagram && (
+                <a
+                  href={settings.social_instagram}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="w-10 h-10 bg-cream/10 rounded-full flex items-center justify-center hover:bg-primary transition"
+                >
+                  <Instagram className="w-5 h-5" />
+                </a>
+              )}
 
-              <a
-                href="https://twitter.com/yourpage"
-                target="_blank"
-                rel="noopener noreferrer"
-                className="w-10 h-10 bg-cream/10 rounded-full flex items-center justify-center hover:bg-primary transition-colors duration-300"
-              >
-                <Twitter className="w-5 h-5" />
-              </a>
+              {settings?.social_twitter && (
+                <a
+                  href={settings.social_twitter}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="w-10 h-10 bg-cream/10 rounded-full flex items-center justify-center hover:bg-primary transition"
+                >
+                  <Twitter className="w-5 h-5" />
+                </a>
+              )}
             </div>
+
           </div>
 
           {/* Quick Links */}

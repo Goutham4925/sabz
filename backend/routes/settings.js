@@ -1,8 +1,8 @@
-// backend/routes/settings.js
 const express = require("express");
 const prisma = require("../prisma/client");
 
 const router = express.Router();
+
 
 // ----------------------------
 // GET /api/settings
@@ -25,6 +25,7 @@ router.get("/", async (req, res) => {
     console.error("GET /settings error:", err);
     res.status(500).json({ error: "Failed to fetch settings" });
   }
+
 });
 
 // ----------------------------
@@ -37,14 +38,7 @@ router.put("/:id", async (req, res) => {
       return res.status(400).json({ error: "Invalid ID" });
     }
 
-    let data = { ...req.body };
-
-    // Convert "" → null
-    Object.keys(data).forEach((key) => {
-      if (data[key] === "") data[key] = null;
-    });
-
-    // Only allow Prisma fields
+    // ✅ Explicit allow-list (NO filtering before this)
     const allowed = {
       hero_title: true,
       hero_subtitle: true,
@@ -80,15 +74,26 @@ router.put("/:id", async (req, res) => {
 
       footer_text: true,
       footer_subtext: true,
+
+      // ✅ SOCIAL LINKS
+      social_facebook: true,
+      social_instagram: true,
+      social_twitter: true,
+
       navbar_logo: true,
       navbar_brand_image: true,
       show_company_text: true,
     };
 
-    // Remove ALL fields not inside allowed list
-    Object.keys(data).forEach((key) => {
-      if (!allowed[key]) delete data[key];
+    const data = {};
+
+    // ✅ Copy ONLY allowed keys
+    Object.keys(allowed).forEach((key) => {
+      if (key in req.body) {
+        data[key] = req.body[key] === "" ? null : req.body[key];
+      }
     });
+
 
     const updated = await prisma.siteSetting.update({
       where: { id },
@@ -100,6 +105,8 @@ router.put("/:id", async (req, res) => {
     console.error("PUT /settings/:id error:", err);
     res.status(500).json({ error: "Failed to save settings" });
   }
+
 });
+
 
 module.exports = router;

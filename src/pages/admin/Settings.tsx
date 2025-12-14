@@ -52,6 +52,9 @@ interface SiteSettings {
 
   footer_text: string | null;
   footer_subtext: string | null;
+  social_facebook: string | null;
+  social_instagram: string | null;
+  social_twitter: string | null;
 }
 
 // --------------------------------------------------
@@ -172,7 +175,11 @@ export default function Settings() {
   // SAVE SETTINGS
   // -------------------------------------
   const handleSave = async () => {
-    if (!settings) return;
+
+    if (!settings) {
+      console.log("❌ No settings");
+      return;
+    }
 
     setSaving(true);
 
@@ -188,10 +195,12 @@ export default function Settings() {
         body: JSON.stringify(settings),
       });
 
+
       if (!res.ok) throw new Error();
 
       toast({ title: "Saved!", description: "Settings updated successfully." });
-    } catch {
+    } catch (err) {
+      console.error("❌ SAVE FAILED", err);
       toast({
         title: "Save Failed",
         description: "Unable to save changes.",
@@ -201,6 +210,7 @@ export default function Settings() {
 
     setSaving(false);
   };
+
 
   // -------------------------------------
   // LOADING UI
@@ -531,6 +541,7 @@ export default function Settings() {
             <CardHeader>
               <CardTitle>Footer Section</CardTitle>
             </CardHeader>
+
             <CardContent className="space-y-4">
               <Label>Footer Main Text</Label>
               <Textarea
@@ -540,8 +551,38 @@ export default function Settings() {
                   setSettings({ ...settings, footer_text: e.target.value })
                 }
               />
+
+              <div className="pt-4 border-t space-y-3">
+                <Label>Facebook URL</Label>
+                <Input
+                  placeholder="https://facebook.com/yourpage"
+                  value={settings.social_facebook || ""}
+                  onChange={(e) =>
+                    setSettings({ ...settings, social_facebook: e.target.value })
+                  }
+                />
+
+                <Label>Instagram URL</Label>
+                <Input
+                  placeholder="https://instagram.com/yourpage"
+                  value={settings.social_instagram || ""}
+                  onChange={(e) =>
+                    setSettings({ ...settings, social_instagram: e.target.value })
+                  }
+                />
+
+                <Label>Twitter / X URL</Label>
+                <Input
+                  placeholder="https://twitter.com/yourpage"
+                  value={settings.social_twitter || ""}
+                  onChange={(e) =>
+                    setSettings({ ...settings, social_twitter: e.target.value })
+                  }
+                />
+              </div>
             </CardContent>
           </Card>
+
 
           {/* ------------------------ SAVE BUTTON ------------------------ */}
           <Button onClick={handleSave} disabled={saving} className="w-full">
