@@ -8,256 +8,210 @@ datasource db {
   directUrl = env("DATABASE_URL")
 }
 
-///////////////////////////////////////////////////////////////////////////
-// USER MODEL
-///////////////////////////////////////////////////////////////////////////
+/// ////////////////////////////////////////////////////////////////////////
+/// ////////////////////////////////////////////////////////////////////////
 model User {
   id         String   @id @default(uuid())
   email      String   @unique
   password   String
   role       String   @default("USER")
-  isApproved Boolean  @default(false)
   createdAt  DateTime @default(now())
+  isApproved Boolean  @default(false)
 }
 
-///////////////////////////////////////////////////////////////////////////
-// CATEGORY MODEL
-///////////////////////////////////////////////////////////////////////////
+/// ////////////////////////////////////////////////////////////////////////
+/// ////////////////////////////////////////////////////////////////////////
 model Category {
   id        Int       @id @default(autoincrement())
   name      String    @unique
   createdAt DateTime  @default(now())
-
   products  Product[]
 }
 
-///////////////////////////////////////////////////////////////////////////
-// PRODUCT MODEL — Supports gallery images + all your fields
-///////////////////////////////////////////////////////////////////////////
+/// ////////////////////////////////////////////////////////////////////////
+/// ////////////////////////////////////////////////////////////////////////
 model Product {
-  id          Int      @id @default(autoincrement())
-  name        String
-  description String?
-  price       Float?
-
-  categoryId  Int?
-  category    Category? @relation(fields: [categoryId], references: [id])
-
-  image_url   String?           // Main product image
-
-  gallery     Json?             // Optional JSON gallery (if you want to store array also)
-
-  is_featured Boolean @default(false)
-
-  // Product details
-  ingredients     String?
-  highlights      String?
-  nutrition_info  String?
-  shelf_life      String?
-  weight          String?
-  package_type    String?
-
-  created_at      DateTime @default(now())
-  updated_at      DateTime @updatedAt
-
-  // Multiple gallery images
-  images      ProductImage[]
+  id             Int            @id @default(autoincrement())
+  name           String
+  description    String?
+  price          Float?
+  image_url      String?
+  is_featured    Boolean        @default(false)
+  created_at     DateTime       @default(now())
+  updated_at     DateTime       @updatedAt
+  categoryId     Int?
+  highlights     String?
+  ingredients    String?
+  nutrition_info String?
+  package_type   String?
+  shelf_life     String?
+  weight         String?
+  gallery        Json?
+  category       Category?      @relation(fields: [categoryId], references: [id])
+  images         ProductImage[]
 }
 
-///////////////////////////////////////////////////////////////////////////
-// PRODUCT IMAGE MODEL — TRUE Multiple Image Support
-///////////////////////////////////////////////////////////////////////////
+/// ////////////////////////////////////////////////////////////////////////
+/// ////////////////////////////////////////////////////////////////////////
 model ProductImage {
   id         Int      @id @default(autoincrement())
   productId  Int
   url        String
   created_at DateTime @default(now())
-
   product    Product  @relation(fields: [productId], references: [id])
 }
 
-///////////////////////////////////////////////////////////////////////////
-// SITE SETTINGS
-///////////////////////////////////////////////////////////////////////////
+/// ////////////////////////////////////////////////////////////////////////
+/// ////////////////////////////////////////////////////////////////////////
 model SiteSetting {
-  id                 Int      @id @default(autoincrement())
-
-  // HERO
-  hero_title          String?
-  hero_subtitle       String?
-  hero_badge_text     String?
-  hero_image_url      String?
-  hero_years_label    String?
-  hero_customers_label String?
-  hero_flavors_label  String?
-
-  // HOME ABOUT
-  about_badge              String?
-  about_title              String?
-  about_paragraph1         String?
-  about_paragraph2         String?
-  about_image_url          String?
-  about_highlight_1_title  String?
-  about_highlight_1_desc   String?
-  about_highlight_2_title  String?
-  about_highlight_2_desc   String?
-  about_highlight_3_title  String?
-  about_highlight_3_desc   String?
-  about_highlight_4_title  String?
-  about_highlight_4_desc   String?
-
-  // PRODUCTS SECTION
-  products_title    String?
-  products_subtitle String?
-
-  // CTA
-  cta_title              String?
-  cta_subtitle           String?
-  cta_image_url          String?
-  cta_primary_label      String?
-  cta_primary_href       String?
-  cta_badge_text         String?
-
-  // FOOTER + NAVBAR
-  footer_text             String?
+  id                      Int     @id @default(autoincrement())
+  hero_title              String?
+  hero_subtitle           String?
+  hero_image_url          String?
+  about_title             String?
+  cta_subtitle            String?
+  cta_title               String?
+  about_highlight_1_desc  String?
+  about_highlight_1_title String?
+  about_highlight_2_desc  String?
+  about_highlight_2_title String?
+  about_highlight_3_desc  String?
+  about_highlight_3_title String?
+  about_highlight_4_desc  String?
+  about_highlight_4_title String?
+  about_image_url         String?
+  about_paragraph1        String?
+  about_paragraph2        String?
   footer_subtext          String?
+  footer_text             String?
+  hero_badge_text         String?
+  hero_customers_label    String?
+  hero_flavors_label      String?
+  hero_years_label        String?
   navbar_logo             String?
+  products_subtitle       String?
+  products_title          String?
+  cta_image_url           String?
+  cta_primary_href        String?
+  cta_primary_label       String?
+  cta_badge_text          String?
+  about_badge             String?
   navbar_brand_image      String?
-  show_company_text       Boolean   @default(true)
+  show_company_text       Boolean @default(true)
+  footer_email            String?
+  footer_phone            String?
+  privacy_policy          String?
+  social_facebook         String?
+  social_instagram        String?
+  social_twitter          String?
+  terms_conditions        String?
 
   @@map("SiteSettings")
 }
 
-///////////////////////////////////////////////////////////////////////////
-// ABOUT PAGE
-///////////////////////////////////////////////////////////////////////////
+/// ////////////////////////////////////////////////////////////////////////
+/// ////////////////////////////////////////////////////////////////////////
 model AboutPage {
-  id               Int     @id @default(autoincrement())
-
-  // HERO
-  hero_badge       String?
-  hero_title       String?
-  hero_paragraph1  String?
-  hero_paragraph2  String?
-  hero_image_url   String?
-
-  // VALUES
-  value_1_icon     String?
-  value_1_title    String?
-  value_1_desc     String?
-  value_2_icon     String?
-  value_2_title    String?
-  value_2_desc     String?
-  value_3_icon     String?
-  value_3_title    String?
-  value_3_desc     String?
-  value_4_icon     String?
-  value_4_title    String?
-  value_4_desc     String?
-
-  // TIMELINE
+  id                  Int     @id @default(autoincrement())
+  hero_badge          String?
+  hero_title          String?
+  hero_paragraph1     String?
+  hero_paragraph2     String?
+  hero_image_url      String?
+  value_1_icon        String?
+  value_1_title       String?
+  value_1_desc        String?
+  value_2_icon        String?
+  value_2_title       String?
+  value_2_desc        String?
+  value_3_icon        String?
+  value_3_title       String?
+  value_3_desc        String?
+  value_4_icon        String?
+  value_4_title       String?
+  value_4_desc        String?
+  milestone_1_year    String?
+  milestone_1_title   String?
+  milestone_1_desc    String?
+  milestone_2_year    String?
+  milestone_2_title   String?
+  milestone_2_desc    String?
+  milestone_3_year    String?
+  milestone_3_title   String?
+  milestone_3_desc    String?
+  milestone_4_year    String?
+  milestone_4_title   String?
+  milestone_4_desc    String?
+  milestone_5_year    String?
+  milestone_5_title   String?
+  milestone_5_desc    String?
+  team_1_name         String?
+  team_1_role         String?
+  team_1_image        String?
+  team_2_name         String?
+  team_2_role         String?
+  team_2_image        String?
+  team_3_name         String?
+  team_3_role         String?
+  team_3_image        String?
+  stat_years          String?
+  stat_flavors        String?
+  stat_countries      String?
+  stat_customers      String?
   timeline_heading    String?
   timeline_subheading String?
-
-  milestone_1_year   String?
-  milestone_1_title  String?
-  milestone_1_desc   String?
-
-  milestone_2_year   String?
-  milestone_2_title  String?
-  milestone_2_desc   String?
-
-  milestone_3_year   String?
-  milestone_3_title  String?
-  milestone_3_desc   String?
-
-  milestone_4_year   String?
-  milestone_4_title  String?
-  milestone_4_desc   String?
-
-  milestone_5_year   String?
-  milestone_5_title  String?
-  milestone_5_desc   String?
-
-  // TEAM
-  team_1_name      String?
-  team_1_role      String?
-  team_1_image     String?
-
-  team_2_name      String?
-  team_2_role      String?
-  team_2_image     String?
-
-  team_3_name      String?
-  team_3_role      String?
-  team_3_image     String?
-
-  // STATS
-  stat_years      String?
-  stat_flavors    String?
-  stat_countries  String?
-  stat_customers  String?
 
   @@map("AboutPage")
 }
 
-///////////////////////////////////////////////////////////////////////////
-// CONTACT PAGE
-///////////////////////////////////////////////////////////////////////////
+/// ////////////////////////////////////////////////////////////////////////
+/// ////////////////////////////////////////////////////////////////////////
 model ContactPage {
-  id              Int     @id @default(autoincrement())
-
-  hero_badge      String?
-  hero_title      String?
-  hero_subtitle   String?
-
-  card_1_icon     String?
-  card_1_title    String?
-  card_1_line1    String?
-  card_1_line2    String?
-
-  card_2_icon     String?
-  card_2_title    String?
-  card_2_line1    String?
-  card_2_line2    String?
-
-  card_3_icon     String?
-  card_3_title    String?
-  card_3_line1    String?
-  card_3_line2    String?
-
-  card_4_icon     String?
-  card_4_title    String?
-  card_4_line1    String?
-  card_4_line2    String?
-
-  faq_1_q         String?
-  faq_1_a         String?
-  faq_2_q         String?
-  faq_2_a         String?
-  faq_3_q         String?
-  faq_3_a         String?
-  faq_4_q         String?
-  faq_4_a         String?
-
-  map_title       String?
-  map_address     String?
+  id            Int     @id @default(autoincrement())
+  hero_badge    String?
+  hero_title    String?
+  hero_subtitle String?
+  card_1_icon   String?
+  card_1_title  String?
+  card_1_line1  String?
+  card_1_line2  String?
+  card_2_icon   String?
+  card_2_title  String?
+  card_2_line1  String?
+  card_2_line2  String?
+  card_3_icon   String?
+  card_3_title  String?
+  card_3_line1  String?
+  card_3_line2  String?
+  card_4_icon   String?
+  card_4_title  String?
+  card_4_line1  String?
+  card_4_line2  String?
+  map_title     String?
+  map_address   String?
+  faq_1_q       String?
+  faq_1_a       String?
+  faq_2_q       String?
+  faq_2_a       String?
+  faq_3_q       String?
+  faq_3_a       String?
+  faq_4_q       String?
+  faq_4_a       String?
 
   @@map("ContactPage")
 }
 
-///////////////////////////////////////////////////////////////////////////
-// CONTACT MESSAGES
-///////////////////////////////////////////////////////////////////////////
+/// ////////////////////////////////////////////////////////////////////////
+/// ////////////////////////////////////////////////////////////////////////
 model ContactMessage {
   id          Int      @id @default(autoincrement())
   name        String
   email       String
   subject     String
   message     String
+  createdAt   DateTime @default(now())
   phone       String?
   productId   Int?
   productName String?
-  is_read     Boolean   @default(false)
-  createdAt   DateTime @default(now())
+  is_read     Boolean  @default(false)
 }
