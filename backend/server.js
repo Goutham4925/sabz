@@ -13,29 +13,43 @@ const app = express();
 const PORT = process.env.PORT || 5000;
 
 // ----------------------------
-// MIDDLEWARES
+// CORS CONFIG (PRODUCTION SAFE)
 // ----------------------------
+const allowedOrigins = [
+  "http://localhost:8080",
+  "http://localhost:5173",
+  "https://gobbly-treat-1.onrender.com", // ✅ FRONTEND
+];
+
 app.use(
   cors({
-    origin: ["http://localhost:8080", "https://gobbly-treat.onrender.com"],
+    origin: function (origin, callback) {
+      // Allow Postman / server-to-server
+      if (!origin) return callback(null, true);
+
+      if (allowedOrigins.includes(origin)) {
+        return callback(null, true);
+      }
+
+      return callback(new Error("Not allowed by CORS"));
+    },
+    credentials: true,
     methods: ["GET", "POST", "PUT", "DELETE", "OPTIONS"],
     allowedHeaders: ["Content-Type", "Authorization"],
   })
 );
 
+// ✅ REQUIRED for preflight
+app.options("*", cors());
 
-
-// 🔥 THIS LINE HANDLES OPTIONS SAFELY (NO CRASH)
-app.use((req, res, next) => {
-  if (req.method === "OPTIONS") {
-    return res.sendStatus(204);
-  }
-  next();
-});
-
+// ----------------------------
+// BODY PARSER
+// ----------------------------
 app.use(express.json());
 
-// Serve uploaded images
+// ----------------------------
+// STATIC FILES
+// ----------------------------
 app.use("/uploads", express.static("public/uploads"));
 
 // ----------------------------
@@ -52,7 +66,7 @@ app.use("/api/about", require("./routes/about"));
 app.use("/api/settings", settingsRoutes);
 
 // ----------------------------
-// ADMIN-PROTECTED ROUTES
+// ADMIN ROUTES
 // ----------------------------
 app.use("/api/admin", verifyAdmin, require("./routes/admin"));
 
@@ -67,5 +81,5 @@ app.get("/", (req, res) => {
 // START SERVER
 // ----------------------------
 app.listen(PORT, () => {
-  console.log(`Backend server running on http://localhost:${PORT}`);
+  console.log(`Backend server running on port ${PORT}`);
 });
