@@ -39,8 +39,7 @@ app.use(
   })
 );
 
-// ✅ REQUIRED for preflight
-app.options("*", cors());
+
 
 // ----------------------------
 // BODY PARSER
