@@ -7,7 +7,6 @@ const authRoutes = require("./routes/auth");
 const productRoutes = require("./routes/products");
 const settingsRoutes = require("./routes/settings");
 const contactPageRoutes = require("./routes/contactPage");
-
 const { verifyAdmin } = require("./middleware/auth");
 
 const app = express();
@@ -20,8 +19,17 @@ app.use(
   cors({
     origin: "*",
     methods: ["GET", "POST", "PUT", "DELETE"],
+    allowedHeaders: ["Content-Type", "Authorization"],
   })
 );
+
+// 🔥 THIS LINE HANDLES OPTIONS SAFELY (NO CRASH)
+app.use((req, res, next) => {
+  if (req.method === "OPTIONS") {
+    return res.sendStatus(204);
+  }
+  next();
+});
 
 app.use(express.json());
 
@@ -32,12 +40,10 @@ app.use("/uploads", express.static("public/uploads"));
 // PUBLIC ROUTES
 // ----------------------------
 app.use("/api/auth", authRoutes);
-
-// FRONTEND access for browsing
 app.use("/api/products", productRoutes);
 app.use("/api/categories", require("./routes/categories"));
 app.use("/api/product-images", require("./routes/productImages"));
-app.use("/api/upload", require("./routes/upload")); 
+app.use("/api/upload", require("./routes/upload"));
 app.use("/api/messages", require("./routes/contactMessages"));
 app.use("/api/contact-page", contactPageRoutes);
 app.use("/api/about", require("./routes/about"));
