@@ -46,6 +46,8 @@ router.put("/:id", async (req, res) => {
     // Convert "" → null
     Object.keys(data).forEach((key) => {
       if (data[key] === "") data[key] = null;
+      if (data[key] === "true") data[key] = true;
+      if (data[key] === "false") data[key] = false;
     });
 
     // ❌ DO NOT allow updating primary key

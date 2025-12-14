@@ -134,61 +134,71 @@ const About = () => {
         </section>
 
         {/* ================= TIMELINE SECTION (DYNAMIC) ================= */}
-        <section className="py-24">
-          <div className="container mx-auto px-4 md:px-8 max-w-4xl">
+        {!about.timeline_hidden && about.timeline?.length > 0 && (
+          <section className="py-24">
+            <div className="container mx-auto px-4 md:px-8 max-w-4xl">
 
-            <div className="text-center max-w-2xl mx-auto mb-16">
-              <h2
-                className="section-title mb-4"
-                dangerouslySetInnerHTML={{
-                  __html: about.timeline_heading || "Our Journey",
-                }}
-              />
-              <p className="section-subtitle">
-                {about.timeline_subheading ||
-                  "From humble beginnings to international recognition"}
-              </p>
-            </div>
+              {/* HEADING */}
+              <div className="text-center max-w-2xl mx-auto mb-16">
+                <h2
+                  className="section-title mb-4"
+                  dangerouslySetInnerHTML={{
+                    __html: about.timeline_heading?.trim() || "Our Journey",
+                  }}
+                />
+                <p className="section-subtitle">
+                  {about.timeline_subheading?.trim() ||
+                    "From humble beginnings to international recognition"}
+                </p>
+              </div>
 
-            <div className="relative">
-              {/* Vertical Line */}
-              <div className="absolute left-1/2 top-0 bottom-0 w-1 bg-border transform -translate-x-1/2" />
+              {/* TIMELINE */}
+              <div className="relative">
+                {/* Vertical Line */}
+                <div className="absolute left-1/2 top-0 bottom-0 w-1 bg-border transform -translate-x-1/2" />
 
-              {about.timeline?.map((item: any, index: number) => {
-                const isLeft = index % 2 === 0;
+                {about.timeline.map((item: any, index: number) => {
+                  if (!item.year && !item.title && !item.desc) return null;
 
-                return (
-                  <div
-                    key={item.id}
-                    className={`relative flex items-start mb-16 last:mb-0 ${
-                      isLeft ? "flex-row" : "flex-row-reverse"
-                    }`}
-                  >
-                    <div className={`w-1/2 px-6 ${isLeft ? "text-right" : "text-left"}`}>
-                      <span className="font-display text-4xl font-bold text-primary block">
-                        {item.year}
-                      </span>
+                  const isLeft = index % 2 === 0;
 
-                      <h3 className="font-display text-xl font-semibold mt-2 mb-2">
-                        {item.title}
-                      </h3>
+                  return (
+                    <div
+                      key={item.id}
+                      className={`relative flex items-start mb-16 last:mb-0 ${
+                        isLeft ? "flex-row" : "flex-row-reverse"
+                      }`}
+                    >
+                      <div
+                        className={`w-1/2 px-6 ${
+                          isLeft ? "text-right" : "text-left"
+                        }`}
+                      >
+                        <span className="font-display text-4xl font-bold text-primary block">
+                          {item.year}
+                        </span>
 
-                      <p className="text-muted-foreground">
-                        {item.desc}
-                      </p>
+                        <h3 className="font-display text-xl font-semibold mt-2 mb-2">
+                          {item.title}
+                        </h3>
+
+                        <p className="text-muted-foreground">
+                          {item.desc}
+                        </p>
+                      </div>
+
+                      <div className="relative flex items-center justify-center w-12">
+                        <div className="w-4 h-4 bg-primary rounded-full shadow-md" />
+                      </div>
+
+                      <div className="w-1/2 px-6" />
                     </div>
-
-                    <div className="relative flex items-center justify-center w-12">
-                      <div className="w-4 h-4 bg-primary rounded-full shadow-md" />
-                    </div>
-
-                    <div className="w-1/2 px-6" />
-                  </div>
-                );
-              })}
+                  );
+                })}
+              </div>
             </div>
-          </div>
-        </section>
+          </section>
+        )}
 
         {/* ================= TEAM SECTION ================= */}
         <section className="py-24 bg-secondary/30">

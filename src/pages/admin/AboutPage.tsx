@@ -328,7 +328,22 @@ const saveTimelineItem = async (id: number, payload: any) => {
 
           <CardContent className="space-y-6">
 
-            {/* Heading */}
+            {/* SHOW / HIDE TIMELINE */}
+            <div className="flex items-center gap-3">
+              <input
+                type="checkbox"
+                checked={!data.timeline_hidden}
+                onChange={(e) =>
+                  handleChange("timeline_hidden", !e.target.checked)
+                }
+                className="w-4 h-4"
+              />
+              <Label>Show Timeline Section</Label>
+            </div>
+
+            <hr className="opacity-30" />
+
+            {/* ================= HEADING ================= */}
             <Label>Timeline Heading (supports &lt;span&gt; formatting)</Label>
 
             <Textarea
@@ -370,16 +385,21 @@ const saveTimelineItem = async (id: number, payload: any) => {
               </Button>
             </div>
 
-
+            {/* ================= SUBHEADING ================= */}
             <Label>Timeline Subheading</Label>
             <Input
               value={data.timeline_subheading}
-              onChange={(e) => handleChange("timeline_subheading", e.target.value)}
+              onChange={(e) =>
+                handleChange("timeline_subheading", e.target.value)
+              }
             />
 
-            {/* DYNAMIC MILESTONES */}
+            {/* ================= MILESTONES ================= */}
             {timeline.map((item, index) => (
-              <div key={item.id} className="border p-4 rounded-xl space-y-3">
+              <div
+                key={item.id}
+                className="border p-4 rounded-xl space-y-3"
+              >
                 <h3 className="font-semibold">
                   Milestone {index + 1}
                 </h3>
@@ -388,9 +408,8 @@ const saveTimelineItem = async (id: number, payload: any) => {
                 <Input
                   value={item.year}
                   onChange={(e) => {
-                    const value = e.target.value;
                     const copy = [...timeline];
-                    copy[index].year = value;
+                    copy[index].year = e.target.value;
                     setTimeline(copy);
                   }}
                   onBlur={() =>
@@ -401,15 +420,13 @@ const saveTimelineItem = async (id: number, payload: any) => {
                     })
                   }
                 />
-
 
                 <Label>Title</Label>
                 <Input
                   value={item.title}
                   onChange={(e) => {
-                    const value = e.target.value;
                     const copy = [...timeline];
-                    copy[index].title = value;
+                    copy[index].title = e.target.value;
                     setTimeline(copy);
                   }}
                   onBlur={() =>
@@ -420,16 +437,14 @@ const saveTimelineItem = async (id: number, payload: any) => {
                     })
                   }
                 />
-
 
                 <Label>Description</Label>
                 <Textarea
                   rows={2}
                   value={item.desc}
                   onChange={(e) => {
-                    const value = e.target.value;
                     const copy = [...timeline];
-                    copy[index].desc = value;
+                    copy[index].desc = e.target.value;
                     setTimeline(copy);
                   }}
                   onBlur={() =>
@@ -440,7 +455,6 @@ const saveTimelineItem = async (id: number, payload: any) => {
                     })
                   }
                 />
-
 
                 <Button
                   variant="destructive"
@@ -454,7 +468,9 @@ const saveTimelineItem = async (id: number, payload: any) => {
                       },
                     });
 
-                    setTimeline(timeline.filter((t) => t.id !== item.id));
+                    setTimeline(
+                      timeline.filter((t) => t.id !== item.id)
+                    );
                   }}
                 >
                   Delete Milestone
@@ -462,7 +478,7 @@ const saveTimelineItem = async (id: number, payload: any) => {
               </div>
             ))}
 
-            {/* ADD BUTTON */}
+            {/* ================= ADD BUTTON ================= */}
             <Button
               onClick={async () => {
                 const token = localStorage.getItem("token");
@@ -490,6 +506,7 @@ const saveTimelineItem = async (id: number, payload: any) => {
 
           </CardContent>
         </Card>
+
 
 
         {/* ===================== TEAM SECTION ===================== */}
