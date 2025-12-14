@@ -10,19 +10,25 @@ router.get("/", async (req, res) => {
   try {
     let about = await prisma.aboutPage.findFirst();
 
-    // If not exists, create default empty page
     if (!about) {
-      about = await prisma.aboutPage.create({
-        data: {},
-      });
+      about = await prisma.aboutPage.create({ data: {} });
     }
 
-    res.json(about);
+    const timeline = await prisma.aboutTimeline.findMany({
+      where: { aboutId: about.id },
+      orderBy: { order: "asc" },
+    });
+
+    res.json({
+      ...about,
+      timeline,
+    });
   } catch (err) {
     console.error("GET /about error:", err);
     res.status(500).json({ error: "Failed to fetch About Page" });
   }
 });
+
 
 // ------------------------------------
 // PUT /api/about/:id  → Update About Page

@@ -161,6 +161,8 @@ model AboutPage {
   timeline_heading    String?
   timeline_subheading String?
 
+  timeline AboutTimeline[]
+
   @@map("AboutPage")
 }
 
@@ -214,4 +216,17 @@ model ContactMessage {
   productId   Int?
   productName String?
   is_read     Boolean  @default(false)
+}
+
+model AboutTimeline {
+  id    Int    @id @default(autoincrement())
+  year  String
+  title String
+  desc  String
+  order Int
+
+  aboutId Int
+  about   AboutPage @relation(fields: [aboutId], references: [id], onDelete: Cascade)
+
+  @@index([aboutId, order])
 }

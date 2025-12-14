@@ -63,6 +63,8 @@ app.use("/api/messages", require("./routes/contactMessages"));
 app.use("/api/contact-page", contactPageRoutes);
 app.use("/api/about", require("./routes/about"));
 app.use("/api/settings", settingsRoutes);
+app.use("/api/about-timeline", require("./routes/aboutTimeline"));
+
 
 // ----------------------------
 // ADMIN ROUTES

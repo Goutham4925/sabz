@@ -51,7 +51,6 @@ const About = () => {
                 {about.hero_badge || "Our Story"}
               </span>
 
-              {/* ⭐ Render HTML-formatted title */}
               <h1
                 className="section-title mb-6 animate-fade-up stagger-1"
                 dangerouslySetInnerHTML={{
@@ -70,7 +69,7 @@ const About = () => {
               </p>
             </div>
 
-            {/* RIGHT HERO IMAGE */}
+            {/* RIGHT */}
             <div className="relative animate-fade-up stagger-4">
               <div className="relative rounded-3xl overflow-hidden shadow-elevated">
                 {about.hero_image_url && (
@@ -103,18 +102,17 @@ const About = () => {
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-8">
               {[1, 2, 3, 4].map((i) => {
                 const iconVal = about[`value_${i}_icon`] ?? "";
-                const isImage = typeof iconVal === "string" && iconVal.startsWith("http");
+                const isImage = iconVal.startsWith("http");
                 const Icon =
-                  typeof iconVal === "string" && iconMap[iconVal]
-                    ? iconMap[iconVal]
-                    : Heart;
+                  iconMap[iconVal] || Heart;
 
                 return (
                   <div key={i} className="glass-card p-8 text-center">
                     {isImage ? (
-                      <div className="w-16 h-16 rounded-2xl overflow-hidden mx-auto mb-6">
-                        <img src={iconVal} className="w-full h-full object-cover" />
-                      </div>
+                      <img
+                        src={iconVal}
+                        className="w-16 h-16 rounded-2xl mx-auto mb-6 object-cover"
+                      />
                     ) : (
                       <div className="w-16 h-16 bg-gradient-to-br from-primary to-accent rounded-2xl flex items-center justify-center mx-auto mb-6">
                         <Icon className="w-8 h-8 text-primary-foreground" />
@@ -135,55 +133,49 @@ const About = () => {
           </div>
         </section>
 
-        {/* ================= TIMELINE SECTION ================= */}
+        {/* ================= TIMELINE SECTION (DYNAMIC) ================= */}
         <section className="py-24">
           <div className="container mx-auto px-4 md:px-8 max-w-4xl">
 
-            {/* ⭐ Timeline Heading with HTML support */}
             <div className="text-center max-w-2xl mx-auto mb-16">
               <h2
                 className="section-title mb-4"
                 dangerouslySetInnerHTML={{
-                  __html: about.timeline_heading?.trim() || "Our Journey",
+                  __html: about.timeline_heading || "Our Journey",
                 }}
               />
-
               <p className="section-subtitle">
-                {about.timeline_subheading?.trim() ||
+                {about.timeline_subheading ||
                   "From humble beginnings to international recognition"}
               </p>
             </div>
 
-            {/* Timeline Wrapper */}
             <div className="relative">
+              {/* Vertical Line */}
               <div className="absolute left-1/2 top-0 bottom-0 w-1 bg-border transform -translate-x-1/2" />
 
-              {[1, 2, 3, 4, 5].map((i, index) => {
-                const year = about[`milestone_${i}_year`];
-                const title = about[`milestone_${i}_title`];
-                const desc = about[`milestone_${i}_desc`];
-
-                if (!year && !title && !desc) return null;
-
+              {about.timeline?.map((item: any, index: number) => {
                 const isLeft = index % 2 === 0;
 
                 return (
                   <div
-                    key={i}
+                    key={item.id}
                     className={`relative flex items-start mb-16 last:mb-0 ${
                       isLeft ? "flex-row" : "flex-row-reverse"
                     }`}
                   >
                     <div className={`w-1/2 px-6 ${isLeft ? "text-right" : "text-left"}`}>
                       <span className="font-display text-4xl font-bold text-primary block">
-                        {year}
+                        {item.year}
                       </span>
 
                       <h3 className="font-display text-xl font-semibold mt-2 mb-2">
-                        {title}
+                        {item.title}
                       </h3>
 
-                      <p className="text-muted-foreground">{desc}</p>
+                      <p className="text-muted-foreground">
+                        {item.desc}
+                      </p>
                     </div>
 
                     <div className="relative flex items-center justify-center w-12">
@@ -206,8 +198,8 @@ const About = () => {
 
             <div className="grid grid-cols-1 md:grid-cols-3 gap-8 max-w-4xl mx-auto">
               {[1, 2, 3].map((i) => (
-                <div key={i} className="group text-center">
-                  <div className="relative w-48 h-48 mx-auto mb-6 rounded-full overflow-hidden shadow-card">
+                <div key={i} className="text-center">
+                  <div className="w-48 h-48 mx-auto mb-6 rounded-full overflow-hidden shadow-card">
                     {about[`team_${i}_image`] && (
                       <img
                         src={about[`team_${i}_image`]}
@@ -238,21 +230,18 @@ const About = () => {
               </p>
               <p>Years of Excellence</p>
             </div>
-
             <div>
               <p className="font-display text-5xl font-bold text-golden">
                 {about.stat_flavors}
               </p>
               <p>Unique Flavors</p>
             </div>
-
             <div>
               <p className="font-display text-5xl font-bold text-golden">
                 {about.stat_countries}
               </p>
               <p>Countries Served</p>
             </div>
-
             <div>
               <p className="font-display text-5xl font-bold text-golden">
                 {about.stat_customers}

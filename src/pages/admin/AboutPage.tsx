@@ -17,6 +17,8 @@ export default function AboutPageAdmin() {
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
   const { toast } = useToast();
+  const [timeline, setTimeline] = useState<any[]>([]);
+
 
   // -----------------------------------------
   // UNIVERSAL IMAGE UPLOADER
@@ -42,6 +44,23 @@ export default function AboutPageAdmin() {
       });
     }
   };
+
+const saveTimelineItem = async (id: number, payload: any) => {
+  const token = localStorage.getItem("token");
+
+  await fetch(`${BASE}/about-timeline/${id}`, {
+    method: "PUT",
+    headers: {
+      "Content-Type": "application/json",
+      Authorization: `Bearer ${token}`,
+    },
+    body: JSON.stringify(payload),
+  });
+};
+
+
+
+
 
   // -----------------------------------------
   // FETCH ABOUT PAGE DATA
@@ -109,6 +128,7 @@ export default function AboutPageAdmin() {
         fields.forEach((f) => (cleaned[f] = d[f] ?? ""));
 
         setData(cleaned);
+        setTimeline(d.timeline || []);
         setLoading(false);
       });
   }, []);
@@ -306,7 +326,9 @@ export default function AboutPageAdmin() {
             <CardTitle>Timeline</CardTitle>
           </CardHeader>
 
-          <CardContent className="space-y-8">
+          <CardContent className="space-y-6">
+
+            {/* Heading */}
             <Label>Timeline Heading (supports &lt;span&gt; formatting)</Label>
 
             <Textarea
@@ -316,10 +338,10 @@ export default function AboutPageAdmin() {
             />
 
             {/* Highlight Word Tool */}
-            <div className="flex items-center gap-2 mt-1">
+            <div className="flex items-center gap-2 mt-2">
               <Input
                 placeholder="Word to highlight (e.g., Journey)"
-                id="timelineHeadingWord"
+                id="timelineHighlightWord"
                 className="w-48"
               />
 
@@ -327,7 +349,7 @@ export default function AboutPageAdmin() {
                 type="button"
                 onClick={() => {
                   const field = document.getElementById(
-                    "timelineHeadingWord"
+                    "timelineHighlightWord"
                   ) as HTMLInputElement;
 
                   const word = field?.value.trim();
@@ -348,38 +370,127 @@ export default function AboutPageAdmin() {
               </Button>
             </div>
 
+
             <Label>Timeline Subheading</Label>
             <Input
               value={data.timeline_subheading}
               onChange={(e) => handleChange("timeline_subheading", e.target.value)}
             />
 
-            {[1, 2, 3, 4, 5].map((i) => (
-              <div key={i} className="border p-4 rounded-xl space-y-3">
-                <h3 className="font-semibold">Milestone {i}</h3>
+            {/* DYNAMIC MILESTONES */}
+            {timeline.map((item, index) => (
+              <div key={item.id} className="border p-4 rounded-xl space-y-3">
+                <h3 className="font-semibold">
+                  Milestone {index + 1}
+                </h3>
 
                 <Label>Year</Label>
                 <Input
-                  value={data[`milestone_${i}_year`]}
-                  onChange={(e) => handleChange(`milestone_${i}_year`, e.target.value)}
+                  value={item.year}
+                  onChange={(e) => {
+                    const value = e.target.value;
+                    const copy = [...timeline];
+                    copy[index].year = value;
+                    setTimeline(copy);
+                  }}
+                  onBlur={() =>
+                    saveTimelineItem(item.id, {
+                      year: item.year,
+                      title: item.title,
+                      desc: item.desc,
+                    })
+                  }
                 />
+
 
                 <Label>Title</Label>
                 <Input
-                  value={data[`milestone_${i}_title`]}
-                  onChange={(e) => handleChange(`milestone_${i}_title`, e.target.value)}
+                  value={item.title}
+                  onChange={(e) => {
+                    const value = e.target.value;
+                    const copy = [...timeline];
+                    copy[index].title = value;
+                    setTimeline(copy);
+                  }}
+                  onBlur={() =>
+                    saveTimelineItem(item.id, {
+                      year: item.year,
+                      title: item.title,
+                      desc: item.desc,
+                    })
+                  }
                 />
+
 
                 <Label>Description</Label>
                 <Textarea
                   rows={2}
-                  value={data[`milestone_${i}_desc`]}
-                  onChange={(e) => handleChange(`milestone_${i}_desc`, e.target.value)}
+                  value={item.desc}
+                  onChange={(e) => {
+                    const value = e.target.value;
+                    const copy = [...timeline];
+                    copy[index].desc = value;
+                    setTimeline(copy);
+                  }}
+                  onBlur={() =>
+                    saveTimelineItem(item.id, {
+                      year: item.year,
+                      title: item.title,
+                      desc: item.desc,
+                    })
+                  }
                 />
+
+
+                <Button
+                  variant="destructive"
+                  onClick={async () => {
+                    const token = localStorage.getItem("token");
+
+                    await fetch(`${BASE}/about-timeline/${item.id}`, {
+                      method: "DELETE",
+                      headers: {
+                        Authorization: `Bearer ${token}`,
+                      },
+                    });
+
+                    setTimeline(timeline.filter((t) => t.id !== item.id));
+                  }}
+                >
+                  Delete Milestone
+                </Button>
               </div>
             ))}
+
+            {/* ADD BUTTON */}
+            <Button
+              onClick={async () => {
+                const token = localStorage.getItem("token");
+
+                const res = await fetch(`${BASE}/about-timeline`, {
+                  method: "POST",
+                  headers: {
+                    "Content-Type": "application/json",
+                    Authorization: `Bearer ${token}`,
+                  },
+                  body: JSON.stringify({
+                    aboutId: data.id,
+                    year: "",
+                    title: "",
+                    desc: "",
+                  }),
+                });
+
+                const newItem = await res.json();
+                setTimeline([...timeline, newItem]);
+              }}
+            >
+              + Add Milestone
+            </Button>
+
           </CardContent>
         </Card>
+
 
         {/* ===================== TEAM SECTION ===================== */}
         <Card className="mb-8">
