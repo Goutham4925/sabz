@@ -211,26 +211,41 @@ export function Footer() {
             </div>
 
             {/* Contact */}
-            {contact && (
-              <ul className="space-y-3">
-                <li className="flex gap-2">
-                  <RenderIcon name={contact.card_1_icon} />
-                  <span>{contact.card_1_line1}</span>
+            <ul className="space-y-3">
+
+              {/* 📍 Location (from Settings) */}
+              {settings?.footer_subtext && (
+                <li className="flex gap-2 items-start">
+                  <MapPin className="mt-1" />
+                  <span
+                    dangerouslySetInnerHTML={{
+                      __html: settings.footer_subtext,
+                    }}
+                  />
                 </li>
+              )}
+
+              {/* 📞 Phone (from Contact Page) */}
+              {contact?.card_2_line1 && (
                 <li className="flex gap-2">
                   <Phone />
                   <a href={`tel:${contact.card_2_line1}`}>
                     {contact.card_2_line1}
                   </a>
                 </li>
+              )}
+
+              {/* ✉️ Email (from Contact Page) */}
+              {contact?.card_3_line1 && (
                 <li className="flex gap-2">
                   <Mail />
                   <a href={`mailto:${contact.card_3_line1}`}>
                     {contact.card_3_line1}
                   </a>
                 </li>
-              </ul>
-            )}
+              )}
+
+            </ul>
           </div>
         </div>
 

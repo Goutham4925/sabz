@@ -539,6 +539,8 @@ export default function Settings() {
             </CardContent>
           </Card>
 
+          {/* ------------------------ FOOTER SECTION ------------------------ */}
+
           <Card>
             <CardHeader>
               <CardTitle>Footer Section</CardTitle>
@@ -581,6 +583,20 @@ export default function Settings() {
                     setSettings({ ...settings, social_twitter: e.target.value })
                   }
                 />
+                <Label>Footer Location / Address (HTML allowed)</Label>
+                <Textarea
+                  rows={3}
+                  placeholder=" 123 Baker Street, Bangalore, India"
+                  value={settings.footer_subtext || ""}
+                  onChange={(e) =>
+                    setSettings({
+                      ...settings,
+                      footer_subtext: e.target.value,
+                    })
+                  }
+                />
+
+
               </div>
             </CardContent>
           </Card>
