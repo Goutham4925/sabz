@@ -10,6 +10,7 @@ import {
   Twitter,
   X,
 } from "lucide-react";
+import { SiFacebook, SiInstagram, SiX } from "react-icons/si";
 import { API_URL } from "@/config/api";
 
 const quickLinks = [
@@ -162,17 +163,17 @@ export function Footer() {
               <div className="flex gap-4">
                 {settings?.social_facebook && (
                   <a href={settings.social_facebook} target="_blank">
-                    <Facebook />
+                    <SiFacebook />
                   </a>
                 )}
                 {settings?.social_instagram && (
                   <a href={settings.social_instagram} target="_blank">
-                    <Instagram />
+                    <SiInstagram />
                   </a>
                 )}
                 {settings?.social_twitter && (
                   <a href={settings.social_twitter} target="_blank">
-                    <Twitter />
+                    <SiX />
                   </a>
                 )}
               </div>

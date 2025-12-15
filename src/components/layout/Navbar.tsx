@@ -112,7 +112,7 @@ export function Navbar() {
               </Link>
             ))}
 
-            {/* 🚀 FIX: Order Now Button with Link */}
+            
             <Link to="/products">
               <Button
                 className="bg-gradient-to-r from-golden to-accent text-chocolate px-4 py-2 font-semibold hover:opacity-90 transition"

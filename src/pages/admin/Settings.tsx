@@ -573,9 +573,9 @@ export default function Settings() {
                   }
                 />
 
-                <Label>Twitter / X URL</Label>
+                <Label> X URL</Label>
                 <Input
-                  placeholder="https://twitter.com/yourpage"
+                  placeholder="https://x.com/yourpage"
                   value={settings.social_twitter || ""}
                   onChange={(e) =>
                     setSettings({ ...settings, social_twitter: e.target.value })
