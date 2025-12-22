@@ -6,14 +6,16 @@ const prisma = new PrismaClient();
 async function main() {
   console.log("Seeding database...");
 
-  // 1) ADMIN USER (already working)
+  // ------------------------------------------------------------------
+  // 1) ADMIN USER
+  // ------------------------------------------------------------------
   const existingAdmin = await prisma.user.findUnique({
     where: { email: "admin@example.com" },
   });
 
   if (!existingAdmin) {
     const hashed = await bcrypt.hash("admin123", 10);
-    const admin = await prisma.user.create({
+    await prisma.user.create({
       data: {
         email: "admin@example.com",
         password: hashed,
@@ -26,15 +28,16 @@ async function main() {
     console.log("Admin already exists, skipping creation.");
   }
 
+  // ------------------------------------------------------------------
   // 2) DEFAULT SITE SETTINGS
+  // ------------------------------------------------------------------
   const existingSettings = await prisma.siteSetting.findFirst();
 
   if (!existingSettings) {
     await prisma.siteSetting.create({
       data: {
-        // HERO
-        hero_title:
-          "Crafted with Tradition. Baked with Love.",
+        // ---------------- HERO ----------------
+        hero_title: "Crafted with Tradition. Baked with Love.",
         hero_subtitle:
           "Experience the golden perfection of handcrafted biscuits, made with the finest ingredients and recipes passed down through generations.",
         hero_badge_text: "Premium Artisan Quality Since 1980",
@@ -43,14 +46,15 @@ async function main() {
         hero_customers_label: "50K+",
         hero_flavors_label: "25+",
 
-        // ABOUT
+        // ---------------- ABOUT ----------------
         about_title: "A Legacy of Delicious Moments",
         about_paragraph1:
-          "For over four decades, Golden Crust has been crafting the finest biscuits using time-honored recipes and the highest quality ingredients. What started as a small family bakery has grown into a beloved brand, but our commitment to excellence remains unchanged.",
+          "For over four decades, Golden Crust has been crafting the finest biscuits using time-honored recipes and the highest quality ingredients.",
         about_paragraph2:
-          "Every biscuit we create is a celebration of tradition, craftsmanship, and the simple joy of sharing something delicious with the ones you love.",
+          "Every biscuit we create is a celebration of tradition, craftsmanship, and the simple joy of sharing something delicious.",
         about_image_url:
           "https://images.unsplash.com/photo-1509440159596-0249088772ff?w=600&h=700&fit=crop",
+
         about_highlight_1_title: "Since 1980",
         about_highlight_1_desc: "Over 40 years of baking excellence",
         about_highlight_2_title: "Made with Love",
@@ -60,20 +64,20 @@ async function main() {
         about_highlight_4_title: "Award Winning",
         about_highlight_4_desc: "Recognized for quality worldwide",
 
-        // PRODUCTS SECTION
+        // ---------------- PRODUCTS ----------------
         products_title: "Our Signature Collection",
         products_subtitle: "Discover our most loved biscuits",
 
-        // CTA SECTION (adjust later if you like)
-        cta_badge: "Perfect for Gifting",
-        cta_title: "Ready to Experience <span class='text-golden'>Golden Perfection</span>?",
-        cta_subtitle: "Order premium biscuits today and discover timeless flavors.",
-        cta_primary_text: "Shop Now",
-        cta_primary_link: "/products",
-        cta_secondary_text: "Corporate Orders",
-        cta_secondary_link: "/contact",
+        // ---------------- CTA ----------------
+        cta_badge_text: "Perfect for Gifting",
+        cta_title:
+          "Ready to Experience <span class='text-golden'>Golden Perfection</span>?",
+        cta_subtitle:
+          "Order premium biscuits today and discover timeless flavors.",
+        cta_primary_label: "Shop Now",
+        cta_primary_href: "/products",
 
-        // FOOTER / NAVBAR
+        // ---------------- FOOTER / NAVBAR ----------------
         footer_text: "Golden Crust — All rights reserved.",
         footer_subtext: "Crafting premium biscuits since 1980.",
         navbar_logo: "Golden Crust",
