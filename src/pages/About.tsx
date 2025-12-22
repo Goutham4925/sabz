@@ -83,7 +83,11 @@ const About = () => {
               <div className="absolute -bottom-6 -left-6 glass-card p-6 shadow-elevated golden-glow">
                 <Cookie className="w-8 h-8 text-primary mb-2" />
                 <p className="font-display text-lg font-semibold">
-                  Est. {about.stat_years || "1980"}
+                  {(() => {
+                    const establishedYear = Number(about?.stat_years) || 1980;
+                    const currentYear = new Date().getFullYear();
+                    return `Est. at ${currentYear - establishedYear}`;
+                  })()}
                 </p>
               </div>
             </div>
