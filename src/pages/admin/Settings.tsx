@@ -71,41 +71,62 @@ export default function Settings() {
   // -------------------------------------
   // HIGHLIGHT TOOL (Reusable Everywhere)
   // -------------------------------------
-  const highlightTool = (fieldKey: string) => (
-    <div className="mt-2">
-      <div className="flex items-center gap-2">
-        <Input
-          placeholder="Word to highlight"
-          id={`highlightWordInput_${fieldKey}`}
-          className="w-48"
-        />
+const highlightTool = (fieldKey: string) => (
+  <div className="mt-2 space-y-2">
+    <div className="flex items-center gap-2">
+      <Input
+        placeholder="Word to highlight"
+        id={`highlightWordInput_${fieldKey}`}
+        className="w-44"
+      />
 
-        <Button
-          type="button"
-          onClick={() => {
-            const input = document.getElementById(
-              `highlightWordInput_${fieldKey}`
-            ) as HTMLInputElement;
+      <select
+        id={`highlightType_${fieldKey}`}
+        className="border rounded-md px-2 py-1 text-sm"
+        defaultValue="normal"
+      >
+        <option value="normal">Normal Gradient</option>
+        <option value="light">Light Gradient</option>
+      </select>
 
-            const word = input?.value.trim();
-            if (!word) return;
+      <Button
+        type="button"
+        onClick={() => {
+          const input = document.getElementById(
+            `highlightWordInput_${fieldKey}`
+          ) as HTMLInputElement;
 
-            const colored = `<span class='text-[#e4a95c]'>${word}</span>`;
+          const typeSelect = document.getElementById(
+            `highlightType_${fieldKey}`
+          ) as HTMLSelectElement;
 
-            setSettings((prev: any) => ({
-              ...prev,
-              [fieldKey]: prev[fieldKey]?.replace(word, colored) ?? "",
-            }));
+          const word = input?.value.trim();
+          if (!word) return;
 
-            input.value = "";
-          }}
-        >
-          Highlight
-        </Button>
-      </div>
+          const gradientClass =
+            typeSelect?.value === "light"
+              ? "text-gradient-light"
+              : "text-gradient";
 
+          const colored = `<span class="${gradientClass}">${word}</span>`;
+
+          setSettings((prev: any) => ({
+            ...prev,
+            [fieldKey]:
+              prev[fieldKey]?.replace(
+                new RegExp(`\\b${word}\\b`, "g"),
+                colored
+              ) ?? "",
+          }));
+
+          input.value = "";
+        }}
+      >
+        Highlight
+      </Button>
     </div>
-  );
+  </div>
+);
 
   // -------------------------------------
   // IMAGE UPLOAD HANDLER

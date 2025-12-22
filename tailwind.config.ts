@@ -8,6 +8,7 @@ export default {
     "./app/**/*.{ts,tsx}",
     "./src/**/*.{ts,tsx}",
   ],
+
   theme: {
     container: {
       center: true,
@@ -24,7 +25,7 @@ export default {
       },
 
       /* ---------------------------------
-         BRAND COLOR SYSTEM
+         🌶️ KERALA SPICE COLOR SYSTEM
       ---------------------------------- */
       colors: {
         border: "hsl(var(--border))",
@@ -33,29 +34,31 @@ export default {
         background: "hsl(var(--background))",
         foreground: "hsl(var(--foreground))",
 
-        /* PRIMARY BRAND COLORS */
+        /* PRIMARY – CHILLI RED */
         primary: {
-          DEFAULT: "#36a3ce",              // LIGHT BLUE
+          DEFAULT: "#b91c1c",          // deep chilli red
           foreground: "#ffffff",
         },
+
+        /* SECONDARY – TURMERIC GOLD */
         secondary: {
-          DEFAULT: "#e4a95c",              // GOLD ACCENT
+          DEFAULT: "#f59e0b",          // turmeric
           foreground: "#1a1a1a",
         },
 
         destructive: {
-          DEFAULT: "hsl(var(--destructive))",
-          foreground: "hsl(var(--destructive-foreground))",
+          DEFAULT: "#dc2626",
+          foreground: "#ffffff",
         },
 
         muted: {
-          DEFAULT: "hsl(var(--muted))",
-          foreground: "hsl(var(--muted-foreground))",
+          DEFAULT: "#f3e8e1",
+          foreground: "#6b4b3e",
         },
 
         accent: {
-          DEFAULT: "hsl(var(--accent))",
-          foreground: "hsl(var(--accent-foreground))",
+          DEFAULT: "#f59e0b",
+          foreground: "#1a1a1a",
         },
 
         popover: {
@@ -68,36 +71,36 @@ export default {
           foreground: "hsl(var(--card-foreground))",
         },
 
-        /* CTA + FOOTER BACKGROUND */
+        /* FOOTER / DARK SECTIONS – PEPPER BROWN */
         chocolate: {
-          DEFAULT: "#0b6b89",              // DARK BLUE
-          light: "#36a3ce",                // Lighter blue for UI
+          DEFAULT: "#7c2d12",
+          light: "#b45309",
         },
 
-        /* GOLD TEXT / HIGHLIGHTS */
+        /* GOLDEN HIGHLIGHTS */
         golden: {
-          DEFAULT: "#e4a95c",
-          glow: "#f1c67c",
+          DEFAULT: "#f59e0b",
+          glow: "#fde68a",
         },
 
-        /* LIGHT NEUTRAL TEXT */
+        /* LIGHT NEUTRALS */
         cream: {
-          DEFAULT: "#f7efe6",
-          dark: "#e7d9c8",
+          DEFAULT: "#fff7ed",
+          dark: "#fdebd3",
         },
 
-        "warm-white": "#fbf8f3",
+        "warm-white": "#fffbf5",
 
-        /* SIDEBAR COLORS */
+        /* SIDEBAR */
         sidebar: {
-          DEFAULT: "#0b6b89",
+          DEFAULT: "#7c2d12",
           foreground: "#ffffff",
-          primary: "#36a3ce",
+          primary: "#b91c1c",
           "primary-foreground": "#ffffff",
-          accent: "#e4a95c",
+          accent: "#f59e0b",
           "accent-foreground": "#1a1a1a",
-          border: "#0b6b89",
-          ring: "#36a3ce",
+          border: "#7c2d12",
+          ring: "#b91c1c",
         },
       },
 
@@ -111,22 +114,27 @@ export default {
       },
 
       /* ---------------------------------
-         Shadows
+         Shadows (Spice Glow)
       ---------------------------------- */
       boxShadow: {
         soft: "0 2px 8px rgba(0,0,0,0.08)",
-        card: "0 4px 14px rgba(0,0,0,0.12)",
-        elevated: "0 8px 18px rgba(0,0,0,0.15)",
-        glow: "0 0 20px rgba(228,169,92,0.4)", // gold glow
+        card: "0 6px 20px rgba(185,28,28,0.18)",
+        elevated: "0 12px 30px rgba(185,28,28,0.25)",
+        glow: "0 0 30px rgba(245,158,11,0.45)",
       },
 
       /* ---------------------------------
-         Background Gradients
+         Background Gradients (KEY FIX)
       ---------------------------------- */
       backgroundImage: {
-        "gradient-hero": "linear-gradient(135deg, #36a3ce, #0b6b89)",
-        "gradient-gold": "linear-gradient(135deg, #e4a95c, #f1c67c)",
-        "gradient-warm": "linear-gradient(135deg, #f7efe6, #e7d9c8)",
+        "gradient-hero":
+          "linear-gradient(135deg, #7c2d12 0%, #991b1b 45%, #b45309 100%)",
+
+        "gradient-gold":
+          "linear-gradient(135deg, #b91c1c 0%, #f59e0b 100%)",
+
+        "gradient-warm":
+          "linear-gradient(180deg, #fffbf5 0%, #fdebd3 100%)",
       },
 
       /* ---------------------------------

@@ -54,6 +54,71 @@ export default function ContactPageAdmin() {
     }
   };
 
+// -------------------------------------
+// HIGHLIGHT TOOL (Reusable)
+// -------------------------------------
+const HighlightTool = ({
+  fieldKey,
+  placeholder,
+}: {
+  fieldKey: string;
+  placeholder: string;
+}) => (
+  <div className="flex items-center gap-2 mt-2">
+    <Input
+      placeholder={placeholder}
+      id={`highlightWord_${fieldKey}`}
+      className="w-48"
+    />
+
+    <select
+      id={`highlightType_${fieldKey}`}
+      className="border rounded-md px-2 py-1 text-sm"
+      defaultValue="normal"
+    >
+      <option value="normal">Normal</option>
+      <option value="light">Light</option>
+    </select>
+
+    <Button
+      type="button"
+      onClick={() => {
+        const input = document.getElementById(
+          `highlightWord_${fieldKey}`
+        ) as HTMLInputElement;
+
+        const typeSelect = document.getElementById(
+          `highlightType_${fieldKey}`
+        ) as HTMLSelectElement;
+
+        const word = input?.value.trim();
+        if (!word) return;
+
+        const gradientClass =
+          typeSelect.value === "light"
+            ? "text-gradient-light"
+            : "text-gradient";
+
+        const colored = `<span class="${gradientClass}">${word}</span>`;
+
+        setData((prev: any) => ({
+          ...prev,
+          [fieldKey]:
+            prev[fieldKey]?.replace(
+              new RegExp(`\\b${word}\\b`, "g"),
+              colored
+            ) ?? "",
+        }));
+
+        input.value = "";
+      }}
+    >
+      Highlight
+    </Button>
+  </div>
+);
+
+
   // -----------------------------
   // FETCH CONTACT PAGE
   // -----------------------------
@@ -181,36 +246,11 @@ export default function ContactPageAdmin() {
                 />
 
                 {/* Highlight Word Helper */}
-                <div className="flex items-center gap-2 mt-2">
-                  <Input
-                    placeholder="Word to highlight (e.g., Contact)"
-                    id="highlightHeroWord"
-                    className="w-48"
-                  />
+                <HighlightTool
+                  fieldKey="hero_title"
+                  placeholder="Word to highlight (e.g., Contact)"
+                />
 
-                  <Button
-                    type="button"
-                    onClick={() => {
-                      const input = document.getElementById(
-                        "highlightHeroWord"
-                      ) as HTMLInputElement;
-
-                      const word = input?.value.trim();
-                      if (!word) return;
-
-                      const spanTag = `<span class='text-[#e4a95c]'>${word}</span>`;
-
-                      setData((prev: any) => ({
-                        ...prev,
-                        hero_title: prev.hero_title?.replace(word, spanTag) ?? ""
-                      }));
-
-                      input.value = "";
-                    }}
-                  >
-                    Highlight Word
-                  </Button>
-                </div>
 
               </div>
 

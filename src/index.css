@@ -17,7 +17,7 @@
     --popover-foreground: 25 30% 15%;
 
     /* Rich amber gold - primary brand color */
-    --primary: 38 75% 45%;
+    --primary: 6 78% 46%;
     --primary-foreground: 40 33% 98%;
 
     /* Warm cream secondary */
@@ -45,22 +45,38 @@
     /* Custom brand colors */
     --chocolate: 25 45% 25%;
     --chocolate-light: 25 35% 35%;
-    --golden: 43 90% 50%;
-    --golden-glow: 43 100% 70%;
+    --golden: 6 78% 46%;
+    --golden-glow: 8 90% 60%;
     --cream: 40 40% 95%;
     --cream-dark: 38 30% 88%;
     --warm-white: 40 50% 99%;
 
     /* Gradients */
-    --gradient-hero: linear-gradient(135deg, hsl(38 30% 92%) 0%, hsl(40 40% 95%) 50%, hsl(43 35% 90%) 100%);
-    --gradient-gold: linear-gradient(135deg, hsl(38 75% 45%) 0%, hsl(43 85% 55%) 100%);
-    --gradient-warm: linear-gradient(180deg, hsl(40 50% 99%) 0%, hsl(38 30% 92%) 100%);
+    --gradient-hero: linear-gradient(
+      135deg,
+      hsl(18 40% 97%) 0%,     /* coconut parchment */
+      hsl(12 45% 94%) 50%,   /* warm spice blush */
+      hsl(20 35% 92%) 100%   /* palm sugar beige */
+    );
+
+    --gradient-gold: linear-gradient(
+      135deg,
+      hsl(6 78% 46%) 0%,     /* chilli red */
+      hsl(36 90% 55%) 100%  /* turmeric gold */
+    );
+
+    --gradient-warm: linear-gradient(
+      180deg,
+      hsl(18 45% 99%) 0%,    /* warm white */
+      hsl(12 45% 94%) 100%  /* soft spice cream */
+    );
+
 
     /* Shadows */
-    --shadow-soft: 0 4px 20px -4px hsl(25 30% 15% / 0.08);
-    --shadow-card: 0 8px 30px -8px hsl(25 30% 15% / 0.12);
-    --shadow-elevated: 0 20px 50px -15px hsl(25 30% 15% / 0.15);
-    --shadow-glow: 0 0 40px hsl(43 90% 50% / 0.3);
+    --shadow-soft: 0 4px 20px -4px hsl(15 35% 18% / 0.08);
+    --shadow-card: 0 8px 30px -8px hsl(6 78% 46% / 0.15);
+    --shadow-elevated: 0 20px 50px -15px hsl(6 78% 46% / 0.25);
+    --shadow-glow: 0 0 40px hsl(6 78% 46% / 0.35);
 
     --sidebar-background: 40 33% 98%;
     --sidebar-foreground: 25 30% 15%;
@@ -82,7 +98,7 @@
     --popover: 25 22% 14%;
     --popover-foreground: 40 30% 95%;
 
-    --primary: 43 85% 55%;
+    --primary: 8 85% 55%;
     --primary-foreground: 25 30% 10%;
 
     --secondary: 25 20% 18%;
@@ -91,7 +107,7 @@
     --muted: 25 18% 20%;
     --muted-foreground: 35 15% 60%;
 
-    --accent: 38 75% 45%;
+    --accent: 36 90% 55%;
     --accent-foreground: 40 30% 95%;
 
     --destructive: 0 55% 50%;
@@ -103,15 +119,15 @@
 
     --chocolate: 35 30% 75%;
     --chocolate-light: 35 25% 60%;
-    --golden: 43 90% 50%;
-    --golden-glow: 43 100% 60%;
+    --golden: 6 78% 46%;
+    --golden-glow: 8 90% 60%;
     --cream: 25 20% 18%;
     --cream-dark: 25 18% 15%;
     --warm-white: 25 22% 14%;
 
     --sidebar-background: 25 25% 10%;
     --sidebar-foreground: 40 30% 95%;
-    --sidebar-primary: 43 85% 55%;
+    --primary: 6 78% 46%;
     --sidebar-primary-foreground: 25 30% 10%;
     --sidebar-accent: 25 20% 18%;
     --sidebar-accent-foreground: 40 30% 95%;
@@ -217,6 +233,20 @@
   .stagger-3 { animation-delay: 0.3s; }
   .stagger-4 { animation-delay: 0.4s; }
   .stagger-5 { animation-delay: 0.5s; }
+
+  .text-gradient-light {
+    background: linear-gradient(
+      90deg,
+      #ffb3b3,
+      #ffcc99,
+      #ffe0b3
+    );
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
+    color: transparent;
+  }
+
 }
 
 @keyframes fadeUp {

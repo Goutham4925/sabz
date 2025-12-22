@@ -59,6 +59,70 @@ const saveTimelineItem = async (id: number, payload: any) => {
 };
 
 
+  // -------------------------------------
+  // HIGHLIGHT TOOL (Reusable Everywhere)
+  // -------------------------------------
+
+  const HighlightTool = ({
+    fieldKey,
+    placeholder,
+  }: {
+    fieldKey: string;
+    placeholder: string;
+  }) => (
+    <div className="flex items-center gap-2 mt-2">
+      <Input
+        placeholder={placeholder}
+        id={`highlightWord_${fieldKey}`}
+        className="w-48"
+      />
+
+      <select
+        id={`highlightType_${fieldKey}`}
+        className="border rounded-md px-2 py-1 text-sm"
+        defaultValue="normal"
+      >
+        <option value="normal">Normal</option>
+        <option value="light">Light</option>
+      </select>
+
+      <Button
+        type="button"
+        onClick={() => {
+          const input = document.getElementById(
+            `highlightWord_${fieldKey}`
+          ) as HTMLInputElement;
+
+          const typeSelect = document.getElementById(
+            `highlightType_${fieldKey}`
+          ) as HTMLSelectElement;
+
+          const word = input?.value.trim();
+          if (!word) return;
+
+          const gradientClass =
+            typeSelect.value === "light"
+              ? "text-gradient-light"
+              : "text-gradient";
+
+          const colored = `<span class="${gradientClass}">${word}</span>`;
+
+          setData((prev: any) => ({
+            ...prev,
+            [fieldKey]:
+              prev[fieldKey]?.replace(
+                new RegExp(`\\b${word}\\b`, "g"),
+                colored
+              ) ?? "",
+          }));
+
+          input.value = "";
+        }}
+      >
+        Highlight
+      </Button>
+    </div>
+  );
 
 
 
@@ -200,33 +264,11 @@ const saveTimelineItem = async (id: number, payload: any) => {
               onChange={(e) => handleChange("hero_title", e.target.value)}
             />
 
-            <div className="flex items-center gap-2 mt-2">
-              <Input
-                placeholder="Word to highlight (e.g., Tradition)"
-                id="heroHighlightWord"
-                className="w-48"
-              />
+            <HighlightTool
+              fieldKey="hero_title"
+              placeholder="Word to highlight (e.g., Tradition)"
+            />
 
-              <Button
-                type="button"
-                onClick={() => {
-                  const field = document.getElementById("heroHighlightWord") as HTMLInputElement;
-                  const word = field?.value.trim();
-                  if (!word) return;
-
-                  const colored = `<span class='text-[#e4a95c]'>${word}</span>`;
-
-                  setData((prev: any) => ({
-                    ...prev,
-                    hero_title: prev.hero_title?.replace(word, colored) ?? "",
-                  }));
-
-                  field.value = "";
-                }}
-              >
-                Highlight Word
-              </Button>
-            </div>
 
             <Label>Paragraph 1</Label>
             <Textarea
@@ -353,37 +395,11 @@ const saveTimelineItem = async (id: number, payload: any) => {
             />
 
             {/* Highlight Word Tool */}
-            <div className="flex items-center gap-2 mt-2">
-              <Input
-                placeholder="Word to highlight (e.g., Journey)"
-                id="timelineHighlightWord"
-                className="w-48"
-              />
+            <HighlightTool
+              fieldKey="timeline_heading"
+              placeholder="Word to highlight (e.g., Journey)"
+            />
 
-              <Button
-                type="button"
-                onClick={() => {
-                  const field = document.getElementById(
-                    "timelineHighlightWord"
-                  ) as HTMLInputElement;
-
-                  const word = field?.value.trim();
-                  if (!word) return;
-
-                  const colored = `<span class='text-[#e4a95c]'>${word}</span>`;
-
-                  setData((prev: any) => ({
-                    ...prev,
-                    timeline_heading:
-                      prev.timeline_heading?.replace(word, colored) ?? "",
-                  }));
-
-                  field.value = "";
-                }}
-              >
-                Highlight Word
-              </Button>
-            </div>
 
             {/* ================= SUBHEADING ================= */}
             <Label>Timeline Subheading</Label>

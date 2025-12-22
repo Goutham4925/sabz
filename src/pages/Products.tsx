@@ -1,5 +1,6 @@
 import { useEffect, useState } from "react";
 import { useSearchParams } from "react-router-dom";
+import DOMPurify from "dompurify";
 
 import { Navbar } from "@/components/layout/Navbar";
 import { Footer } from "@/components/layout/Footer";
@@ -25,6 +26,8 @@ const Products = () => {
   const [categories, setCategories] = useState<Category[]>([
     { id: "all", name: "All" },
   ]);
+  const [settings, setSettings] = useState<any>(null);
+
   const [showPrices, setShowPrices] = useState(true);
   const [loading, setLoading] = useState(true);
 
@@ -34,26 +37,38 @@ const Products = () => {
   const [searchParams, setSearchParams] = useSearchParams();
   const activeCategoryId = searchParams.get("categoryId") || "all";
 
-  // ------------------------------------------------
-  // FETCH PRODUCTS + CATEGORIES
-  // ------------------------------------------------
+  // -------------------------------------------
+  // SANITIZE CMS HTML
+  // -------------------------------------------
+  const sanitize = (html: string | null | undefined) =>
+    DOMPurify.sanitize(html || "", {
+      ALLOWED_TAGS: ["span", "strong", "b", "em", "i"],
+      ALLOWED_ATTR: ["class"],
+    });
+
+  // -------------------------------------------
+  // FETCH PRODUCTS + CATEGORIES + SETTINGS
+  // -------------------------------------------
   useEffect(() => {
     const load = async () => {
       setGlobalLoading(true);
 
       try {
-        const [prodRes, catRes] = await Promise.all([
+        const [prodRes, catRes, settingsRes] = await Promise.all([
           fetch(`${API_URL}/products`),
           fetch(`${API_URL}/categories`),
+          fetch(`${API_URL}/settings`),
         ]);
 
         const productsData = await prodRes.json();
         const categoryData = await catRes.json();
+        const settingsData = await settingsRes.json();
 
         setProducts(productsData);
         setCategories([{ id: "all", name: "All" }, ...categoryData]);
+        setSettings(settingsData);
       } catch (err) {
-        console.error("Failed to load products/categories:", err);
+        console.error("Failed to load products page:", err);
       } finally {
         setLoading(false);
         setGlobalLoading(false);
@@ -63,9 +78,9 @@ const Products = () => {
     load();
   }, []);
 
-  // ------------------------------------------------
-  // FILTER PRODUCTS BASED ON URL CATEGORY
-  // ------------------------------------------------
+  // -------------------------------------------
+  // FILTER PRODUCTS
+  // -------------------------------------------
   const filteredProducts =
     activeCategoryId === "all"
       ? products
@@ -73,9 +88,9 @@ const Products = () => {
           (p) => String(p.categoryId) === String(activeCategoryId)
         );
 
-  // ------------------------------------------------
-  // HANDLE CATEGORY CLICK (SYNC WITH URL)
-  // ------------------------------------------------
+  // -------------------------------------------
+  // HANDLE CATEGORY CLICK
+  // -------------------------------------------
   const handleCategoryClick = (id: string | number) => {
     if (id === "all") {
       setSearchParams({});
@@ -93,22 +108,32 @@ const Products = () => {
       <main className="pt-32 pb-24">
         <div className="container mx-auto px-4 md:px-8">
 
-          {/* HEADER */}
+          {/* ================= HEADER (CMS DRIVEN) ================= */}
           <div className="text-center max-w-3xl mx-auto mb-16">
             <span className="badge-premium mb-4 inline-block">
-              Our Collection
+              {settings?.products_badge || "Our Collection"}
             </span>
 
-            <h1 className="section-title mb-4">
-              Premium <span className="text-gradient">Biscuits</span>
-            </h1>
+            <h1
+              className="section-title mb-4"
+              dangerouslySetInnerHTML={{
+                __html:
+                  sanitize(settings?.products_title) ||
+                  "Premium <span class='text-gradient'>Products</span>",
+              }}
+            />
 
-            <p className="section-subtitle">
-              Explore our complete range of handcrafted artisan biscuits.
-            </p>
+            <p
+              className="section-subtitle"
+              dangerouslySetInnerHTML={{
+                __html:
+                  sanitize(settings?.products_subtitle) ||
+                  "Explore our complete range of handcrafted products.",
+              }}
+            />
           </div>
 
-          {/* FILTER BUTTONS */}
+          {/* ================= FILTERS ================= */}
           <div className="flex flex-col md:flex-row items-center justify-between gap-6 mb-12">
             <div className="flex flex-wrap items-center gap-2">
               {categories.map((c) => {
@@ -139,7 +164,7 @@ const Products = () => {
             </label>
           </div>
 
-          {/* DESKTOP GRID */}
+          {/* ================= DESKTOP GRID ================= */}
           <div className="hidden md:grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-8">
             {filteredProducts.map((product, idx) => (
               <div
@@ -152,7 +177,7 @@ const Products = () => {
             ))}
           </div>
 
-          {/* MOBILE SWIPER */}
+          {/* ================= MOBILE SWIPER ================= */}
           <div className="md:hidden mb-12">
             <Swiper
               modules={[Pagination]}
@@ -168,7 +193,7 @@ const Products = () => {
             </Swiper>
           </div>
 
-          {/* EMPTY STATE */}
+          {/* ================= EMPTY STATE ================= */}
           {filteredProducts.length === 0 && (
             <div className="text-center py-16">
               <p className="text-muted-foreground text-lg">

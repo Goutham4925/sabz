@@ -38,7 +38,7 @@ export function HeroSection() {
   return (
     <section className="relative min-h-screen flex items-center justify-center overflow-hidden">
       {/* Background */}
-      <div className="absolute inset-0 bg-gradient-hero" />
+      
 
       {/* Decorative blobs */}
       <div className="absolute top-20 left-10 w-72 h-72 bg-primary/10 rounded-full blur-3xl animate-float" />
@@ -46,15 +46,17 @@ export function HeroSection() {
       <div className="absolute top-1/4 right-1/4 w-16 h-16 bg-gradient-to-br from-primary/20 to-accent/20 rounded-full blur-sm animate-float" style={{ animationDelay: "1s" }} />
       <div className="absolute bottom-1/3 left-1/4 w-12 h-12 bg-gradient-to-br from-accent/20 to-primary/20 rounded-full blur-sm animate-float" style={{ animationDelay: "3s" }} />
 
-      {/* Hero Image (DYNAMIC) */}
+      {/* Hero Image */}
       {settings.hero_image_url && (
         <img
           src={settings.hero_image_url}
           alt="Hero Background"
-          className="absolute inset-0 w-full h-full object-cover opacity-40"
-          onError={(e) => (e.currentTarget.src = "/placeholder.svg")}
+          className="absolute inset-0 w-full h-full object-cover"
         />
       )}
+
+      {/* RED / SPICE COLOR OVERLAY */}
+      <div className="absolute inset-0 bg-gradient-hero opacity-85" />
 
       {/* Content */}
       <div className="container mx-auto px-4 md:px-8 relative z-10">
