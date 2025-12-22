@@ -18,7 +18,7 @@ const PORT = process.env.PORT || 5000;
 const allowedOrigins = [
   "http://localhost:8080",
   "http://localhost:5173",
-  "https://gobbly-treat-1.onrender.com", // ✅ FRONTEND
+  "https://sabz-kitchen-backend.onrender.com", // ✅ FRONTEND
 ];
 
 app.use(
