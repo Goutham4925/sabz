@@ -1,6 +1,8 @@
 import { useEffect, useState } from "react";
 import AdminLayout from "@/components/admin/AdminLayout";
 import ProtectedRoute from "@/components/admin/ProtectedRoute";
+import UniversalLoader from "@/components/ui/UniversalLoader";
+
 import {
   Card,
   CardContent,
@@ -21,11 +23,12 @@ import {
   Server,
   Database,
 } from "lucide-react";
+
 import { API_URL } from "@/config/api";
 
-// const API_URL = "http://localhost:5000/api";
-
 export default function Dashboard() {
+  const [loading, setLoading] = useState(true);
+
   const [stats, setStats] = useState({
     totalProducts: 0,
     featuredProducts: 0,
@@ -51,29 +54,34 @@ export default function Dashboard() {
     const token = localStorage.getItem("token");
 
     try {
-      // Fetch Products
-      const productRes = await fetch(`${API_URL}/products`);
-      const products = await productRes.json();
+      setLoading(true);
+
+      // 🚀 PARALLEL FETCH (FAST & CLEAN)
+      const [productRes, userRes, msgRes] = await Promise.all([
+        fetch(`${API_URL}/products`),
+        fetch(`${API_URL}/admin/users`, {
+          headers: { Authorization: `Bearer ${token}` },
+        }),
+        fetch(`${API_URL}/messages`),
+      ]);
+
+      const [products, users, messages] = await Promise.all([
+        productRes.json(),
+        userRes.json(),
+        msgRes.json(),
+      ]);
 
       const categories = new Set(products.map((p: any) => p.category));
+
       const avgPrice =
-        products.reduce((sum: number, p: any) => sum + Number(p.price || 0), 0) /
-        (products.length || 1);
+        products.reduce(
+          (sum: number, p: any) => sum + Number(p.price || 0),
+          0
+        ) / (products.length || 1);
 
-      // Fetch Users
-      const userRes = await fetch(`${API_URL}/admin/users`, {
-        headers: { Authorization: `Bearer ${token}` },
-      });
-      const users = await userRes.json();
-
-      const pending = users.filter((u: any) => !u.isApproved).length;
+      const pendingUsers = users.filter((u: any) => !u.isApproved).length;
       const admins = users.filter((u: any) => u.role === "admin").length;
-
-      // Fetch Messages
-      const msgRes = await fetch(`${API_URL}/messages`);
-      const messages = await msgRes.json();
-
-      const unread = messages.filter((m: any) => !m.is_read).length;
+      const unreadMessages = messages.filter((m: any) => !m.is_read).length;
 
       setStats({
         totalProducts: products.length,
@@ -82,17 +90,19 @@ export default function Dashboard() {
         averagePrice: avgPrice,
 
         totalUsers: users.length,
-        pendingUsers: pending,
+        pendingUsers,
         admins,
 
         totalMessages: messages.length,
-        unreadMessages: unread,
+        unreadMessages,
 
-        apiStatus: "Online",
+        apiStatus: productRes.ok ? "Online" : "Offline",
         dbStatus: "Connected",
       });
     } catch (err) {
       console.error("Dashboard Error:", err);
+    } finally {
+      setLoading(false); // ✅ ALWAYS TURN OFF LOADER
     }
   };
 
@@ -113,17 +123,24 @@ export default function Dashboard() {
     { title: "Messages", value: stats.totalMessages, icon: Mail },
     { title: "Unread Messages", value: stats.unreadMessages, icon: MessageSquare },
 
-    { title: "API_URL Status", value: stats.apiStatus, icon: Server },
+    { title: "API Status", value: stats.apiStatus, icon: Server },
     { title: "Database", value: stats.dbStatus, icon: Database },
   ];
 
   return (
     <ProtectedRoute>
+      {/* 🔥 UNIVERSAL LOADER OVERLAY */}
+      {loading && <UniversalLoader />}
+
       <AdminLayout>
         <div className="space-y-10">
           <div>
-            <h1 className="font-display text-4xl text-chocolate">Dashboard</h1>
-            <p className="text-muted-foreground">Admin overview and insights</p>
+            <h1 className="font-display text-4xl text-chocolate">
+              Dashboard
+            </h1>
+            <p className="text-muted-foreground">
+              Admin overview and insights
+            </p>
           </div>
 
           {/* STATS GRID */}
@@ -147,7 +164,9 @@ export default function Dashboard() {
           <Card>
             <CardHeader>
               <CardTitle>Quick Actions</CardTitle>
-              <CardDescription>Frequently used admin tools</CardDescription>
+              <CardDescription>
+                Frequently used admin tools
+              </CardDescription>
             </CardHeader>
 
             <CardContent className="grid grid-cols-1 md:grid-cols-3 gap-4">
