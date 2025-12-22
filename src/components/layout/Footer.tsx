@@ -21,25 +21,15 @@ const quickLinks = [
 ];
 
 // --------------------------------------------------
-// ICON RENDERER
+// URL NORMALIZER (🔥 FIX)
 // --------------------------------------------------
-const iconMap: any = {
-  MapPin,
-  Phone,
-  Mail,
-  Facebook,
-  Instagram,
-  Twitter,
-};
-
-function RenderIcon({ name, className }: { name: string; className?: string }) {
-  if (!name) return null;
-  if (name.startsWith("http")) {
-    return <img src={name} className={className} />;
+const normalizeUrl = (url: string) => {
+  if (!url) return "";
+  if (url.startsWith("http://") || url.startsWith("https://")) {
+    return url;
   }
-  const Icon = iconMap[name];
-  return Icon ? <Icon className={className} /> : null;
-}
+  return `https://${url}`;
+};
 
 // --------------------------------------------------
 // LEGAL MODAL
@@ -93,28 +83,10 @@ export function Footer() {
   const [openPrivacy, setOpenPrivacy] = useState(false);
   const [openTerms, setOpenTerms] = useState(false);
 
-  // Load Site Settings
   useEffect(() => {
-    fetch(`${API_URL}/settings`)
-      .then((res) => res.json())
-      .then(setSettings)
-      .catch(console.error);
-  }, []);
-
-  // Load Categories
-  useEffect(() => {
-    fetch(`${API_URL}/categories`)
-      .then((res) => res.json())
-      .then(setCategories)
-      .catch(console.error);
-  }, []);
-
-  // Load Contact Page
-  useEffect(() => {
-    fetch(`${API_URL}/contact-page`)
-      .then((res) => res.json())
-      .then(setContact)
-      .catch(console.error);
+    fetch(`${API_URL}/settings`).then((res) => res.json()).then(setSettings);
+    fetch(`${API_URL}/categories`).then((res) => res.json()).then(setCategories);
+    fetch(`${API_URL}/contact-page`).then((res) => res.json()).then(setContact);
   }, []);
 
   const logo = settings?.navbar_logo;
@@ -124,11 +96,10 @@ export function Footer() {
   return (
     <>
       <footer className="bg-chocolate text-cream">
-        {/* Main Footer */}
         <div className="container mx-auto px-4 md:px-8 py-16">
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-12">
 
-            {/* Brand */}
+            {/* BRAND */}
             <div>
               <Link to="/" className="flex items-center gap-3 mb-6">
                 <div className="w-full h-32 flex items-center justify-center">
@@ -143,7 +114,6 @@ export function Footer() {
                   {brandImage && (
                     <img src={brandImage} className="h-10 mb-1" />
                   )}
-
                   {showText && (
                     <>
                       <span className="font-bold text-xl">Gobbly Treat</span>
@@ -156,30 +126,42 @@ export function Footer() {
               </Link>
 
               <p className="text-sm opacity-70 mb-6">
-                {settings?.footer_text ||
-                  "Crafting premium biscuits with love and tradition since 1980."}
+                {settings?.footer_text}
               </p>
 
+              {/* ✅ SOCIAL LINKS (FIXED) */}
               <div className="flex gap-4">
                 {settings?.social_facebook && (
-                  <a href={settings.social_facebook} target="_blank">
+                  <a
+                    href={normalizeUrl(settings.social_facebook)}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                  >
                     <SiFacebook />
                   </a>
                 )}
                 {settings?.social_instagram && (
-                  <a href={settings.social_instagram} target="_blank">
+                  <a
+                    href={normalizeUrl(settings.social_instagram)}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                  >
                     <SiInstagram />
                   </a>
                 )}
                 {settings?.social_twitter && (
-                  <a href={settings.social_twitter} target="_blank">
+                  <a
+                    href={normalizeUrl(settings.social_twitter)}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                  >
                     <SiX />
                   </a>
                 )}
               </div>
             </div>
 
-            {/* Quick Links */}
+            {/* QUICK LINKS */}
             <div>
               <h3 className="font-semibold mb-4">Quick Links</h3>
               <ul className="space-y-2">
@@ -193,7 +175,7 @@ export function Footer() {
               </ul>
             </div>
 
-            {/* Categories */}
+            {/* CATEGORIES */}
             <div>
               <h3 className="font-semibold mb-4">Our Products</h3>
               <ul className="space-y-2">
@@ -210,10 +192,8 @@ export function Footer() {
               </ul>
             </div>
 
-            {/* Contact */}
+            {/* CONTACT */}
             <ul className="space-y-3">
-
-              {/* 📍 Location (from Settings) */}
               {settings?.footer_subtext && (
                 <li className="flex gap-2 items-start">
                   <MapPin className="mt-1" />
@@ -225,7 +205,6 @@ export function Footer() {
                 </li>
               )}
 
-              {/* 📞 Phone (from Contact Page) */}
               {contact?.card_2_line1 && (
                 <li className="flex gap-2">
                   <Phone />
@@ -235,7 +214,6 @@ export function Footer() {
                 </li>
               )}
 
-              {/* ✉️ Email (from Contact Page) */}
               {contact?.card_3_line1 && (
                 <li className="flex gap-2">
                   <Mail />
@@ -244,12 +222,11 @@ export function Footer() {
                   </a>
                 </li>
               )}
-
             </ul>
           </div>
         </div>
 
-        {/* Bottom Bar */}
+        {/* BOTTOM BAR */}
         <div className="border-t border-white/10 py-6">
           <div className="container mx-auto flex flex-col md:flex-row justify-between gap-4">
             <p className="text-sm opacity-50">
@@ -263,7 +240,6 @@ export function Footer() {
               >
                 Privacy Policy
               </button>
-
               <button
                 onClick={() => setOpenTerms(true)}
                 className="text-sm opacity-50 hover:opacity-100"
@@ -275,7 +251,7 @@ export function Footer() {
         </div>
       </footer>
 
-      {/* Modals */}
+      {/* MODALS */}
       <LegalModal
         open={openPrivacy}
         onClose={() => setOpenPrivacy(false)}

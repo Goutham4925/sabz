@@ -67,7 +67,7 @@ export function CTASection() {
           dangerouslySetInnerHTML={{
             __html:
               settings.cta_title ||
-              "Ready to Experience <span class='text-golden'>Golden Perfection</span>?",
+              "Ready to Experience <span class='text-gradient'>Golden Perfection</span>?",
           }}
         />
 
