@@ -31,14 +31,19 @@ model Category {
 /// ////////////////////////////////////////////////////////////////////////
 /// ////////////////////////////////////////////////////////////////////////
 model Product {
-  id             Int            @id @default(autoincrement())
+  id             Int      @id @default(autoincrement())
   name           String
   description    String?
   price          Float?
   image_url      String?
-  is_featured    Boolean        @default(false)
-  created_at     DateTime       @default(now())
-  updated_at     DateTime       @updatedAt
+
+  rating         Float?   @default(0)
+  ratingCount    Int?     @default(0)
+
+  is_featured    Boolean  @default(false)
+  created_at     DateTime @default(now())
+  updated_at     DateTime @updatedAt
+
   categoryId     Int?
   highlights     String?
   ingredients    String?
@@ -46,6 +51,7 @@ model Product {
   package_type   String?
   shelf_life     String?
   weight         String?
+
   gallery        Json?
   category       Category?      @relation(fields: [categoryId], references: [id])
   images         ProductImage[]

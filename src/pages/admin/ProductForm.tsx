@@ -71,6 +71,8 @@ interface FormDataType {
   shelf_life: string;
   weight: string;
   package_type: string;
+  rating: number;
+  ratingCount: number;
 }
 
 export default function ProductForm() {
@@ -97,6 +99,10 @@ export default function ProductForm() {
     categoryId: "none",
     image_url: "",
     is_featured: false,
+
+    rating: 4.5,
+    ratingCount: 100,
+
     ingredients: "",
     highlights: "",
     nutrition_info: "",
@@ -138,6 +144,10 @@ export default function ProductForm() {
         categoryId: data.category?.id ? String(data.category.id) : "none",
         image_url: data.image_url || "",
         is_featured: data.is_featured,
+
+        rating: data.rating ?? 4.5,
+        ratingCount: data.ratingCount ?? 100,
+
         ingredients: data.ingredients || "",
         highlights: data.highlights || "",
         nutrition_info: data.nutrition_info || "",
@@ -245,9 +255,12 @@ export default function ProductForm() {
     const payload = {
       ...formData,
       price: formData.price ? Number(formData.price) : null,
+      rating: Number(formData.rating),
+      ratingCount: Number(formData.ratingCount),
       categoryId:
         formData.categoryId === "none" ? null : Number(formData.categoryId),
     };
+
 
     const res = await fetch(
       isEditing ? `${API_URL}/products/${id}` : `${API_URL}/products`,
@@ -363,6 +376,38 @@ export default function ProductForm() {
                     </Select>
                   </div>
                 </div>
+
+
+                {/* RATING */}
+                <div className="grid grid-cols-2 gap-4">
+                  <div>
+                    <Label>Rating (0–5)</Label>
+                    <Input
+                      type="number"
+                      step="0.1"
+                      min="0"
+                      max="5"
+                      value={formData.rating}
+                      onChange={(e) =>
+                        setFormData({ ...formData, rating: Number(e.target.value) })
+                      }
+                    />
+                  </div>
+
+                  <div>
+                    <Label>Rating Count</Label>
+                    <Input
+                      type="number"
+                      min="0"
+                      value={formData.ratingCount}
+                      onChange={(e) =>
+                        setFormData({ ...formData, ratingCount: Number(e.target.value) })
+                      }
+                    />
+                  </div>
+                </div>
+
+
 
                 {/* MAIN IMAGE */}
                 <div>

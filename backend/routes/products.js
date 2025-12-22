@@ -11,12 +11,12 @@ router.get("/", async (req, res) => {
     const products = await prisma.product.findMany({
       include: {
         category: true,
-        images: true, // ✅ include gallery
+        images: true,
       },
       orderBy: { created_at: "desc" },
     });
 
-  res.json(products);
+    res.json(products);
   } catch (err) {
     console.error("GET /products error:", err);
     res.status(500).json({ error: "Failed to fetch products" });
@@ -53,7 +53,9 @@ router.get("/:id", async (req, res) => {
       include: { category: true, images: true },
     });
 
-    if (!product) return res.status(404).json({ error: "Product not found" });
+    if (!product) {
+      return res.status(404).json({ error: "Product not found" });
+    }
 
     res.json(product);
   } catch (err) {
@@ -77,6 +79,11 @@ router.post("/", async (req, res) => {
         categoryId: data.categoryId ? Number(data.categoryId) : null,
         image_url: data.image_url || null,
         is_featured: Boolean(data.is_featured),
+
+        // ⭐ RATING SUPPORT
+        rating: data.rating !== undefined ? Number(data.rating) : 4.5,
+        ratingCount:
+          data.ratingCount !== undefined ? Number(data.ratingCount) : 0,
 
         ingredients: data.ingredients || null,
         highlights: data.highlights || null,
@@ -111,6 +118,14 @@ router.put("/:id", async (req, res) => {
         categoryId: data.categoryId ? Number(data.categoryId) : null,
         image_url: data.image_url || null,
         is_featured: Boolean(data.is_featured),
+
+        // ⭐ SAFE RATING UPDATE (does not overwrite unless provided)
+        rating:
+          data.rating !== undefined ? Number(data.rating) : undefined,
+        ratingCount:
+          data.ratingCount !== undefined
+            ? Number(data.ratingCount)
+            : undefined,
 
         ingredients: data.ingredients || null,
         highlights: data.highlights || null,
@@ -173,10 +188,13 @@ router.delete("/:id", async (req, res) => {
   try {
     const id = Number(req.params.id);
 
-    // Remove gallery images first
-    await prisma.productImage.deleteMany({ where: { productId: id } });
+    await prisma.productImage.deleteMany({
+      where: { productId: id },
+    });
 
-    await prisma.product.delete({ where: { id } });
+    await prisma.product.delete({
+      where: { id },
+    });
 
     res.json({ success: true });
   } catch (err) {
