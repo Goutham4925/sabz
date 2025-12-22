@@ -131,7 +131,7 @@ export function Footer() {
             {/* Brand */}
             <div>
               <Link to="/" className="flex items-center gap-3 mb-6">
-                <div className="w-32 h-32 flex items-center justify-center">
+                <div className="w-full h-32 flex items-center justify-center">
                   {logo ? (
                     <img src={logo} className="object-contain w-full h-full" />
                   ) : (
