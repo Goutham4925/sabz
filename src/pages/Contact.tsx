@@ -226,13 +226,13 @@ const Contact = () => {
               </div>
 
               {/* MAP SECTION */}
-              <div className="rounded-2xl overflow-hidden shadow-card h-64 bg-secondary">
+              {/* <div className="rounded-2xl overflow-hidden shadow-card h-64 bg-secondary">
                 <div className="w-full h-full flex items-center justify-center text-center text-muted-foreground">
                   <MapPin className="w-12 h-12 mx-auto mb-4 text-primary" />
                   <p className="font-medium">{page.map_title}</p>
                   <p className="text-sm">{page.map_address}</p>
                 </div>
-              </div>
+              </div> */}
             </div>
           </div>
 

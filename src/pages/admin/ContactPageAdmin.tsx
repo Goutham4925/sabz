@@ -349,7 +349,7 @@ const HighlightTool = ({
               ))}
 
               {/* MAP */}
-              <div>
+              {/* <div>
                 <Label>Map Title</Label>
                 <Input
                   value={data.map_title}
@@ -364,7 +364,7 @@ const HighlightTool = ({
                   value={data.map_address}
                   onChange={(e) => handle("map_address", e.target.value)}
                 />
-              </div>
+              </div> */}
 
               {/* SAVE BUTTON */}
               <Button onClick={save} disabled={saving} className="w-full">
