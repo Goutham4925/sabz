@@ -176,6 +176,8 @@ export default function AboutPageAdmin() {
           "milestone_5_title",
           "milestone_5_desc",
 
+          "team_heading",
+          "team_subheading",
           "team_1_name",
           "team_1_role",
           "team_1_image",
@@ -571,10 +573,47 @@ export default function AboutPageAdmin() {
           {/* ===================== TEAM SECTION ===================== */}
           <Card className="overflow-hidden">
             <CardHeader className="bg-gray-50">
-              <CardTitle className="text-lg">Team Members</CardTitle>
+              <CardTitle className="text-lg">Team Section</CardTitle>
             </CardHeader>
 
             <CardContent className="space-y-8 pt-6">
+
+              {/* ---------- SECTION HEADING ---------- */}
+              <div className="space-y-3">
+                <Label>Team Section Heading (supports &lt;span&gt;)</Label>
+                <Textarea
+                  rows={2}
+                  value={data.team_heading}
+                  onChange={(e) =>
+                    handleChange("team_heading", e.target.value)
+                  }
+                  className="w-full"
+                  placeholder="Meet the <span class='text-gradient'>Team</span>"
+                />
+
+                <HighlightTool
+                  fieldKey="team_heading"
+                  placeholder="Word to highlight (e.g., Team)"
+                />
+              </div>
+
+              {/* ---------- SECTION SUBTITLE ---------- */}
+              <div className="space-y-3">
+                <Label>Team Section Subtitle</Label>
+                <Textarea
+                  rows={2}
+                  value={data.team_subheading}
+                  onChange={(e) =>
+                    handleChange("team_subheading", e.target.value)
+                  }
+                  className="w-full"
+                  placeholder="The passionate people behind every authentic blend"
+                />
+              </div>
+
+              <hr className="opacity-30" />
+
+              {/* ---------- TEAM MEMBERS ---------- */}
               {[1, 2, 3].map((i) => (
                 <div key={i} className="border p-4 rounded-xl space-y-3">
                   <h3 className="font-semibold">Team Member {i}</h3>
@@ -582,14 +621,18 @@ export default function AboutPageAdmin() {
                   <Label>Name</Label>
                   <Input
                     value={data[`team_${i}_name`]}
-                    onChange={(e) => handleChange(`team_${i}_name`, e.target.value)}
+                    onChange={(e) =>
+                      handleChange(`team_${i}_name`, e.target.value)
+                    }
                     className="w-full"
                   />
 
                   <Label>Role</Label>
                   <Input
                     value={data[`team_${i}_role`]}
-                    onChange={(e) => handleChange(`team_${i}_role`, e.target.value)}
+                    onChange={(e) =>
+                      handleChange(`team_${i}_role`, e.target.value)
+                    }
                     className="w-full"
                   />
 
@@ -611,22 +654,25 @@ export default function AboutPageAdmin() {
                       accept="image/*"
                       className="hidden"
                       onChange={(e) =>
-                        e.target.files && uploadImage(e.target.files[0], `team_${i}_image`)
+                        e.target.files &&
+                        uploadImage(e.target.files[0], `team_${i}_image`)
                       }
                     />
 
-                    <Button 
+                    <Button
                       className="w-full sm:w-auto"
-                      onClick={() => document.getElementById(`teamUpload${i}`)!.click()}
+                      onClick={() =>
+                        document.getElementById(`teamUpload${i}`)!.click()
+                      }
                     >
                       <Upload className="w-4 h-4 mr-2" /> Upload
                     </Button>
                   </div>
 
                   {data[`team_${i}_image`]?.startsWith("http") && (
-                    <img 
-                      src={data[`team_${i}_image`]} 
-                      className="w-24 rounded-xl mt-2 max-w-full" 
+                    <img
+                      src={data[`team_${i}_image`]}
+                      className="w-24 rounded-xl mt-2 max-w-full"
                       alt={`Team member ${i}`}
                     />
                   )}
@@ -634,6 +680,7 @@ export default function AboutPageAdmin() {
               ))}
             </CardContent>
           </Card>
+
 
           {/* ===================== STATS SECTION ===================== */}
           <Card className="overflow-hidden">

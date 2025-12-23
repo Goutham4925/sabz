@@ -166,7 +166,10 @@ model AboutPage {
   stat_customers      String?
   timeline_heading    String?
   timeline_subheading String?
-  timeline_hidden    Boolean @default(false)
+  timeline_hidden     Boolean @default(false)
+  team_heading        String?
+  team_subheading     String?
+
 
   timeline AboutTimeline[]
 
