@@ -1,112 +1,125 @@
-📘 Gobbly Treat – Full-Stack Product Showcase Platform
+🧂 Saabz Kitchen – Full-Stack Spices Product Showcase & CMS Platform
 
-A fully featured, modern product-showcase and CMS platform built with React, Express.js, Prisma, PostgreSQL, Multer image uploads, JWT Authentication, and a secure Admin Dashboard.
+Saabz Kitchen is a modern, full-stack product showcase and CMS platform built for a spices & food products brand.
+It enables customers to explore spice products, learn about the brand, and send enquiries—while providing administrators with a secure, powerful CMS dashboard to manage products, pages, users, and messages.
 
-This platform allows customers to explore products, learn about the brand, and submit enquiries—while giving administrators a complete CMS to manage products, pages, users, and messages.
+Built with React, Express.js, Prisma, PostgreSQL, Multer, JWT Authentication, and a role-based Admin Panel.
 
 🚀 Features Overview
-🛍️ Frontend (Customer Facing)
+🛍️ Frontend (Customer-Facing)
 
-Modern UI with React + Tailwind + ShadCN
+Modern UI using React + Tailwind CSS + ShadCN
 
-Product listing + product detail pages
+Spice product listing & detailed product pages
 
-Fully dynamic About Page
+Fully dynamic About Saabz Kitchen page
 
-Fully dynamic Contact Page
+Fully dynamic Contact Us page
 
-Contact + Product Enquiry forms
+Product enquiry & general contact forms
 
 Image rendering from backend /uploads
 
-FAQ sections
+FAQ sections (storage, usage, sourcing, etc.)
 
-Fully mobile responsive design
+Fully mobile-responsive design
 
 🔐 Authentication System
 
 Email + password login
 
-JWT-based authentication (token stored in localStorage)
+JWT-based authentication
 
-Role-based access
+Role-based access control (RBAC)
 
-admin — full control panel
+admin — full CMS access
 
 user — restricted
 
+Secure token storage (localStorage)
+
 ✔ Account Approval Workflow
 
-New users → isApproved: false
+New users → isApproved = false
 
-Admin must approve user
+Admin must approve users
 
 Unapproved users cannot log in
 
-Optional “Disable Signup” switch for restricted access
+Optional Disable Signup feature for private admin access
 
 🧑‍💼 Admin Dashboard Features
-1. Product Management
+1️⃣ Spice Product Management
 
-Add, edit, delete products
+Add, edit, delete spice products
 
 Upload product images via /api/upload
 
 Multiple gallery images
 
-Full CRUD
+Product details like:
 
-2. About Page CMS
+Description
+
+Packaging
+
+Shelf life
+
+Usage notes
+
+Full CRUD operations
+
+2️⃣ About Page CMS
 
 Edit hero section
 
-Edit story paragraphs
+Edit brand story (Saabz Kitchen journey)
 
-Edit highlights
+Edit highlights (quality, sourcing, freshness)
 
-Edit team members
+Edit team members / brand values
 
 Upload images or icons
 
-Fully dynamic DB-driven page
+Fully database-driven content
 
-3. Contact Page CMS
+3️⃣ Contact Page CMS
 
-Edit hero, subtitle
+Edit hero title & subtitle
 
-Edit contact cards (icon, title, lines)
+Manage contact info cards
 
 Edit FAQ questions & answers
 
-Edit map title & address
+Update map title & business address
 
-4. Messages Inbox
+4️⃣ Messages Inbox
 
 View customer enquiries
 
-Product enquiries automatically include product name
+Product enquiries auto-attach product name
 
-Mark message as read
+Mark messages as read
 
 Delete messages
 
-5. User Management
+5️⃣ User Management
 
-Approve new users
+Approve or reject users
 
-Promote/demote admin
+Promote / demote admins
 
 Delete users
 
-See pending + approved accounts
+View pending & approved accounts
 
-6. Upload Management
+6️⃣ Upload Management
 
 All images stored in /public/uploads
 
-Returns usable image URL to store in DB
+Backend returns usable public image URLs
 
-Replaces old images automatically
+Old images replaced automatically
 
 🏗️ Tech Stack
 Frontend
@@ -115,7 +128,7 @@ React (Vite)
 
 React Router
 
-Tailwind CSS / ShadCN
+Tailwind CSS / ShadCN UI
 
 Lucide Icons
 
@@ -133,13 +146,13 @@ Prisma ORM
 
 PostgreSQL
 
-Multer for image uploads
+Multer (image uploads)
 
 JWT Authentication
 
-Bcrypt for password hashing
+Bcrypt (password hashing)
 
-Role-based Access Control (RBAC)
+Role-Based Access Control (RBAC)
 
 📁 Folder Structure
 root/
@@ -158,7 +171,7 @@ root/
 │   │   └── contactMessages.js
 │   ├── middleware/
 │   │   └── auth.js
-│   ├── public/uploads/     (image storage)
+│   ├── public/uploads/      # Image storage
 │   ├── server.js
 │   ├── package.json
 │   └── .env
@@ -186,7 +199,7 @@ model User {
   createdAt  DateTime @default(now())
 }
 
-Product
+Product (Spices)
 model Product {
   id          Int      @id @default(autoincrement())
   name        String
@@ -213,71 +226,82 @@ model ContactMessage {
 }
 
 🔐 Authentication Flow
-1. Signup
+1️⃣ Signup
 
 POST /api/auth/register
+Creates a user with isApproved = false
 
-Creates user with isApproved = false
-
-2. Admin Approves
+2️⃣ Admin Approval
 
 PUT /api/admin/approve/:id
 
-3. Login
+3️⃣ Login
 
 POST /api/auth/login
-Returns:
+
+Response:
 
 {
   "token": "jwt-token",
-  "user": { "email": "x", "role": "admin" }
+  "user": {
+    "email": "admin@saabzkitchen.com",
+    "role": "admin"
+  }
 }
 
-4. Protected Requests
+4️⃣ Protected Requests
 
 Frontend sends:
 
 Authorization: Bearer <token>
 
 🗃️ Image Upload Workflow
-1️⃣ React sends:
+
+1️⃣ React sends
 POST /api/upload
 Content-Type: multipart/form-data
 
-2️⃣ Backend saves image in /public/uploads
+2️⃣ Backend stores image in /public/uploads
+
 3️⃣ Backend returns:
+
 https://yourdomain.com/uploads/filename.png
 
-4️⃣ URL stored in DB
-📨 Contact + Product Enquiry Workflow
-1. User submits form
 
+4️⃣ Image URL stored in database
+
+📨 Contact & Product Enquiry Workflow
+
+1️⃣ Customer submits form
 POST /api/messages
 
-2. Backend stores it
+2️⃣ Backend stores enquiry
 
-Includes product name if productId passed
+Includes product name if productId provided
 
-3. Admin sees messages in dashboard
-4. Admin can:
+3️⃣ Admin views enquiries in dashboard
+
+4️⃣ Admin can:
 
 Mark as read
 
-Delete
+Delete messages
 
 🔒 ProtectedRoute Logic (Frontend)
 
-Admin pages require:
+Admin routes require:
 
 ✔ Valid JWT
-✔ role = admin
-✔ isApproved = true
 
-Unauthorized users → redirected to /admin/login.
+✔ role === admin
+
+✔ isApproved === true
+
+Unauthorized users are redirected to /admin/login.
 
 🧪 Environment Variables
 Backend .env
-DATABASE_URL="postgresql://user:password@host:5432/gobblytreat"
+DATABASE_URL="postgresql://user:password@host:5432/saabzkitchen"
 JWT_SECRET="your-secret"
 PORT=5000
 
@@ -303,9 +327,9 @@ Build Command: npm install
 
 Start Command: node server.js
 
-Add environment variables (DATABASE_URL, JWT_SECRET)
+Add environment variables
 
-Enable Static Directory: /public
+Enable static directory: /public
 
 Frontend
 
@@ -313,36 +337,36 @@ Build Command: npm install && npm run build
 
 Publish Directory: dist
 
-Add frontend .env with:
-
-VITE_API_URL="https://your-backend-url.onrender.com/api"
+Add .env with backend API URL
 
 🎯 Future Enhancements
 
-Product categories
+Spice categories & filters
 
-Order system / Cart
+Online ordering / cart system
 
 Email notifications
 
-Image optimization CDN
+CDN image optimization
 
 Admin activity logs
 
+Multi-language support
+
 🏁 Conclusion
 
-Gobbly Treat is a complete full-stack CMS-driven product showcase system featuring:
+Saabz Kitchen is a complete CMS-driven spices & food product platform featuring:
 
 Secure authentication
 
-CMS for About + Contact pages
+Full admin dashboard
 
-Full product management
+Dynamic About & Contact pages
 
-Message inbox
+Product management system
 
-Dynamic frontend
+Customer enquiry inbox
 
-Extendable backend architecture
+Scalable backend architecture
 
-This README fully documents the system’s structure and workflow.
+Designed to grow alongside your brand 🌿🧂
