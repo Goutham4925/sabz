@@ -69,64 +69,72 @@ export default function Settings() {
   const { toast } = useToast();
 
   // -------------------------------------
-  // HIGHLIGHT TOOL (Reusable Everywhere)
+  // HIGHLIGHT TOOL (Reusable Everywhere) - RESPONSIVE
   // -------------------------------------
-const highlightTool = (fieldKey: string) => (
-  <div className="mt-2 space-y-2">
-    <div className="flex items-center gap-2">
-      <Input
-        placeholder="Word to highlight"
-        id={`highlightWordInput_${fieldKey}`}
-        className="w-44"
-      />
+  const highlightTool = (fieldKey: string) => (
+    <div className="mt-2 space-y-2">
+      <div className="flex flex-col xs:flex-row items-start xs:items-center gap-2">
+        <div className="w-full xs:w-auto xs:flex-1">
+          <Input
+            placeholder="Word to highlight"
+            id={`highlightWordInput_${fieldKey}`}
+            className="w-full xs:w-40"
+          />
+        </div>
+        
+        <div className="w-full xs:w-auto">
+          <select
+            id={`highlightType_${fieldKey}`}
+            className="border rounded-md px-2 py-1 text-sm w-full xs:w-auto"
+            defaultValue="normal"
+          >
+            <option value="normal">Normal Gradient</option>
+            <option value="light">Light Gradient</option>
+          </select>
+        </div>
 
-      <select
-        id={`highlightType_${fieldKey}`}
-        className="border rounded-md px-2 py-1 text-sm"
-        defaultValue="normal"
-      >
-        <option value="normal">Normal Gradient</option>
-        <option value="light">Light Gradient</option>
-      </select>
+        <Button
+          type="button"
+          className="w-full xs:w-auto"
+          onClick={() => {
+            const input = document.getElementById(
+              `highlightWordInput_${fieldKey}`
+            ) as HTMLInputElement;
 
-      <Button
-        type="button"
-        onClick={() => {
-          const input = document.getElementById(
-            `highlightWordInput_${fieldKey}`
-          ) as HTMLInputElement;
+            const typeSelect = document.getElementById(
+              `highlightType_${fieldKey}`
+            ) as HTMLSelectElement;
 
-          const typeSelect = document.getElementById(
-            `highlightType_${fieldKey}`
-          ) as HTMLSelectElement;
+            const word = input?.value.trim();
+            if (!word) return;
 
-          const word = input?.value.trim();
-          if (!word) return;
+            const gradientClass =
+              typeSelect?.value === "light"
+                ? "text-gradient-light"
+                : "text-gradient";
 
-          const gradientClass =
-            typeSelect?.value === "light"
-              ? "text-gradient-light"
-              : "text-gradient";
+            const colored = `<span class="${gradientClass}">${word}</span>`;
 
-          const colored = `<span class="${gradientClass}">${word}</span>`;
+            setSettings((prev: any) => ({
+              ...prev,
+              [fieldKey]:
+                prev[fieldKey]?.replace(
+                  new RegExp(`\\b${word}\\b`, "g"),
+                  colored
+                ) ?? "",
+            }));
 
-          setSettings((prev: any) => ({
-            ...prev,
-            [fieldKey]:
-              prev[fieldKey]?.replace(
-                new RegExp(`\\b${word}\\b`, "g"),
-                colored
-              ) ?? "",
-          }));
-
-          input.value = "";
-        }}
-      >
-        Highlight
-      </Button>
+            input.value = "";
+          }}
+        >
+          Highlight
+        </Button>
+      </div>
+      <p className="text-xs text-gray-500">
+        Type a word, choose gradient style, then click "Highlight"
+      </p>
     </div>
-  </div>
-);
+  );
 
   // -------------------------------------
   // IMAGE UPLOAD HANDLER
@@ -256,24 +264,31 @@ const highlightTool = (fieldKey: string) => (
   return (
     <ProtectedRoute>
       <AdminLayout>
-        <div className="space-y-8 max-w-3xl">
+        <div className="space-y-8 w-full max-w-3xl mx-auto px-2 sm:px-4 lg:px-6 overflow-x-hidden">
+          <div className="text-center mb-4">
+            <h1 className="text-2xl font-bold">Site Settings</h1>
+            <p className="text-gray-500 text-sm">Manage your website content and appearance</p>
+          </div>
 
           {/* ------------------------ BRANDING ------------------------ */}
-          <Card>
-            <CardHeader>
-              <CardTitle>Branding (Navbar)</CardTitle>
+          <Card className="overflow-hidden">
+            <CardHeader className="bg-gray-50">
+              <CardTitle className="text-lg">Branding (Navbar)</CardTitle>
             </CardHeader>
-            <CardContent className="space-y-6">
+            <CardContent className="space-y-6 pt-6">
               {/* NAV LOGO */}
               <div>
                 <Label>Navbar Logo Image</Label>
-                <div className="flex items-center gap-3 mt-2">
-                  <Input
-                    value={settings.navbar_logo || ""}
-                    onChange={(e) =>
-                      setSettings({ ...settings, navbar_logo: e.target.value })
-                    }
-                  />
+                <div className="flex flex-col sm:flex-row items-start sm:items-center gap-3 mt-2">
+                  <div className="flex-1 w-full">
+                    <Input
+                      value={settings.navbar_logo || ""}
+                      onChange={(e) =>
+                        setSettings({ ...settings, navbar_logo: e.target.value })
+                      }
+                      className="w-full"
+                    />
+                  </div>
 
                   <input
                     type="file"
@@ -283,7 +298,10 @@ const highlightTool = (fieldKey: string) => (
                     onChange={(e) => handleImageUpload(e, "navbar_logo")}
                   />
 
-                  <Button onClick={() => document.getElementById("navbarLogoUpload")?.click()}>
+                  <Button 
+                    className="w-full sm:w-auto"
+                    onClick={() => document.getElementById("navbarLogoUpload")?.click()}
+                  >
                     Upload
                   </Button>
                 </div>
@@ -292,6 +310,7 @@ const highlightTool = (fieldKey: string) => (
                   <img
                     src={settings.navbar_logo}
                     className="w-32 h-24 object-contain border rounded mt-3"
+                    alt="Navbar logo"
                   />
                 )}
               </div>
@@ -300,16 +319,19 @@ const highlightTool = (fieldKey: string) => (
               <div>
                 <Label>Brand Name Image</Label>
 
-                <div className="flex items-center gap-3 mt-2">
-                  <Input
-                    value={settings.navbar_brand_image || ""}
-                    onChange={(e) =>
-                      setSettings({
-                        ...settings,
-                        navbar_brand_image: e.target.value,
-                      })
-                    }
-                  />
+                <div className="flex flex-col sm:flex-row items-start sm:items-center gap-3 mt-2">
+                  <div className="flex-1 w-full">
+                    <Input
+                      value={settings.navbar_brand_image || ""}
+                      onChange={(e) =>
+                        setSettings({
+                          ...settings,
+                          navbar_brand_image: e.target.value,
+                        })
+                      }
+                      className="w-full"
+                    />
+                  </div>
 
                   <input
                     type="file"
@@ -319,7 +341,10 @@ const highlightTool = (fieldKey: string) => (
                     onChange={(e) => handleImageUpload(e, "navbar_brand_image")}
                   />
 
-                  <Button onClick={() => document.getElementById("brandNameUpload")?.click()}>
+                  <Button 
+                    className="w-full sm:w-auto"
+                    onClick={() => document.getElementById("brandNameUpload")?.click()}
+                  >
                     Upload
                   </Button>
                 </div>
@@ -327,7 +352,8 @@ const highlightTool = (fieldKey: string) => (
                 {settings.navbar_brand_image && (
                   <img
                     src={settings.navbar_brand_image}
-                    className="w-40 h-auto object-contain border rounded mt-3"
+                    className="w-40 h-auto object-contain border rounded mt-3 max-w-full"
+                    alt="Brand name"
                   />
                 )}
               </div>
@@ -350,17 +376,18 @@ const highlightTool = (fieldKey: string) => (
           </Card>
 
           {/* ------------------------ HERO SECTION ------------------------ */}
-          <Card>
-            <CardHeader>
-              <CardTitle>Hero Section</CardTitle>
+          <Card className="overflow-hidden">
+            <CardHeader className="bg-gray-50">
+              <CardTitle className="text-lg">Hero Section</CardTitle>
             </CardHeader>
-            <CardContent className="space-y-4">
+            <CardContent className="space-y-4 pt-6">
               <Label>Hero Badge</Label>
               <Input
                 value={settings.hero_badge_text || ""}
                 onChange={(e) =>
                   setSettings({ ...settings, hero_badge_text: e.target.value })
                 }
+                className="w-full"
               />
 
               <Label>Hero Title (supports &lt;span&gt;)</Label>
@@ -370,6 +397,7 @@ const highlightTool = (fieldKey: string) => (
                 onChange={(e) =>
                   setSettings({ ...settings, hero_title: e.target.value })
                 }
+                className="w-full"
               />
               {highlightTool("hero_title")}
 
@@ -379,16 +407,20 @@ const highlightTool = (fieldKey: string) => (
                 onChange={(e) =>
                   setSettings({ ...settings, hero_subtitle: e.target.value })
                 }
+                className="w-full"
               />
 
               <Label>Hero Image</Label>
-              <div className="flex items-center gap-3">
-                <Input
-                  value={settings.hero_image_url || ""}
-                  onChange={(e) =>
-                    setSettings({ ...settings, hero_image_url: e.target.value })
-                  }
-                />
+              <div className="flex flex-col sm:flex-row items-start sm:items-center gap-3">
+                <div className="flex-1 w-full">
+                  <Input
+                    value={settings.hero_image_url || ""}
+                    onChange={(e) =>
+                      setSettings({ ...settings, hero_image_url: e.target.value })
+                    }
+                    className="w-full"
+                  />
+                </div>
 
                 <input
                   type="file"
@@ -398,29 +430,37 @@ const highlightTool = (fieldKey: string) => (
                   onChange={(e) => handleImageUpload(e, "hero_image_url")}
                 />
 
-                <Button onClick={() => document.getElementById("heroImgUpload")?.click()}>
+                <Button 
+                  className="w-full sm:w-auto"
+                  onClick={() => document.getElementById("heroImgUpload")?.click()}
+                >
                   Upload
                 </Button>
               </div>
 
               {settings.hero_image_url && (
-                <img src={settings.hero_image_url} className="w-40 rounded mt-2 shadow" />
+                <img 
+                  src={settings.hero_image_url} 
+                  className="w-40 rounded mt-2 shadow max-w-full" 
+                  alt="Hero"
+                />
               )}
             </CardContent>
           </Card>
 
           {/* ------------------------ ABOUT SECTION ------------------------ */}
-          <Card>
-            <CardHeader>
-              <CardTitle>About Section</CardTitle>
+          <Card className="overflow-hidden">
+            <CardHeader className="bg-gray-50">
+              <CardTitle className="text-lg">About Section</CardTitle>
             </CardHeader>
-            <CardContent className="space-y-4">
+            <CardContent className="space-y-4 pt-6">
               <Label>About Badge</Label>
               <Input
                 value={settings.about_badge || ""}
                 onChange={(e) =>
                   setSettings({ ...settings, about_badge: e.target.value })
                 }
+                className="w-full"
               />
 
               <Label>About Title (supports &lt;span&gt;)</Label>
@@ -429,6 +469,7 @@ const highlightTool = (fieldKey: string) => (
                 onChange={(e) =>
                   setSettings({ ...settings, about_title: e.target.value })
                 }
+                className="w-full"
               />
               {highlightTool("about_title")}
 
@@ -438,6 +479,7 @@ const highlightTool = (fieldKey: string) => (
                 onChange={(e) =>
                   setSettings({ ...settings, about_paragraph1: e.target.value })
                 }
+                className="w-full"
               />
 
               <Label>Paragraph 2</Label>
@@ -446,16 +488,20 @@ const highlightTool = (fieldKey: string) => (
                 onChange={(e) =>
                   setSettings({ ...settings, about_paragraph2: e.target.value })
                 }
+                className="w-full"
               />
 
               <Label>About Image</Label>
-              <div className="flex items-center gap-3">
-                <Input
-                  value={settings.about_image_url || ""}
-                  onChange={(e) =>
-                    setSettings({ ...settings, about_image_url: e.target.value })
-                  }
-                />
+              <div className="flex flex-col sm:flex-row items-start sm:items-center gap-3">
+                <div className="flex-1 w-full">
+                  <Input
+                    value={settings.about_image_url || ""}
+                    onChange={(e) =>
+                      setSettings({ ...settings, about_image_url: e.target.value })
+                    }
+                    className="w-full"
+                  />
+                </div>
 
                 <input
                   type="file"
@@ -465,29 +511,37 @@ const highlightTool = (fieldKey: string) => (
                   onChange={(e) => handleImageUpload(e, "about_image_url")}
                 />
 
-                <Button onClick={() => document.getElementById("aboutImgUpload")?.click()}>
+                <Button 
+                  className="w-full sm:w-auto"
+                  onClick={() => document.getElementById("aboutImgUpload")?.click()}
+                >
                   Upload
                 </Button>
               </div>
 
               {settings.about_image_url && (
-                <img src={settings.about_image_url} className="w-40 mt-2 rounded shadow" />
+                <img 
+                  src={settings.about_image_url} 
+                  className="w-40 mt-2 rounded shadow max-w-full" 
+                  alt="About" 
+                />
               )}
             </CardContent>
           </Card>
 
           {/* ------------------------ PRODUCTS SECTION ------------------------ */}
-          <Card>
-            <CardHeader>
-              <CardTitle>Products Section</CardTitle>
+          <Card className="overflow-hidden">
+            <CardHeader className="bg-gray-50">
+              <CardTitle className="text-lg">Products Section</CardTitle>
             </CardHeader>
-            <CardContent className="space-y-4">
+            <CardContent className="space-y-4 pt-6">
               <Label>Products Title (supports &lt;span&gt;)</Label>
               <Input
                 value={settings.products_title || ""}
                 onChange={(e) =>
                   setSettings({ ...settings, products_title: e.target.value })
                 }
+                className="w-full"
               />
               {highlightTool("products_title")}
 
@@ -497,22 +551,24 @@ const highlightTool = (fieldKey: string) => (
                 onChange={(e) =>
                   setSettings({ ...settings, products_subtitle: e.target.value })
                 }
+                className="w-full"
               />
             </CardContent>
           </Card>
 
           {/* ------------------------ CTA SECTION ------------------------ */}
-          <Card>
-            <CardHeader>
-              <CardTitle>CTA Section</CardTitle>
+          <Card className="overflow-hidden">
+            <CardHeader className="bg-gray-50">
+              <CardTitle className="text-lg">CTA Section</CardTitle>
             </CardHeader>
-            <CardContent className="space-y-4">
+            <CardContent className="space-y-4 pt-6">
               <Label>CTA Badge</Label>
               <Input
                 value={settings.cta_badge_text || ""}
                 onChange={(e) =>
                   setSettings({ ...settings, cta_badge_text: e.target.value })
                 }
+                className="w-full"
               />
 
               <Label>CTA Title (supports &lt;span&gt;)</Label>
@@ -521,6 +577,7 @@ const highlightTool = (fieldKey: string) => (
                 onChange={(e) =>
                   setSettings({ ...settings, cta_title: e.target.value })
                 }
+                className="w-full"
               />
               {highlightTool("cta_title")}
 
@@ -530,16 +587,20 @@ const highlightTool = (fieldKey: string) => (
                 onChange={(e) =>
                   setSettings({ ...settings, cta_subtitle: e.target.value })
                 }
+                className="w-full"
               />
 
               <Label>CTA Image</Label>
-              <div className="flex items-center gap-3">
-                <Input
-                  value={settings.cta_image_url || ""}
-                  onChange={(e) =>
-                    setSettings({ ...settings, cta_image_url: e.target.value })
-                  }
-                />
+              <div className="flex flex-col sm:flex-row items-start sm:items-center gap-3">
+                <div className="flex-1 w-full">
+                  <Input
+                    value={settings.cta_image_url || ""}
+                    onChange={(e) =>
+                      setSettings({ ...settings, cta_image_url: e.target.value })
+                    }
+                    className="w-full"
+                  />
+                </div>
 
                 <input
                   type="file"
@@ -549,25 +610,31 @@ const highlightTool = (fieldKey: string) => (
                   onChange={(e) => handleImageUpload(e, "cta_image_url")}
                 />
 
-                <Button onClick={() => document.getElementById("ctaImgUpload")?.click()}>
+                <Button 
+                  className="w-full sm:w-auto"
+                  onClick={() => document.getElementById("ctaImgUpload")?.click()}
+                >
                   Upload
                 </Button>
               </div>
 
               {settings.cta_image_url && (
-                <img src={settings.cta_image_url} className="w-40 rounded mt-2 shadow" />
+                <img 
+                  src={settings.cta_image_url} 
+                  className="w-40 rounded mt-2 shadow max-w-full" 
+                  alt="CTA" 
+                />
               )}
             </CardContent>
           </Card>
 
           {/* ------------------------ FOOTER SECTION ------------------------ */}
-
-          <Card>
-            <CardHeader>
-              <CardTitle>Footer Section</CardTitle>
+          <Card className="overflow-hidden">
+            <CardHeader className="bg-gray-50">
+              <CardTitle className="text-lg">Footer Section</CardTitle>
             </CardHeader>
 
-            <CardContent className="space-y-4">
+            <CardContent className="space-y-4 pt-6">
               <Label>Footer Main Text</Label>
               <Textarea
                 rows={3}
@@ -575,6 +642,7 @@ const highlightTool = (fieldKey: string) => (
                 onChange={(e) =>
                   setSettings({ ...settings, footer_text: e.target.value })
                 }
+                className="w-full"
               />
 
               <div className="pt-4 border-t space-y-3">
@@ -585,6 +653,7 @@ const highlightTool = (fieldKey: string) => (
                   onChange={(e) =>
                     setSettings({ ...settings, social_facebook: e.target.value })
                   }
+                  className="w-full"
                 />
 
                 <Label>Instagram URL</Label>
@@ -594,20 +663,23 @@ const highlightTool = (fieldKey: string) => (
                   onChange={(e) =>
                     setSettings({ ...settings, social_instagram: e.target.value })
                   }
+                  className="w-full"
                 />
 
-                <Label> X URL</Label>
+                <Label>X URL</Label>
                 <Input
                   placeholder="https://x.com/yourpage"
                   value={settings.social_twitter || ""}
                   onChange={(e) =>
                     setSettings({ ...settings, social_twitter: e.target.value })
                   }
+                  className="w-full"
                 />
+                
                 <Label>Footer Location / Address (HTML allowed)</Label>
                 <Textarea
                   rows={3}
-                  placeholder=" 123 Baker Street, Bangalore, India"
+                  placeholder="123 Baker Street, Bangalore, India"
                   value={settings.footer_subtext || ""}
                   onChange={(e) =>
                     setSettings({
@@ -615,20 +687,19 @@ const highlightTool = (fieldKey: string) => (
                       footer_subtext: e.target.value,
                     })
                   }
+                  className="w-full"
                 />
-
-
               </div>
             </CardContent>
           </Card>
 
           {/* ------------------------ Legal SECTION ------------------------ */}
-          <Card>
-            <CardHeader>
-              <CardTitle>Legal Pages</CardTitle>
+          <Card className="overflow-hidden">
+            <CardHeader className="bg-gray-50">
+              <CardTitle className="text-lg">Legal Pages</CardTitle>
             </CardHeader>
 
-            <CardContent className="space-y-6">
+            <CardContent className="space-y-6 pt-6">
               <div>
                 <Label>Privacy Policy (HTML allowed)</Label>
                 <Textarea
@@ -638,6 +709,7 @@ const highlightTool = (fieldKey: string) => (
                   onChange={(e) =>
                     setSettings({ ...settings, privacy_policy: e.target.value })
                   }
+                  className="w-full"
                 />
               </div>
 
@@ -650,17 +722,30 @@ const highlightTool = (fieldKey: string) => (
                   onChange={(e) =>
                     setSettings({ ...settings, terms_conditions: e.target.value })
                   }
+                  className="w-full"
                 />
               </div>
             </CardContent>
           </Card>
 
-
-
           {/* ------------------------ SAVE BUTTON ------------------------ */}
-          <Button onClick={handleSave} disabled={saving} className="w-full">
-            {saving ? "Saving..." : "Save All Changes"}
+          <Button 
+            onClick={handleSave} 
+            disabled={saving} 
+            className="w-full sticky bottom-4 z-10 max-w-md mx-auto"
+            size="lg"
+          >
+            {saving ? (
+              <>
+                <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                Saving...
+              </>
+            ) : (
+              "Save All Changes"
+            )}
           </Button>
+          
+          <div className="pb-8"></div>
         </div>
       </AdminLayout>
     </ProtectedRoute>

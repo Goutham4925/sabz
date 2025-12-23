@@ -54,70 +54,79 @@ export default function ContactPageAdmin() {
     }
   };
 
-// -------------------------------------
-// HIGHLIGHT TOOL (Reusable)
-// -------------------------------------
-const HighlightTool = ({
-  fieldKey,
-  placeholder,
-}: {
-  fieldKey: string;
-  placeholder: string;
-}) => (
-  <div className="flex items-center gap-2 mt-2">
-    <Input
-      placeholder={placeholder}
-      id={`highlightWord_${fieldKey}`}
-      className="w-48"
-    />
+  // -------------------------------------
+  // RESPONSIVE HIGHLIGHT TOOL
+  // -------------------------------------
+  const HighlightTool = ({
+    fieldKey,
+    placeholder,
+  }: {
+    fieldKey: string;
+    placeholder: string;
+  }) => (
+    <div className="mt-2 space-y-2">
+      <div className="flex flex-col xs:flex-row items-start xs:items-center gap-2">
+        <div className="w-full xs:w-auto xs:flex-1">
+          <Input
+            placeholder={placeholder}
+            id={`highlightWord_${fieldKey}`}
+            className="w-full xs:w-40"
+          />
+        </div>
+        
+        <div className="w-full xs:w-auto">
+          <select
+            id={`highlightType_${fieldKey}`}
+            className="border rounded-md px-2 py-1 text-sm w-full xs:w-auto"
+            defaultValue="normal"
+          >
+            <option value="normal">Normal Gradient</option>
+            <option value="light">Light Gradient</option>
+          </select>
+        </div>
 
-    <select
-      id={`highlightType_${fieldKey}`}
-      className="border rounded-md px-2 py-1 text-sm"
-      defaultValue="normal"
-    >
-      <option value="normal">Normal</option>
-      <option value="light">Light</option>
-    </select>
+        <Button
+          type="button"
+          className="w-full xs:w-auto"
+          onClick={() => {
+            const input = document.getElementById(
+              `highlightWord_${fieldKey}`
+            ) as HTMLInputElement;
 
-    <Button
-      type="button"
-      onClick={() => {
-        const input = document.getElementById(
-          `highlightWord_${fieldKey}`
-        ) as HTMLInputElement;
+            const typeSelect = document.getElementById(
+              `highlightType_${fieldKey}`
+            ) as HTMLSelectElement;
 
-        const typeSelect = document.getElementById(
-          `highlightType_${fieldKey}`
-        ) as HTMLSelectElement;
+            const word = input?.value.trim();
+            if (!word) return;
 
-        const word = input?.value.trim();
-        if (!word) return;
+            const gradientClass =
+              typeSelect.value === "light"
+                ? "text-gradient-light"
+                : "text-gradient";
 
-        const gradientClass =
-          typeSelect.value === "light"
-            ? "text-gradient-light"
-            : "text-gradient";
+            const colored = `<span class="${gradientClass}">${word}</span>`;
 
-        const colored = `<span class="${gradientClass}">${word}</span>`;
+            setData((prev: any) => ({
+              ...prev,
+              [fieldKey]:
+                prev[fieldKey]?.replace(
+                  new RegExp(`\\b${word}\\b`, "g"),
+                  colored
+                ) ?? "",
+            }));
 
-        setData((prev: any) => ({
-          ...prev,
-          [fieldKey]:
-            prev[fieldKey]?.replace(
-              new RegExp(`\\b${word}\\b`, "g"),
-              colored
-            ) ?? "",
-        }));
-
-        input.value = "";
-      }}
-    >
-      Highlight
-    </Button>
-  </div>
-);
-
+            input.value = "";
+          }}
+        >
+          Highlight
+        </Button>
+      </div>
+      <p className="text-xs text-gray-500">
+        Type a word, choose gradient style, then click "Highlight"
+      </p>
+    </div>
+  );
 
   // -----------------------------
   // FETCH CONTACT PAGE
@@ -207,10 +216,6 @@ const HighlightTool = ({
     setSaving(false);
   };
 
-  // --------------------------------
-  // NO MORE FULL PAGE RETURN HERE!
-  // --------------------------------
-
   return (
     <ProtectedRoute>
       <AdminLayout>
@@ -220,167 +225,192 @@ const HighlightTool = ({
             <Loader2 className="animate-spin h-8 w-8" />
           </div>
         ) : (
-          <Card>
-            <CardHeader>
-              <CardTitle>Contact Page Settings</CardTitle>
-            </CardHeader>
+          <div className="space-y-8 w-full max-w-3xl mx-auto px-2 sm:px-4 lg:px-6 overflow-x-hidden">
+            <div className="text-center mb-4">
+              <h1 className="text-2xl font-bold">Contact Page Settings</h1>
+              <p className="text-gray-500 text-sm">Manage your Contact page content</p>
+            </div>
 
-            <CardContent className="space-y-8">
-              {/* HERO SECTION */}
-              <div>
-                <Label>Hero Badge</Label>
-                <Input
-                  value={data.hero_badge}
-                  onChange={(e) => handle("hero_badge", e.target.value)}
-                />
-              </div>
+            <Card className="overflow-hidden">
+              <CardHeader className="bg-gray-50">
+                <CardTitle className="text-lg">Contact Page Settings</CardTitle>
+              </CardHeader>
 
-              {/* HERO TITLE — supports <span> formatting */}
-              <div>
-                <Label>Hero Title (supports &lt;span&gt; formatting)</Label>
-
-                <Textarea
-                  rows={3}
-                  value={data.hero_title}
-                  onChange={(e) => handle("hero_title", e.target.value)}
-                />
-
-                {/* Highlight Word Helper */}
-                <HighlightTool
-                  fieldKey="hero_title"
-                  placeholder="Word to highlight (e.g., Contact)"
-                />
-
-
-              </div>
-
-
-              <div>
-                <Label>Hero Subtitle</Label>
-                <Textarea
-                  rows={2}
-                  value={data.hero_subtitle}
-                  onChange={(e) => handle("hero_subtitle", e.target.value)}
-                />
-              </div>
-
-              {/* CONTACT CARDS */}
-              {[1, 2, 3, 4].map((i) => (
-                <div key={i} className="border p-4 rounded-xl space-y-3">
-                  <h3 className="font-semibold text-lg">Contact Card {i}</h3>
-
-                  <Label>Card Icon (icon name or upload)</Label>
-                  <div className="flex items-center gap-3">
-                    <Input
-                      value={data[`card_${i}_icon`]}
-                      placeholder="MapPin / Phone / https://..."
-                      onChange={(e) => handle(`card_${i}_icon`, e.target.value)}
-                    />
-
-                    <input
-                      type="file"
-                      accept="image/*"
-                      id={`uploadCard${i}`}
-                      className="hidden"
-                      onChange={(e) =>
-                        e.target.files &&
-                        uploadImage(e.target.files[0], `card_${i}_icon`)
-                      }
-                    />
-
-                    <Button
-                      onClick={() =>
-                        document.getElementById(`uploadCard${i}`)?.click()
-                      }
-                    >
-                      <Upload className="w-4 h-4 mr-2" /> Upload
-                    </Button>
-                  </div>
-
-                  {data[`card_${i}_icon`]?.startsWith("http") && (
-                    <img
-                      src={data[`card_${i}_icon`]}
-                      className="w-14 h-14 object-cover rounded-lg mt-2"
-                    />
-                  )}
-
-                  <Label>Title</Label>
+              <CardContent className="space-y-8 pt-6">
+                {/* HERO SECTION */}
+                <div>
+                  <Label>Hero Badge</Label>
                   <Input
-                    value={data[`card_${i}_title`]}
-                    onChange={(e) =>
-                      handle(`card_${i}_title`, e.target.value)
-                    }
-                  />
-
-                  <Label>Line 1</Label>
-                  <Input
-                    value={data[`card_${i}_line1`]}
-                    onChange={(e) =>
-                      handle(`card_${i}_line1`, e.target.value)
-                    }
-                  />
-
-                  <Label>Line 2</Label>
-                  <Input
-                    value={data[`card_${i}_line2`]}
-                    onChange={(e) =>
-                      handle(`card_${i}_line2`, e.target.value)
-                    }
+                    value={data.hero_badge}
+                    onChange={(e) => handle("hero_badge", e.target.value)}
+                    className="w-full"
                   />
                 </div>
-              ))}
 
-              {/* FAQ */}
-              {[1, 2, 3, 4].map((i) => (
-                <div key={i} className="border p-4 rounded-lg space-y-3">
-                  <Label>FAQ {i} – Question</Label>
-                  <Input
-                    value={data[`faq_${i}_q`]}
-                    onChange={(e) => handle(`faq_${i}_q`, e.target.value)}
+                {/* HERO TITLE — supports <span> formatting */}
+                <div>
+                  <Label>Hero Title (supports &lt;span&gt; formatting)</Label>
+                  <Textarea
+                    rows={3}
+                    value={data.hero_title}
+                    onChange={(e) => handle("hero_title", e.target.value)}
+                    className="w-full"
                   />
 
-                  <Label>FAQ {i} – Answer</Label>
+                  {/* Highlight Word Helper */}
+                  <HighlightTool
+                    fieldKey="hero_title"
+                    placeholder="Word to highlight (e.g., Contact)"
+                  />
+                </div>
+
+                <div>
+                  <Label>Hero Subtitle</Label>
                   <Textarea
                     rows={2}
-                    value={data[`faq_${i}_a`]}
-                    onChange={(e) => handle(`faq_${i}_a`, e.target.value)}
+                    value={data.hero_subtitle}
+                    onChange={(e) => handle("hero_subtitle", e.target.value)}
+                    className="w-full"
                   />
                 </div>
-              ))}
 
-              {/* MAP */}
-              {/* <div>
-                <Label>Map Title</Label>
-                <Input
-                  value={data.map_title}
-                  onChange={(e) => handle("map_title", e.target.value)}
-                />
-              </div>
+                {/* CONTACT CARDS */}
+                {[1, 2, 3, 4].map((i) => (
+                  <div key={i} className="border p-4 rounded-xl space-y-3">
+                    <h3 className="font-semibold text-lg">Contact Card {i}</h3>
 
-              <div>
-                <Label>Map Address</Label>
-                <Textarea
-                  rows={2}
-                  value={data.map_address}
-                  onChange={(e) => handle("map_address", e.target.value)}
-                />
-              </div> */}
+                    <Label>Card Icon (icon name or upload)</Label>
+                    <div className="flex flex-col sm:flex-row items-start sm:items-center gap-3">
+                      <div className="flex-1 w-full">
+                        <Input
+                          value={data[`card_${i}_icon`]}
+                          placeholder="MapPin / Phone / https://..."
+                          onChange={(e) => handle(`card_${i}_icon`, e.target.value)}
+                          className="w-full"
+                        />
+                      </div>
 
-              {/* SAVE BUTTON */}
-              <Button onClick={save} disabled={saving} className="w-full">
-                {saving ? (
-                  <>
-                    <Loader2 className="animate-spin w-4 h-4 mr-2" />
-                    Saving...
-                  </>
-                ) : (
-                  <>
-                    <Save className="w-4 h-4 mr-2" /> Save Changes
-                  </>
-                )}
-              </Button>
-            </CardContent>
-          </Card>
+                      <input
+                        type="file"
+                        accept="image/*"
+                        id={`uploadCard${i}`}
+                        className="hidden"
+                        onChange={(e) =>
+                          e.target.files &&
+                          uploadImage(e.target.files[0], `card_${i}_icon`)
+                        }
+                      />
+
+                      <Button
+                        className="w-full sm:w-auto"
+                        onClick={() =>
+                          document.getElementById(`uploadCard${i}`)?.click()
+                        }
+                      >
+                        <Upload className="w-4 h-4 mr-2" /> Upload
+                      </Button>
+                    </div>
+
+                    {data[`card_${i}_icon`]?.startsWith("http") && (
+                      <img
+                        src={data[`card_${i}_icon`]}
+                        className="w-14 h-14 object-cover rounded-lg mt-2 max-w-full"
+                        alt={`Card ${i} icon`}
+                      />
+                    )}
+
+                    <Label>Title</Label>
+                    <Input
+                      value={data[`card_${i}_title`]}
+                      onChange={(e) =>
+                        handle(`card_${i}_title`, e.target.value)
+                      }
+                      className="w-full"
+                    />
+
+                    <Label>Line 1</Label>
+                    <Input
+                      value={data[`card_${i}_line1`]}
+                      onChange={(e) =>
+                        handle(`card_${i}_line1`, e.target.value)
+                      }
+                      className="w-full"
+                    />
+
+                    <Label>Line 2</Label>
+                    <Input
+                      value={data[`card_${i}_line2`]}
+                      onChange={(e) =>
+                        handle(`card_${i}_line2`, e.target.value)
+                      }
+                      className="w-full"
+                    />
+                  </div>
+                ))}
+
+                {/* FAQ */}
+                {[1, 2, 3, 4].map((i) => (
+                  <div key={i} className="border p-4 rounded-lg space-y-3">
+                    <Label>FAQ {i} – Question</Label>
+                    <Input
+                      value={data[`faq_${i}_q`]}
+                      onChange={(e) => handle(`faq_${i}_q`, e.target.value)}
+                      className="w-full"
+                    />
+
+                    <Label>FAQ {i} – Answer</Label>
+                    <Textarea
+                      rows={2}
+                      value={data[`faq_${i}_a`]}
+                      onChange={(e) => handle(`faq_${i}_a`, e.target.value)}
+                      className="w-full"
+                    />
+                  </div>
+                ))}
+
+                {/* MAP (commented out) */}
+                {/* <div>
+                  <Label>Map Title</Label>
+                  <Input
+                    value={data.map_title}
+                    onChange={(e) => handle("map_title", e.target.value)}
+                    className="w-full"
+                  />
+                </div>
+
+                <div>
+                  <Label>Map Address</Label>
+                  <Textarea
+                    rows={2}
+                    value={data.map_address}
+                    onChange={(e) => handle("map_address", e.target.value)}
+                    className="w-full"
+                  />
+                </div> */}
+
+                {/* SAVE BUTTON */}
+                <Button 
+                  onClick={save} 
+                  disabled={saving} 
+                  className="w-full sticky bottom-4 z-10"
+                  size="lg"
+                >
+                  {saving ? (
+                    <>
+                      <Loader2 className="animate-spin w-4 h-4 mr-2" />
+                      Saving...
+                    </>
+                  ) : (
+                    <>
+                      <Save className="w-4 h-4 mr-2" /> Save Changes
+                    </>
+                  )}
+                </Button>
+              </CardContent>
+            </Card>
+            
+            <div className="pb-8"></div>
+          </div>
         )}
       </AdminLayout>
     </ProtectedRoute>
