@@ -18,7 +18,7 @@ const PORT = process.env.PORT || 5000;
 const allowedOrigins = [
   "http://localhost:8080",
   "http://localhost:5173",
-  "https://saabz.netlify.app",
+  "https://saabz.onrender.com/",
 ];
 
 app.use(
