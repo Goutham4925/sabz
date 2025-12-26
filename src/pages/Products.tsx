@@ -6,7 +6,6 @@ import { Navbar } from "@/components/layout/Navbar";
 import { Footer } from "@/components/layout/Footer";
 import { ProductCard } from "@/components/home/ProductCard";
 import { Button } from "@/components/ui/button";
-import { useGlobalLoading } from "@/context/LoadingContext";
 
 import { Swiper, SwiperSlide } from "swiper/react";
 import { Pagination } from "swiper/modules";
@@ -29,9 +28,6 @@ const Products = () => {
   const [settings, setSettings] = useState<any>(null);
 
   const [showPrices, setShowPrices] = useState(true);
-  const [loading, setLoading] = useState(true);
-
-  const { setLoading: setGlobalLoading } = useGlobalLoading();
 
   // URL PARAMS
   const [searchParams, setSearchParams] = useSearchParams();
@@ -51,8 +47,6 @@ const Products = () => {
   // -------------------------------------------
   useEffect(() => {
     const load = async () => {
-      setGlobalLoading(true);
-
       try {
         const [prodRes, catRes, settingsRes] = await Promise.all([
           fetch(`${API_URL}/products`),
@@ -69,9 +63,6 @@ const Products = () => {
         setSettings(settingsData);
       } catch (err) {
         console.error("Failed to load products page:", err);
-      } finally {
-        setLoading(false);
-        setGlobalLoading(false);
       }
     };
 
@@ -98,8 +89,6 @@ const Products = () => {
       setSearchParams({ categoryId: String(id) });
     }
   };
-
-  if (loading) return null;
 
   return (
     <div className="min-h-screen">

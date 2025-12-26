@@ -6,7 +6,6 @@ import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
 import { MapPin, Phone, Mail, Clock, Send } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
-import { useGlobalLoading } from "@/context/LoadingContext";
 import { API_URL } from "@/config/api";
 
 const API = `${API_URL}/contact-page`;
@@ -21,10 +20,8 @@ const iconMap: any = {
 
 const Contact = () => {
   const { toast } = useToast();
-  const { setLoading: setGlobalLoading } = useGlobalLoading();
 
   const [page, setPage] = useState<any>(null);
-  const [loading, setLoading] = useState(true);
 
   const [formData, setFormData] = useState({
     name: "",
@@ -38,15 +35,12 @@ const Contact = () => {
   // LOAD PAGE CONTENT
   useEffect(() => {
     const load = async () => {
-      setGlobalLoading(true);
-
       try {
         const r = await fetch(API);
         const data = await r.json();
         setPage(data);
-      } finally {
-        setLoading(false);
-        setGlobalLoading(false);
+      } catch (err) {
+        console.error("Failed to load contact page:", err);
       }
     };
 
@@ -57,7 +51,6 @@ const Contact = () => {
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setIsSubmitting(true);
-    setGlobalLoading(true);
 
     try {
       const r = await fetch(MESSAGE_API, {
@@ -83,13 +76,12 @@ const Contact = () => {
     }
 
     setIsSubmitting(false);
-    setGlobalLoading(false);
   };
 
   const handleChange = (e: any) =>
     setFormData((prev) => ({ ...prev, [e.target.name]: e.target.value }));
 
-  if (loading || !page) return null;
+  if (!page) return null;
 
   return (
     <div className="min-h-screen">
@@ -103,13 +95,11 @@ const Contact = () => {
               {page.hero_badge}
             </span>
 
-            {/* ⭐ HERO TITLE WITH HTML SUPPORT */}
-            <h1 
+            <h1
               className="section-title mb-4 animate-fade-up stagger-1"
               dangerouslySetInnerHTML={{ __html: page.hero_title }}
             />
 
-            {/* ⭐ HERO SUBTITLE WITH HTML SUPPORT */}
             <p
               className="section-subtitle animate-fade-up stagger-2"
               dangerouslySetInnerHTML={{ __html: page.hero_subtitle }}
@@ -126,7 +116,9 @@ const Contact = () => {
               <form onSubmit={handleSubmit} className="space-y-6">
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                   <div>
-                    <label className="block text-sm font-medium mb-2">Your Name</label>
+                    <label className="block text-sm font-medium mb-2">
+                      Your Name
+                    </label>
                     <Input
                       name="name"
                       value={formData.name}
@@ -136,7 +128,9 @@ const Contact = () => {
                   </div>
 
                   <div>
-                    <label className="block text-sm font-medium mb-2">Email</label>
+                    <label className="block text-sm font-medium mb-2">
+                      Email
+                    </label>
                     <Input
                       name="email"
                       type="email"
@@ -148,7 +142,9 @@ const Contact = () => {
                 </div>
 
                 <div>
-                  <label className="block text-sm font-medium mb-2">Subject</label>
+                  <label className="block text-sm font-medium mb-2">
+                    Subject
+                  </label>
                   <Input
                     name="subject"
                     value={formData.subject}
@@ -158,7 +154,9 @@ const Contact = () => {
                 </div>
 
                 <div>
-                  <label className="block text-sm font-medium mb-2">Message</label>
+                  <label className="block text-sm font-medium mb-2">
+                    Message
+                  </label>
                   <Textarea
                     name="message"
                     rows={6}
@@ -198,7 +196,10 @@ const Contact = () => {
                   const Icon = iconMap[icon] || MapPin;
 
                   return (
-                    <div key={i} className="glass-card p-6 hover:shadow-elevated">
+                    <div
+                      key={i}
+                      className="glass-card p-6 hover:shadow-elevated"
+                    >
                       <div className="w-12 h-12 rounded-xl flex items-center justify-center mb-4 bg-gradient-to-br from-primary to-accent">
                         {isImage ? (
                           <img
@@ -224,22 +225,14 @@ const Contact = () => {
                   );
                 })}
               </div>
-
-              {/* MAP SECTION */}
-              {/* <div className="rounded-2xl overflow-hidden shadow-card h-64 bg-secondary">
-                <div className="w-full h-full flex items-center justify-center text-center text-muted-foreground">
-                  <MapPin className="w-12 h-12 mx-auto mb-4 text-primary" />
-                  <p className="font-medium">{page.map_title}</p>
-                  <p className="text-sm">{page.map_address}</p>
-                </div>
-              </div> */}
             </div>
           </div>
 
           {/* FAQ SECTION */}
           <section className="mt-24">
             <h2 className="section-title text-center mb-12">
-              Frequently Asked <span className="text-gradient">Questions</span>
+              Frequently Asked{" "}
+              <span className="text-gradient">Questions</span>
             </h2>
 
             <div className="grid grid-cols-1 md:grid-cols-2 gap-6 max-w-4xl mx-auto">

@@ -9,19 +9,16 @@ import { Dialog, DialogContent } from "@/components/ui/dialog";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
 import { useToast } from "@/hooks/use-toast";
-import { useGlobalLoading } from "@/context/LoadingContext";
 import { API_URL } from "@/config/api";
 
 export default function ProductDetail() {
   const { id } = useParams();
   const [product, setProduct] = useState<any>(null);
-  const [loading, setLoading] = useState(true);
 
   const [selectedImage, setSelectedImage] = useState<string | null>(null);
   const [zoomOpen, setZoomOpen] = useState(false);
 
   const { toast } = useToast();
-  const { setLoading: setGlobalLoading } = useGlobalLoading();
 
   const [open, setOpen] = useState(false);
   const [form, setForm] = useState({
@@ -36,7 +33,6 @@ export default function ProductDetail() {
   -------------------------------------------------- */
   useEffect(() => {
     (async () => {
-      setGlobalLoading(true);
       try {
         const res = await fetch(`${API_URL}/products/${id}`);
         const data = await res.json();
@@ -48,14 +44,9 @@ export default function ProductDetail() {
         );
       } catch {
         setProduct(null);
-      } finally {
-        setLoading(false);
-        setGlobalLoading(false);
       }
     })();
   }, [id]);
-
-  if (loading) return null;
 
   if (!product)
     return (
@@ -248,7 +239,7 @@ export default function ProductDetail() {
                 </section>
               )}
 
-              {/* EXTRA DETAILS ✅ FIX */}
+              {/* EXTRA DETAILS */}
               {(product.shelf_life ||
                 product.weight ||
                 product.package_type ||

@@ -2,7 +2,6 @@ import { useEffect, useState } from "react";
 import { Navbar } from "@/components/layout/Navbar";
 import { Footer } from "@/components/layout/Footer";
 import { Award, Heart, Leaf, Users, Cookie } from "lucide-react";
-import { useGlobalLoading } from "@/context/LoadingContext";
 import { API_URL } from "@/config/api";
 
 const iconMap: any = {
@@ -15,24 +14,20 @@ const iconMap: any = {
 const About = () => {
   const [about, setAbout] = useState<any>(null);
   const [loading, setLoading] = useState(true);
-  const { setLoading: setGlobalLoading } = useGlobalLoading();
 
   useEffect(() => {
-    setGlobalLoading(true);
-
     fetch(`${API_URL}/about?v=${Date.now()}`, { cache: "no-store" })
       .then((r) => r.json())
       .then((d) => {
         setAbout(d);
         setLoading(false);
-        setGlobalLoading(false);
       })
       .catch(() => {
         setLoading(false);
-        setGlobalLoading(false);
       });
   }, []);
 
+  // 🔹 No global blocking loader — page renders instantly
   if (loading || !about) return null;
 
   return (
@@ -107,8 +102,7 @@ const About = () => {
               {[1, 2, 3, 4].map((i) => {
                 const iconVal = about[`value_${i}_icon`] ?? "";
                 const isImage = iconVal.startsWith("http");
-                const Icon =
-                  iconMap[iconVal] || Heart;
+                const Icon = iconMap[iconVal] || Heart;
 
                 return (
                   <div key={i} className="glass-card p-8 text-center">
@@ -137,12 +131,11 @@ const About = () => {
           </div>
         </section>
 
-        {/* ================= TIMELINE SECTION (DYNAMIC) ================= */}
+        {/* ================= TIMELINE SECTION ================= */}
         {!about.timeline_hidden && about.timeline?.length > 0 && (
           <section className="py-24">
             <div className="container mx-auto px-4 md:px-8 max-w-4xl">
 
-              {/* HEADING */}
               <div className="text-center max-w-2xl mx-auto mb-16">
                 <h2
                   className="section-title mb-4"
@@ -156,14 +149,11 @@ const About = () => {
                 </p>
               </div>
 
-              {/* TIMELINE */}
               <div className="relative">
-                {/* Vertical Line */}
                 <div className="absolute left-1/2 top-0 bottom-0 w-1 bg-border transform -translate-x-1/2" />
 
                 {about.timeline.map((item: any, index: number) => {
                   if (!item.year && !item.title && !item.desc) return null;
-
                   const isLeft = index % 2 === 0;
 
                   return (
@@ -181,14 +171,10 @@ const About = () => {
                         <span className="font-display text-4xl font-bold text-primary block">
                           {item.year}
                         </span>
-
                         <h3 className="font-display text-xl font-semibold mt-2 mb-2">
                           {item.title}
                         </h3>
-
-                        <p className="text-muted-foreground">
-                          {item.desc}
-                        </p>
+                        <p className="text-muted-foreground">{item.desc}</p>
                       </div>
 
                       <div className="relative flex items-center justify-center w-12">
@@ -213,12 +199,10 @@ const About = () => {
                 __html: about.team_heading || "Meet the Team",
               }}
             />
-
             <p className="section-subtitle mb-16">
               {about.team_subheading ||
                 "The passionate people behind every authentic blend"}
             </p>
-
 
             <div className="grid grid-cols-1 md:grid-cols-3 gap-8 max-w-4xl mx-auto">
               {[1, 2, 3].map((i) => (
@@ -231,11 +215,9 @@ const About = () => {
                       />
                     )}
                   </div>
-
                   <h3 className="font-display text-xl font-semibold">
                     {about[`team_${i}_name`]}
                   </h3>
-
                   <p className="text-primary font-medium">
                     {about[`team_${i}_role`]}
                   </p>
