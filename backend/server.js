@@ -4,57 +4,27 @@ const cors = require("cors");
 require("dotenv").config();
 
 /* ----------------------------
-   ROUTE IMPORTS
----------------------------- */
-const authRoutes = require("./routes/auth");
-const productRoutes = require("./routes/products");
-const settingsRoutes = require("./routes/settings");
-const contactPageRoutes = require("./routes/contactPage");
-const categoriesRoutes = require("./routes/categories");
-const productImagesRoutes = require("./routes/productImages");
-const uploadRoutes = require("./routes/upload");
-const contactMessagesRoutes = require("./routes/contactMessages");
-const aboutRoutes = require("./routes/about");
-const aboutTimelineRoutes = require("./routes/aboutTimeline");
-const adminRoutes = require("./routes/admin");
-
-const { verifyAdmin } = require("./middleware/auth");
-
-/* ----------------------------
    APP INIT
 ---------------------------- */
 const app = express();
 const PORT = process.env.PORT || 5000;
 
+// ✅ REQUIRED FOR RENDER
+app.set("trust proxy", 1);
+
 /* ----------------------------
-   CORS (FIXED & SAFE)
+   FORCE CORS (BULLETPROOF)
 ---------------------------- */
-const allowedOrigins = [
-  "http://localhost:5173",
-  "http://localhost:3000",
-  "https://saabz.netlify.app",
-];
+app.use((req, res, next) => {
+  res.header("Access-Control-Allow-Origin", "https://saabz.netlify.app");
+  res.header("Access-Control-Allow-Methods", "GET,POST,PUT,DELETE,OPTIONS");
+  res.header("Access-Control-Allow-Headers", "Content-Type, Authorization");
 
-app.use(
-  cors({
-    origin: (origin, callback) => {
-      // Allow server-to-server, Postman, Render health checks
-      if (!origin) return callback(null, true);
-
-      if (allowedOrigins.includes(origin)) {
-        return callback(null, true);
-      }
-
-      // IMPORTANT: do NOT throw error
-      return callback(null, false);
-    },
-    methods: ["GET", "POST", "PUT", "DELETE", "OPTIONS"],
-    allowedHeaders: ["Content-Type", "Authorization"],
-  })
-);
-
-// Explicit preflight handling (VERY IMPORTANT)
-app.options("*", cors());
+  if (req.method === "OPTIONS") {
+    return res.sendStatus(200);
+  }
+  next();
+});
 
 /* ----------------------------
    BODY PARSER
@@ -62,28 +32,21 @@ app.options("*", cors());
 app.use(express.json());
 
 /* ----------------------------
-   STATIC FILES
+   ROUTES
 ---------------------------- */
-app.use("/uploads", express.static("public/uploads"));
+app.use("/api/auth", require("./routes/auth"));
+app.use("/api/products", require("./routes/products"));
+app.use("/api/categories", require("./routes/categories"));
+app.use("/api/product-images", require("./routes/productImages"));
+app.use("/api/upload", require("./routes/upload"));
+app.use("/api/messages", require("./routes/contactMessages"));
+app.use("/api/contact-page", require("./routes/contactPage"));
+app.use("/api/about", require("./routes/about"));
+app.use("/api/settings", require("./routes/settings"));
+app.use("/api/about-timeline", require("./routes/aboutTimeline"));
 
-/* ----------------------------
-   PUBLIC ROUTES
----------------------------- */
-app.use("/api/auth", authRoutes);
-app.use("/api/products", productRoutes);
-app.use("/api/categories", categoriesRoutes);
-app.use("/api/product-images", productImagesRoutes);
-app.use("/api/upload", uploadRoutes);
-app.use("/api/messages", contactMessagesRoutes);
-app.use("/api/contact-page", contactPageRoutes);
-app.use("/api/about", aboutRoutes);
-app.use("/api/settings", settingsRoutes);
-app.use("/api/about-timeline", aboutTimelineRoutes);
-
-/* ----------------------------
-   ADMIN ROUTES (PROTECTED)
----------------------------- */
-app.use("/api/admin", verifyAdmin, adminRoutes);
+const { verifyAdmin } = require("./middleware/auth");
+app.use("/api/admin", verifyAdmin, require("./routes/admin"));
 
 /* ----------------------------
    HEALTH CHECK
@@ -93,7 +56,7 @@ app.get("/", (req, res) => {
 });
 
 /* ----------------------------
-   GLOBAL ERROR HANDLER
+   ERROR HANDLER
 ---------------------------- */
 app.use((err, req, res, next) => {
   console.error("SERVER ERROR:", err);
