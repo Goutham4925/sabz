@@ -26,9 +26,9 @@ interface AdminLayoutProps {
 
 const navItems = [
   { path: '/admin/dashboard', label: 'Dashboard', icon: LayoutDashboard },
-  { path: '/admin/products', label: 'Products', icon: Package },
-  { path: '/admin/categories', label: 'Categories', icon: Tags },
   { path: '/admin/settings', label: 'Homepage', icon: Home },
+  { path: '/admin/categories', label: 'Categories', icon: Tags },
+  { path: '/admin/products', label: 'Products', icon: Package },
   { path: '/admin/about', label: 'About Page', icon:  BookOpen },
   { path: '/admin/contact', label: 'Contact Page', icon: Mail },
   { path: '/admin/messages', label: 'Messages', icon: MessageCircle },
