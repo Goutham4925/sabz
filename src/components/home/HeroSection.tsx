@@ -22,32 +22,25 @@ export function HeroSection() {
     loadSettings();
   }, []);
 
-  // ⭐ DO NOT RETURN NULL — prevents layout collapse
-  const heroHeight = "min-h-screen flex items-center justify-center";
-
-  if (!settings) {
-    return (
-      <section className={`relative ${heroHeight} bg-black/10`}>
-        <div className="animate-pulse text-center text-white opacity-40">
-          Loading Hero…
-        </div>
-      </section>
-    );
-  }
-
   return (
     <section className="relative min-h-screen flex items-center justify-center overflow-hidden">
-      {/* Background */}
-      
-
       {/* Decorative blobs */}
       <div className="absolute top-20 left-10 w-72 h-72 bg-primary/10 rounded-full blur-3xl animate-float" />
-      <div className="absolute bottom-20 right-10 w-96 h-96 bg-accent/10 rounded-full blur-3xl animate-float" style={{ animationDelay: "2s" }} />
-      <div className="absolute top-1/4 right-1/4 w-16 h-16 bg-gradient-to-br from-primary/20 to-accent/20 rounded-full blur-sm animate-float" style={{ animationDelay: "1s" }} />
-      <div className="absolute bottom-1/3 left-1/4 w-12 h-12 bg-gradient-to-br from-accent/20 to-primary/20 rounded-full blur-sm animate-float" style={{ animationDelay: "3s" }} />
+      <div
+        className="absolute bottom-20 right-10 w-96 h-96 bg-accent/10 rounded-full blur-3xl animate-float"
+        style={{ animationDelay: "2s" }}
+      />
+      <div
+        className="absolute top-1/4 right-1/4 w-16 h-16 bg-gradient-to-br from-primary/20 to-accent/20 rounded-full blur-sm animate-float"
+        style={{ animationDelay: "1s" }}
+      />
+      <div
+        className="absolute bottom-1/3 left-1/4 w-12 h-12 bg-gradient-to-br from-accent/20 to-primary/20 rounded-full blur-sm animate-float"
+        style={{ animationDelay: "3s" }}
+      />
 
       {/* Hero Image */}
-      {settings.hero_image_url && (
+      {settings?.hero_image_url && (
         <img
           src={settings.hero_image_url}
           alt="Hero Background"
@@ -55,7 +48,7 @@ export function HeroSection() {
         />
       )}
 
-      {/* RED / SPICE COLOR OVERLAY */}
+      {/* Color Overlay */}
       <div className="absolute inset-0 bg-gradient-hero opacity-85" />
 
       {/* Content */}
@@ -68,7 +61,7 @@ export function HeroSection() {
             }`}
           >
             <Sparkles className="w-4 h-4" />
-            <span>{settings.hero_badge_text || "Premium Artisan Quality"}</span>
+            <span>{settings?.hero_badge_text || "Premium Artisan Quality"}</span>
           </div>
 
           {/* Title */}
@@ -77,7 +70,9 @@ export function HeroSection() {
               isVisible ? "opacity-100 translate-y-0" : "opacity-0 translate-y-10"
             }`}
             dangerouslySetInnerHTML={{
-              __html: settings.hero_title || "Crafted with <span class='text-[#e4a95c]'>Tradition</span>. Baked with Love.",
+              __html:
+                settings?.hero_title ||
+                "Crafted with <span class='text-[#e4a95c]'>Tradition</span>. Baked with Love.",
             }}
           />
 
@@ -87,7 +82,8 @@ export function HeroSection() {
               isVisible ? "opacity-100 translate-y-0" : "opacity-0 translate-y-10"
             }`}
           >
-            {settings.hero_subtitle || "Premium biscuits made fresh everyday."}
+            {settings?.hero_subtitle ||
+              "Premium biscuits made fresh everyday."}
           </p>
 
           {/* CTAs */}
@@ -97,14 +93,22 @@ export function HeroSection() {
             }`}
           >
             <Link to="/products">
-              <Button variant="hero" size="xl" className="bg-gradient-to-r from-golden to-accent text-chocolate">
+              <Button
+                variant="hero"
+                size="xl"
+                className="bg-gradient-to-r from-golden to-accent text-chocolate"
+              >
                 View Products
                 <ArrowRight className="w-5 h-5 group-hover:translate-x-1 transition-transform" />
               </Button>
             </Link>
 
             <Link to="/about">
-              <Button className="border-cream/30 text-cream hover:bg-cream/10 hover:text-cream" variant="outline" size="xl">
+              <Button
+                className="border-cream/30 text-cream hover:bg-cream/10 hover:text-cream"
+                variant="outline"
+                size="xl"
+              >
                 Our Story
               </Button>
             </Link>
@@ -116,8 +120,8 @@ export function HeroSection() {
 }
 
 /* -----------------------------------
-   ⭐ PRELOAD FUNCTION FOR Index.jsx 
--------------------------------------*/
+   PRELOAD FUNCTION
+------------------------------------- */
 HeroSection.preload = async () => {
   try {
     const res = await fetch(`${API_URL}/settings`);
