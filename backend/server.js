@@ -19,6 +19,7 @@ const allowedOrigins = [
   "http://localhost:8080",
   "http://localhost:5173",
   "https://saabz-kitchen.onrender.com", 
+  "https://sabz-kitchen.onrender.com",
 ];
 
 app.use(
