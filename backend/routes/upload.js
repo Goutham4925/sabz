@@ -24,7 +24,7 @@ const upload = multer({ storage: multer.memoryStorage() });
 // -------------------------------
 // Helper: Upload buffer to Cloudinary
 // -------------------------------
-function uploadToCloudinary(buffer, folder = "gobbly_treat") {
+function uploadToCloudinary(buffer, folder = "saabz_kitchen") {
   return new Promise((resolve, reject) => {
     const uploadStream = cloudinary.uploader.upload_stream(
       {
@@ -51,7 +51,7 @@ function extractPublicId(url) {
   try {
     const parts = url.split("/");
     const filename = parts.pop(); // xx.png
-    const folder = parts.pop();   // gobbly_treat
+    const folder = parts.pop();   
     return `${folder}/${filename.split(".")[0]}`;
   } catch {
     return null;
@@ -100,7 +100,7 @@ router.post("/gallery", upload.single("image"), async (req, res) => {
     if (!req.file)
       return res.status(400).json({ error: "No file uploaded" });
 
-    const result = await uploadToCloudinary(req.file.buffer, "gobbly_gallery");
+    const result = await uploadToCloudinary(req.file.buffer, "saabz_gallery");
 
     res.json({
       url: result.secure_url,
