@@ -5,6 +5,9 @@ import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { BrowserRouter, Routes, Route } from "react-router-dom";
 import { AuthProvider } from "@/hooks/useAuth";
 
+// Layout
+import PublicLayout from "@/components/layout/PublicLayout";
+
 // Public Pages
 import Index from "./pages/Index";
 import Products from "./pages/Products";
@@ -33,17 +36,18 @@ const queryClient = new QueryClient();
 function RouterWrapper() {
   return (
     <Routes>
-      {/* PUBLIC ROUTES */}
-      <Route path="/" element={<Index />} />
-      <Route path="/products" element={<Products />} />
-      <Route path="/products/:id" element={<ProductDetail />} />
-      <Route path="/about" element={<About />} />
-      <Route path="/contact" element={<Contact />} />
 
-      {/* ADMIN AUTH */}
+      {/* ================= PUBLIC LAYOUT ================= */}
+      <Route element={<PublicLayout />}>
+        <Route path="/" element={<Index />} />
+        <Route path="/products" element={<Products />} />
+        <Route path="/products/:id" element={<ProductDetail />} />
+        <Route path="/about" element={<About />} />
+        <Route path="/contact" element={<Contact />} />
+      </Route>
+
+      {/* ================= ADMIN ROUTES ================= */}
       <Route path="/admin/login" element={<AdminLogin />} />
-
-      {/* ADMIN DASHBOARD */}
       <Route path="/admin/dashboard" element={<Dashboard />} />
       <Route path="/admin/products" element={<AdminProducts />} />
       <Route path="/admin/products/new" element={<ProductForm />} />
@@ -56,8 +60,9 @@ function RouterWrapper() {
       <Route path="/admin/messages" element={<MessagesPage />} />
       <Route path="/admin/users" element={<UserManagement />} />
 
-      {/* 404 */}
+      {/* ================= 404 ================= */}
       <Route path="*" element={<NotFound />} />
+
     </Routes>
   );
 }

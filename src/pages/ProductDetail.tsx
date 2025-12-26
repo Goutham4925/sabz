@@ -51,7 +51,7 @@ export default function ProductDetail() {
   if (!product)
     return (
       <div className="min-h-screen">
-        <Navbar />
+
         <div className="pt-32 text-center">
           <h2 className="text-xl font-bold">Product not found</h2>
           <Link to="/products">

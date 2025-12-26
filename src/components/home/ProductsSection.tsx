@@ -14,21 +14,20 @@ export function ProductsSection() {
   const sectionRef = useRef<HTMLElement>(null);
   const [isVisible, setIsVisible] = useState(false);
 
-  // =====================================================
-  // 1) READ PRELOADED DATA (INSTANT – NO DELAY)
-  // =====================================================
+  /* =====================================================
+     1️⃣ PRELOADED DATA (FAST PATH)
+  ===================================================== */
   const preload = (window as any).__PRELOADED__?.productsBundle;
   const preProducts = preload?.products || [];
   const preSettings = preload?.settings || null;
 
-  // Local state (used ONLY if preloaded data missing)
   const [products, setProducts] = useState<any[]>(preProducts);
   const [settings, setSettings] = useState<any>(preSettings);
   const [loading, setLoading] = useState(!preProducts.length);
 
-  // =====================================================
-  // 2) Fetch ONLY if preload failed
-  // =====================================================
+  /* =====================================================
+     2️⃣ FETCH ONLY IF PRELOAD FAILED
+  ===================================================== */
   useEffect(() => {
     if (preProducts.length) {
       setLoading(false);
@@ -48,17 +47,17 @@ export function ProductsSection() {
         setSettings(await setRes.json());
       } catch (err) {
         console.error("Product load error:", err);
+      } finally {
+        setLoading(false);
       }
-
-      setLoading(false);
     }
 
     load();
   }, []);
 
-  // =====================================================
-  // 3) Intersection Observer (same smooth behavior)
-  // =====================================================
+  /* =====================================================
+     3️⃣ INTERSECTION OBSERVER
+  ===================================================== */
   useEffect(() => {
     const observer = new IntersectionObserver(
       ([entry]) => entry.isIntersecting && setIsVisible(true),
@@ -69,14 +68,34 @@ export function ProductsSection() {
     return () => observer.disconnect();
   }, []);
 
-  // =====================================================
-  // Sanitize allowed inline <span>
-  // =====================================================
+  /* =====================================================
+     SANITIZE CMS HTML
+  ===================================================== */
   const sanitize = (html: string | null | undefined) =>
     DOMPurify.sanitize(html || "", {
       ALLOWED_TAGS: ["span", "strong", "b", "em", "i"],
       ALLOWED_ATTR: ["class", "style"],
     });
+
+  /* =====================================================
+     SKELETONS (LOCAL, LIGHTWEIGHT)
+  ===================================================== */
+  const HeaderSkeleton = () => (
+    <div className="text-center max-w-3xl mx-auto mb-16">
+      <div className="h-6 w-32 mx-auto bg-muted/30 rounded-full mb-4 animate-pulse" />
+      <div className="h-10 w-3/4 mx-auto bg-muted/30 rounded mb-4 animate-pulse" />
+      <div className="h-4 w-2/3 mx-auto bg-muted/30 rounded animate-pulse" />
+    </div>
+  );
+
+  const CardSkeleton = () => (
+    <div className="rounded-2xl bg-muted/30 p-4 animate-pulse">
+      <div className="h-40 bg-muted/40 rounded-xl mb-4" />
+      <div className="h-4 bg-muted/40 rounded w-3/4 mb-2" />
+      <div className="h-4 bg-muted/40 rounded w-1/2 mb-4" />
+      <div className="h-8 bg-muted/40 rounded w-full" />
+    </div>
+  );
 
   return (
     <section
@@ -89,7 +108,7 @@ export function ProductsSection() {
 
         {/* =================== HEADER =================== */}
         {loading ? (
-          <div className="h-[140px] animate-pulse bg-muted/20 rounded-xl mb-10" />
+          <HeaderSkeleton />
         ) : (
           <div className="text-center max-w-3xl mx-auto mb-16">
             <span className="badge-premium mb-4 inline-block">
@@ -101,7 +120,7 @@ export function ProductsSection() {
               dangerouslySetInnerHTML={{
                 __html:
                   sanitize(settings?.products_title) ||
-                  "Premium <span class='text-[#e4a95c]'>Biscuits</span>",
+                  "Premium <span class='text-[#e4a95c]'>Products</span>",
               }}
             />
 
@@ -110,7 +129,7 @@ export function ProductsSection() {
               dangerouslySetInnerHTML={{
                 __html:
                   sanitize(settings?.products_subtitle) ||
-                  "Discover our handcrafted selection of artisan biscuits.",
+                  "Discover our handcrafted selection of premium products.",
               }}
             />
           </div>
@@ -118,9 +137,9 @@ export function ProductsSection() {
 
         {/* =================== PRODUCTS =================== */}
         {loading ? (
-          <div className="grid grid-cols-4 gap-8 mb-12">
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-8 mb-12">
             {Array.from({ length: 4 }).map((_, i) => (
-              <div key={i} className="h-[320px] bg-muted/20 animate-pulse rounded-xl" />
+              <CardSkeleton key={i} />
             ))}
           </div>
         ) : (
@@ -130,12 +149,8 @@ export function ProductsSection() {
               {products.map((p, i) => (
                 <div
                   key={p.id}
+                  style={{ transitionDelay: `${i * 120}ms` }}
                   className="transition-all duration-700"
-                  style={{
-                    opacity: isVisible ? 1 : 0,
-                    transform: isVisible ? "translateY(0)" : "translateY(10px)",
-                    transitionDelay: `${i * 120}ms`,
-                  }}
                 >
                   <ProductCard {...p} />
                 </div>
@@ -160,12 +175,11 @@ export function ProductsSection() {
           </>
         )}
 
-        {/* =================== VIEW ALL BUTTON =================== */}
+        {/* =================== CTA =================== */}
         {!loading && (
           <div className="text-center">
             <Link to="/products">
               <Button
-                variant="default"
                 size="lg"
                 className="bg-gradient-to-r from-golden to-accent text-white"
               >
@@ -181,7 +195,7 @@ export function ProductsSection() {
 }
 
 /* =====================================================
-   PRELOAD → Returns BOTH products + settings
+   PRELOAD (UNCHANGED)
 ===================================================== */
 ProductsSection.preload = async () => {
   try {

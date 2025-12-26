@@ -32,7 +32,7 @@ const About = () => {
 
   return (
     <div className="min-h-screen">
-      <Navbar />
+
 
       <main className="pt-32 pb-24">
 

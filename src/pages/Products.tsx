@@ -5,6 +5,7 @@ import DOMPurify from "dompurify";
 import { Navbar } from "@/components/layout/Navbar";
 import { Footer } from "@/components/layout/Footer";
 import { ProductCard } from "@/components/home/ProductCard";
+import { ProductsGridLoader } from "@/components/home/ProductsGridLoader";
 import { Button } from "@/components/ui/button";
 
 import { Swiper, SwiperSlide } from "swiper/react";
@@ -28,6 +29,7 @@ const Products = () => {
   const [settings, setSettings] = useState<any>(null);
 
   const [showPrices, setShowPrices] = useState(true);
+  const [productsLoading, setProductsLoading] = useState(true);
 
   // URL PARAMS
   const [searchParams, setSearchParams] = useSearchParams();
@@ -43,7 +45,7 @@ const Products = () => {
     });
 
   // -------------------------------------------
-  // FETCH PRODUCTS + CATEGORIES + SETTINGS
+  // FETCH DATA
   // -------------------------------------------
   useEffect(() => {
     const load = async () => {
@@ -63,6 +65,8 @@ const Products = () => {
         setSettings(settingsData);
       } catch (err) {
         console.error("Failed to load products page:", err);
+      } finally {
+        setProductsLoading(false);
       }
     };
 
@@ -97,7 +101,7 @@ const Products = () => {
       <main className="pt-32 pb-24">
         <div className="container mx-auto px-4 md:px-8">
 
-          {/* ================= HEADER (CMS DRIVEN) ================= */}
+          {/* ================= HEADER ================= */}
           <div className="text-center max-w-3xl mx-auto mb-16">
             <span className="badge-premium mb-4 inline-block">
               {settings?.products_badge || "Our Collection"}
@@ -153,37 +157,47 @@ const Products = () => {
             </label>
           </div>
 
-          {/* ================= DESKTOP GRID ================= */}
-          <div className="hidden md:grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-8">
-            {filteredProducts.map((product, idx) => (
-              <div
-                key={product.id}
-                className="animate-fade-up"
-                style={{ animationDelay: `${idx * 100}ms` }}
-              >
-                <ProductCard {...product} showPrice={showPrices} />
+          {/* ================= PRODUCTS GRID ================= */}
+          <div className="hidden md:block">
+            {productsLoading ? (
+              <ProductsGridLoader />
+            ) : (
+              <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-8">
+                {filteredProducts.map((product, idx) => (
+                  <div
+                    key={product.id}
+                    className="animate-fade-up"
+                    style={{ animationDelay: `${idx * 100}ms` }}
+                  >
+                    <ProductCard {...product} showPrice={showPrices} />
+                  </div>
+                ))}
               </div>
-            ))}
+            )}
           </div>
 
           {/* ================= MOBILE SWIPER ================= */}
           <div className="md:hidden mb-12">
-            <Swiper
-              modules={[Pagination]}
-              slidesPerView={1.2}
-              pagination={{ clickable: true }}
-              spaceBetween={20}
-            >
-              {filteredProducts.map((product) => (
-                <SwiperSlide key={product.id}>
-                  <ProductCard {...product} showPrice={showPrices} />
-                </SwiperSlide>
-              ))}
-            </Swiper>
+            {productsLoading ? (
+              <ProductsGridLoader count={3} />
+            ) : (
+              <Swiper
+                modules={[Pagination]}
+                slidesPerView={1.2}
+                pagination={{ clickable: true }}
+                spaceBetween={20}
+              >
+                {filteredProducts.map((product) => (
+                  <SwiperSlide key={product.id}>
+                    <ProductCard {...product} showPrice={showPrices} />
+                  </SwiperSlide>
+                ))}
+              </Swiper>
+            )}
           </div>
 
           {/* ================= EMPTY STATE ================= */}
-          {filteredProducts.length === 0 && (
+          {!productsLoading && filteredProducts.length === 0 && (
             <div className="text-center py-16">
               <p className="text-muted-foreground text-lg">
                 No products found in this category.
