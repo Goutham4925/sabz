@@ -3,69 +3,84 @@ const express = require("express");
 const cors = require("cors");
 require("dotenv").config();
 
-/* ----------------------------
-   APP INIT
----------------------------- */
+const authRoutes = require("./routes/auth");
+const productRoutes = require("./routes/products");
+const settingsRoutes = require("./routes/settings");
+const contactPageRoutes = require("./routes/contactPage");
+const { verifyAdmin } = require("./middleware/auth");
+
 const app = express();
 const PORT = process.env.PORT || 5000;
 
-// ✅ REQUIRED FOR RENDER
-app.set("trust proxy", 1);
+// ----------------------------
+// CORS CONFIG (PRODUCTION SAFE)
+// ----------------------------
+const allowedOrigins = [
+  "http://localhost:8080",
+  "http://localhost:5173",
+  "https://saabz.netlify.app",
+];
 
-/* ----------------------------
-   FORCE CORS (BULLETPROOF)
----------------------------- */
-app.use((req, res, next) => {
-  res.header("Access-Control-Allow-Origin", "https://saabz.netlify.app");
-  res.header("Access-Control-Allow-Methods", "GET,POST,PUT,DELETE,OPTIONS");
-  res.header("Access-Control-Allow-Headers", "Content-Type, Authorization");
+app.use(
+  cors({
+    origin: function (origin, callback) {
+      // Allow Postman / server-to-server
+      if (!origin) return callback(null, true);
 
-  if (req.method === "OPTIONS") {
-    return res.sendStatus(200);
-  }
-  next();
-});
+      if (allowedOrigins.includes(origin)) {
+        return callback(null, true);
+      }
 
-/* ----------------------------
-   BODY PARSER
----------------------------- */
+      return callback(new Error("Not allowed by CORS"));
+    },
+    credentials: true,
+    methods: ["GET", "POST", "PUT", "DELETE", "OPTIONS"],
+    allowedHeaders: ["Content-Type", "Authorization"],
+  })
+);
+
+
+
+// ----------------------------
+// BODY PARSER
+// ----------------------------
 app.use(express.json());
 
-/* ----------------------------
-   ROUTES
----------------------------- */
-app.use("/api/auth", require("./routes/auth"));
-app.use("/api/products", require("./routes/products"));
+// ----------------------------
+// STATIC FILES
+// ----------------------------
+app.use("/uploads", express.static("public/uploads"));
+
+// ----------------------------
+// PUBLIC ROUTES
+// ----------------------------
+app.use("/api/auth", authRoutes);
+app.use("/api/products", productRoutes);
 app.use("/api/categories", require("./routes/categories"));
 app.use("/api/product-images", require("./routes/productImages"));
 app.use("/api/upload", require("./routes/upload"));
 app.use("/api/messages", require("./routes/contactMessages"));
-app.use("/api/contact-page", require("./routes/contactPage"));
+app.use("/api/contact-page", contactPageRoutes);
 app.use("/api/about", require("./routes/about"));
-app.use("/api/settings", require("./routes/settings"));
+app.use("/api/settings", settingsRoutes);
 app.use("/api/about-timeline", require("./routes/aboutTimeline"));
 
-const { verifyAdmin } = require("./middleware/auth");
+
+// ----------------------------
+// ADMIN ROUTES
+// ----------------------------
 app.use("/api/admin", verifyAdmin, require("./routes/admin"));
 
-/* ----------------------------
-   HEALTH CHECK
----------------------------- */
+// ----------------------------
+// HEALTH CHECK
+// ----------------------------
 app.get("/", (req, res) => {
   res.send("Backend API is running");
 });
 
-/* ----------------------------
-   ERROR HANDLER
----------------------------- */
-app.use((err, req, res, next) => {
-  console.error("SERVER ERROR:", err);
-  res.status(500).json({ error: "Internal Server Error" });
-});
-
-/* ----------------------------
-   START SERVER
----------------------------- */
+// ----------------------------
+// START SERVER
+// ----------------------------
 app.listen(PORT, () => {
   console.log(`Backend server running on port ${PORT}`);
 });
