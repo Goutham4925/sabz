@@ -5,10 +5,19 @@ import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { BrowserRouter, Routes, Route } from "react-router-dom";
 import { AuthProvider } from "@/hooks/useAuth";
 
-// Layout
+/* ----------------------------
+   GLOBAL UTIL
+---------------------------- */
+import ScrollToTop from "@/components/ui/ScrollToTop";
+
+/* ----------------------------
+   LAYOUTS
+---------------------------- */
 import PublicLayout from "@/components/layout/PublicLayout";
 
-// Public Pages
+/* ----------------------------
+   PUBLIC PAGES
+---------------------------- */
 import Index from "./pages/Index";
 import Products from "./pages/Products";
 import ProductDetail from "./pages/ProductDetail";
@@ -16,7 +25,9 @@ import About from "./pages/About";
 import Contact from "./pages/Contact";
 import NotFound from "./pages/NotFound";
 
-// Admin Pages
+/* ----------------------------
+   ADMIN PAGES
+---------------------------- */
 import AdminLogin from "./pages/AdminLogin";
 import Dashboard from "./pages/admin/Dashboard";
 import AdminProducts from "./pages/admin/Products";
@@ -28,6 +39,9 @@ import MessagesPage from "./pages/admin/Messages";
 import UserManagement from "./pages/admin/UserManagement";
 import CategoriesPage from "./pages/admin/CategoriesPage";
 
+/* ----------------------------
+   QUERY CLIENT
+---------------------------- */
 const queryClient = new QueryClient();
 
 /* ----------------------------
@@ -36,7 +50,6 @@ const queryClient = new QueryClient();
 function RouterWrapper() {
   return (
     <Routes>
-
       {/* ================= PUBLIC LAYOUT ================= */}
       <Route element={<PublicLayout />}>
         <Route path="/" element={<Index />} />
@@ -62,7 +75,6 @@ function RouterWrapper() {
 
       {/* ================= 404 ================= */}
       <Route path="*" element={<NotFound />} />
-
     </Routes>
   );
 }
@@ -76,6 +88,7 @@ const App = () => (
       <Toaster />
       <Sonner />
       <BrowserRouter>
+        <ScrollToTop />
         <AuthProvider>
           <RouterWrapper />
         </AuthProvider>
