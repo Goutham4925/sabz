@@ -359,7 +359,7 @@ export default function Settings() {
               </div>
 
               {/* SHOW/HIDE TEXT */}
-              <div className="flex items-center gap-3 mt-3">
+              {/* <div className="flex items-center gap-3 mt-3">
                 <input
                   type="checkbox"
                   checked={settings.show_company_text}
@@ -371,7 +371,7 @@ export default function Settings() {
                   }
                 />
                 <Label>Show Company Name Text</Label>
-              </div>
+              </div> */}
             </CardContent>
           </Card>
 
@@ -590,7 +590,7 @@ export default function Settings() {
                 className="w-full"
               />
 
-              <Label>CTA Image</Label>
+              {/* <Label>CTA Image</Label>
               <div className="flex flex-col sm:flex-row items-start sm:items-center gap-3">
                 <div className="flex-1 w-full">
                   <Input
@@ -616,7 +616,7 @@ export default function Settings() {
                 >
                   Upload
                 </Button>
-              </div>
+              </div> */}
 
               {settings.cta_image_url && (
                 <img 
