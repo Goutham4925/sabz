@@ -124,7 +124,7 @@ const AdminLayout = ({ children }: AdminLayoutProps) => {
                 )}
 
                 <span className="font-display text-lg text-chocolate block">
-                  Sabz Kitchen
+                  Saabz Kitchen
                 </span>
                 <span className="text-xs text-muted-foreground">Admin Panel</span>
               </div>
