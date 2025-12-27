@@ -6,7 +6,7 @@ import { API_URL } from "@/config/api";
 
 const FALLBACK = {
   hero_title:
-    "Pure Flavors, <span class='text-[#e4a95c]'>Rooted</span> in Tradition",
+    "Pure Flavors, <span class=\"text-gradient-light\">Rooted</span> in Tradition",
   hero_subtitle: "Experience the authentic taste of Kerala with our handcrafted masala powders, made from the finest spices and recipes passed down through generations.",
   hero_badge_text: "Premium Kerala Spices",
   hero_image_url: null,
