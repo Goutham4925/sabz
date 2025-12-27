@@ -3,6 +3,10 @@ const express = require("express");
 const cors = require("cors");
 require("dotenv").config();
 
+// 🔹 Prisma (single shared instance)
+const prisma = require("./prisma/client");
+
+// 🔹 Routes
 const authRoutes = require("./routes/auth");
 const productRoutes = require("./routes/products");
 const settingsRoutes = require("./routes/settings");
@@ -19,7 +23,7 @@ const allowedOrigins = [
   "http://localhost:8080",
   "http://localhost:5173",
   "https://saabz.onrender.com",
-  "https://sabz-sage.vercel.app"
+  "https://sabz-sage.vercel.app",
 ];
 
 app.use(
@@ -39,8 +43,6 @@ app.use(
     allowedHeaders: ["Content-Type", "Authorization"],
   })
 );
-
-
 
 // ----------------------------
 // BODY PARSER
@@ -66,7 +68,6 @@ app.use("/api/about", require("./routes/about"));
 app.use("/api/settings", settingsRoutes);
 app.use("/api/about-timeline", require("./routes/aboutTimeline"));
 
-
 // ----------------------------
 // ADMIN ROUTES
 // ----------------------------
@@ -78,6 +79,24 @@ app.use("/api/admin", verifyAdmin, require("./routes/admin"));
 app.get("/", (req, res) => {
   res.send("Backend API is running");
 });
+
+// ----------------------------
+// GRACEFUL SHUTDOWN (CRITICAL)
+// ----------------------------
+const shutdown = async (signal) => {
+  console.log(`\n${signal} received. Closing Prisma connections...`);
+  try {
+    await prisma.$disconnect();
+    console.log("Prisma disconnected cleanly.");
+  } catch (err) {
+    console.error("Error during Prisma disconnect:", err);
+  } finally {
+    process.exit(0);
+  }
+};
+
+process.on("SIGTERM", shutdown);
+process.on("SIGINT", shutdown);
 
 // ----------------------------
 // START SERVER
