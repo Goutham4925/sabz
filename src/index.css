@@ -304,3 +304,33 @@ html {
   background: hsl(var(--primary) / 0.7);
 }
 
+/* ================================
+   MOBILE SCROLL SAFETY FIX
+   ================================ */
+
+/* Prevent scroll lock on mobile */
+html,
+body {
+  overscroll-behavior-y: auto;
+  overscroll-behavior-x: none;
+  -webkit-overflow-scrolling: touch;
+  touch-action: pan-y;
+}
+
+/* Swiper should never block vertical scroll */
+.swiper,
+.swiper-wrapper,
+.swiper-slide {
+  touch-action: pan-y !important;
+}
+
+/* Fix iOS momentum scroll + fixed elements */
+body {
+  position: relative;
+  overflow-x: hidden;
+}
+
+/* Prevent accidental scroll lock from animations */
+section {
+  will-change: transform;
+}

@@ -6,7 +6,7 @@ import { ArrowRight } from "lucide-react";
 import DOMPurify from "dompurify";
 import { API_URL } from "@/config/api";
 
-// Swiper (lazy used on mobile only)
+// Swiper (mobile only)
 import { Swiper, SwiperSlide } from "swiper/react";
 import { Pagination } from "swiper/modules";
 import "swiper/css";
@@ -14,7 +14,9 @@ import "swiper/css/pagination";
 
 export function ProductsSection() {
   const sectionRef = useRef<HTMLElement>(null);
-  const [isVisible, setIsVisible] = useState(false);
+
+  const [isVisible, setIsVisible] = useState(true); // ✅ visible by default (no dead state)
+  const [isMobile, setIsMobile] = useState(false);
 
   /* =====================================================
      PRELOAD FAST PATH
@@ -25,23 +27,24 @@ export function ProductsSection() {
 
   const [products, setProducts] = useState<any[]>(preProducts);
   const [settings, setSettings] = useState<any>(preSettings);
-
-  const [productsLoading, setProductsLoading] = useState(!preProducts.length);
-  const [isMobile, setIsMobile] = useState(false);
+  const [loading, setLoading] = useState(!preProducts.length);
 
   /* =====================================================
-     DEVICE CHECK (for Swiper)
+     DEVICE CHECK
   ===================================================== */
   useEffect(() => {
-    setIsMobile(window.innerWidth < 768);
+    const check = () => setIsMobile(window.innerWidth < 768);
+    check();
+    window.addEventListener("resize", check);
+    return () => window.removeEventListener("resize", check);
   }, []);
 
   /* =====================================================
-     FETCH PRODUCTS FIRST (NON-BLOCKING SETTINGS)
+     FETCH DATA (PRODUCTS FIRST)
   ===================================================== */
   useEffect(() => {
     if (preProducts.length) {
-      setProductsLoading(false);
+      setLoading(false);
       return;
     }
 
@@ -52,11 +55,11 @@ export function ProductsSection() {
         const featured = prodData.filter((p: any) => p.is_featured);
         const nonFeatured = prodData.filter((p: any) => !p.is_featured);
         setProducts([...featured, ...nonFeatured].slice(0, 4));
-        setProductsLoading(false); // ⬅ products can render NOW
+        setLoading(false);
       })
-      .catch(console.error);
+      .catch(() => setLoading(false));
 
-    // 🎨 SETTINGS (background)
+    // 🎨 SETTINGS (background, non-blocking)
     fetch(`${API_URL}/settings`)
       .then((r) => r.json())
       .then(setSettings)
@@ -64,9 +67,11 @@ export function ProductsSection() {
   }, []);
 
   /* =====================================================
-     INTERSECTION OBSERVER (SAFE + FALLBACK)
+     INTERSECTION OBSERVER (DESKTOP ONLY)
   ===================================================== */
   useEffect(() => {
+    if (isMobile) return;
+
     const observer = new IntersectionObserver(
       ([entry]) => {
         if (entry.isIntersecting) {
@@ -78,15 +83,8 @@ export function ProductsSection() {
     );
 
     if (sectionRef.current) observer.observe(sectionRef.current);
-
-    // 🛟 Fallback — NEVER stay invisible
-    const timeout = setTimeout(() => setIsVisible(true), 600);
-
-    return () => {
-      observer.disconnect();
-      clearTimeout(timeout);
-    };
-  }, []);
+    return () => observer.disconnect();
+  }, [isMobile]);
 
   /* =====================================================
      SANITIZE CMS HTML
@@ -123,14 +121,17 @@ export function ProductsSection() {
   return (
     <section
       ref={sectionRef}
-      className={`py-24 bg-background relative overflow-hidden transition-all duration-700 ${
-        isVisible ? "opacity-100 translate-y-0" : "opacity-0 translate-y-10"
-      }`}
+      className={`
+        py-24 bg-background relative
+        overflow-visible md:overflow-hidden
+        transition-opacity duration-500
+        ${isVisible ? "opacity-100" : "opacity-0"}
+      `}
     >
       <div className="container mx-auto px-4 md:px-8">
 
-        {/* =================== HEADER =================== */}
-        {productsLoading ? (
+        {/* ================= HEADER ================= */}
+        {loading ? (
           <HeaderSkeleton />
         ) : (
           <div className="text-center max-w-3xl mx-auto mb-16">
@@ -158,8 +159,8 @@ export function ProductsSection() {
           </div>
         )}
 
-        {/* =================== PRODUCTS =================== */}
-        {productsLoading ? (
+        {/* ================= PRODUCTS ================= */}
+        {loading ? (
           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-8 mb-12">
             {Array.from({ length: 4 }).map((_, i) => (
               <CardSkeleton key={i} />
@@ -167,14 +168,14 @@ export function ProductsSection() {
           </div>
         ) : (
           <>
-            {/* Desktop Grid */}
+            {/* DESKTOP GRID */}
             {!isMobile && (
               <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-8 mb-12">
                 {products.map((p, i) => (
                   <div
                     key={p.id}
                     style={{ transitionDelay: `${i * 120}ms` }}
-                    className="transition-all duration-700"
+                    className="transition-opacity duration-500"
                   >
                     <ProductCard {...p} />
                   </div>
@@ -182,14 +183,18 @@ export function ProductsSection() {
               </div>
             )}
 
-            {/* Mobile Swiper */}
+            {/* MOBILE SWIPER */}
             {isMobile && (
               <div className="mb-12">
                 <Swiper
                   modules={[Pagination]}
-                  spaceBetween={20}
                   slidesPerView={1.2}
+                  spaceBetween={20}
                   pagination={{ clickable: true }}
+                  touchStartPreventDefault={false}
+                  touchMoveStopPropagation={false}
+                  passiveListeners={true}
+                  resistanceRatio={0}
                 >
                   {products.map((p) => (
                     <SwiperSlide key={p.id}>
@@ -202,8 +207,8 @@ export function ProductsSection() {
           </>
         )}
 
-        {/* =================== CTA =================== */}
-        {!productsLoading && (
+        {/* ================= CTA ================= */}
+        {!loading && (
           <div className="text-center">
             <Link to="/products">
               <Button
@@ -222,7 +227,7 @@ export function ProductsSection() {
 }
 
 /* =====================================================
-   PRELOAD (OPTIONAL BUT FAST)
+   OPTIONAL PRELOAD (FAST SSR / HYDRATION)
 ===================================================== */
 ProductsSection.preload = async () => {
   try {

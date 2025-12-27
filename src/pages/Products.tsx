@@ -35,10 +35,13 @@ const Products = () => {
   const activeCategoryId = searchParams.get("categoryId") || "all";
 
   /* =====================================================
-     DEVICE CHECK (Swiper only on mobile)
+     DEVICE CHECK (SAFE + RESPONSIVE)
   ===================================================== */
   useEffect(() => {
-    setIsMobile(window.innerWidth < 768);
+    const check = () => setIsMobile(window.innerWidth < 768);
+    check();
+    window.addEventListener("resize", check);
+    return () => window.removeEventListener("resize", check);
   }, []);
 
   /* =====================================================
@@ -51,21 +54,19 @@ const Products = () => {
     });
 
   /* =====================================================
-     FETCH PRODUCTS FIRST (CRITICAL PATH)
+     FETCH DATA (PRODUCTS FIRST)
   ===================================================== */
   useEffect(() => {
+    // 🚀 PRODUCTS — critical path
     fetch(`${API_URL}/products`)
       .then((r) => r.json())
       .then((data) => {
         setProducts(data);
-        setProductsLoading(false); // 🚀 products render immediately
-      })
-      .catch((err) => {
-        console.error("Products load error:", err);
         setProductsLoading(false);
-      });
+      })
+      .catch(() => setProductsLoading(false));
 
-    // 🎨 categories (background)
+    // 🎨 Categories (background)
     fetch(`${API_URL}/categories`)
       .then((r) => r.json())
       .then((cats) =>
@@ -73,7 +74,7 @@ const Products = () => {
       )
       .catch(() => {});
 
-    // 🎨 settings (background)
+    // 🎨 Settings (background)
     fetch(`${API_URL}/settings`)
       .then((r) => r.json())
       .then(setSettings)
@@ -102,7 +103,7 @@ const Products = () => {
      RENDER
   ===================================================== */
   return (
-    <div className="min-h-screen">
+    <div className="min-h-screen overflow-x-hidden">
       <Navbar />
 
       <main className="pt-32 pb-24">
@@ -177,7 +178,10 @@ const Products = () => {
                       className="animate-fade-up"
                       style={{ animationDelay: `${idx * 80}ms` }}
                     >
-                      <ProductCard {...product} showPrice={showPrices} />
+                      <ProductCard
+                        {...product}
+                        showPrice={showPrices}
+                      />
                     </div>
                   ))}
                 </div>
@@ -194,12 +198,19 @@ const Products = () => {
                 <Swiper
                   modules={[Pagination]}
                   slidesPerView={1.2}
-                  pagination={{ clickable: true }}
                   spaceBetween={20}
+                  pagination={{ clickable: true }}
+                  touchStartPreventDefault={false}
+                  touchMoveStopPropagation={false}
+                  passiveListeners={true}
+                  resistanceRatio={0}
                 >
                   {filteredProducts.map((product) => (
                     <SwiperSlide key={product.id}>
-                      <ProductCard {...product} showPrice={showPrices} />
+                      <ProductCard
+                        {...product}
+                        showPrice={showPrices}
+                      />
                     </SwiperSlide>
                   ))}
                 </Swiper>
