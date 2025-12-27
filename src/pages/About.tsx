@@ -212,9 +212,15 @@ const About = () => {
         {/* ================= TEAM ================= */}
         <section className="py-24 bg-secondary/30">
           <div className="container mx-auto px-4 md:px-8 text-center">
-            <h2 className="section-title mb-4">
-              {loading ? "Meet the Team" : about.team_heading || "Meet the Team"}
-            </h2>
+            <h2
+              className="section-title mb-4"
+              dangerouslySetInnerHTML={{
+                __html:
+                  about.team_heading ||
+                  "Meet <span class='text-gradient'>Our Team</span>",
+              }}
+            />
+
 
             <p className="section-subtitle mb-16">
               {loading
