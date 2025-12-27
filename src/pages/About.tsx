@@ -26,11 +26,11 @@ const About = () => {
   }, []);
 
   return (
-    <div className="min-h-screen overflow-x-hidden">
+    <div className="min-h-screen overflow-x-hidden bg-background">
       <Navbar />
 
       {/* =====================================================
-         MAIN — HEIGHT IS ALWAYS RESERVED (NO LAYOUT SHIFT)
+         MAIN — HEIGHT ALWAYS RESERVED (NO CLS)
       ===================================================== */}
       <main className="pt-32 pb-24">
 
@@ -56,7 +56,7 @@ const About = () => {
                     dangerouslySetInnerHTML={{
                       __html:
                         about.hero_title ||
-                        `A Legacy of <span class='text-gradient'>Baking Excellence</span>`,
+                        "A Legacy of <span class='text-gradient'>Baking Excellence</span>",
                     }}
                   />
                 )}
@@ -164,7 +164,7 @@ const About = () => {
           </div>
         </section>
 
-        {/* ================= TIMELINE ================= */}
+        {/* ================= JOURNEY ================= */}
         {!loading && !about.timeline_hidden && about.timeline?.length > 0 && (
           <section className="py-24">
             <div className="container mx-auto px-4 md:px-8 max-w-4xl">
@@ -178,7 +178,8 @@ const About = () => {
                   }}
                 />
                 <p className="section-subtitle">
-                  {about.timeline_subheading || "From humble beginnings to today"}
+                  {about.timeline_subheading ||
+                    "From humble beginnings to today"}
                 </p>
               </div>
 
@@ -186,7 +187,10 @@ const About = () => {
                 <div className="hidden md:block absolute left-1/2 top-0 bottom-0 w-1 bg-border -translate-x-1/2" />
 
                 {about.timeline.map((item: any) => (
-                  <div key={item.id} className="flex flex-col md:flex-row items-start mb-16">
+                  <div
+                    key={item.id}
+                    className="flex flex-col md:flex-row items-start mb-16"
+                  >
                     <div className="md:w-1/2 md:px-6 text-left md:text-right">
                       <span className="font-display text-4xl font-bold text-primary block">
                         {item.year}
@@ -216,16 +220,14 @@ const About = () => {
               className="section-title mb-4"
               dangerouslySetInnerHTML={{
                 __html:
-                  about.team_heading ||
+                  about?.team_heading ||
                   "Meet <span class='text-gradient'>Our Team</span>",
               }}
             />
 
-
             <p className="section-subtitle mb-16">
-              {loading
-                ? "The people behind every product"
-                : about.team_subheading || "The people behind every product"}
+              {about?.team_subheading ||
+                "The people behind every product"}
             </p>
 
             <div className="grid grid-cols-1 md:grid-cols-3 gap-8 max-w-4xl mx-auto">
