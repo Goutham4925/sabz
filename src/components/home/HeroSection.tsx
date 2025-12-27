@@ -4,8 +4,16 @@ import { ArrowRight, Sparkles } from "lucide-react";
 import { Link } from "react-router-dom";
 import { API_URL } from "@/config/api";
 
+const FALLBACK = {
+  hero_title:
+    "Pure Flavors, <span class='text-[#e4a95c]'>Rooted</span> in Tradition",
+  hero_subtitle: "Experience the authentic taste of Kerala with our handcrafted masala powders, made from the finest spices and recipes passed down through generations.",
+  hero_badge_text: "Premium Kerala Spices",
+  hero_image_url: null,
+};
+
 export const HeroSection = memo(function HeroSection() {
-  const [settings, setSettings] = useState<any>(null);
+  const [settings, setSettings] = useState<any>(FALLBACK);
   const [imageLoaded, setImageLoaded] = useState(false);
 
   useEffect(() => {
@@ -15,7 +23,8 @@ export const HeroSection = memo(function HeroSection() {
       .then((res) => res.json())
       .then((data) => {
         if (alive) setSettings(data);
-      });
+      })
+      .catch(() => {});
 
     return () => {
       alive = false;
@@ -24,12 +33,12 @@ export const HeroSection = memo(function HeroSection() {
 
   return (
     <section className="relative min-h-screen flex items-center justify-center overflow-hidden">
-      {/* Decorative blobs */}
+      {/* Decorative blobs (unchanged) */}
       <div className="absolute top-20 left-10 w-72 h-72 bg-primary/10 rounded-full blur-3xl animate-float" />
       <div className="absolute bottom-20 right-10 w-96 h-96 bg-accent/10 rounded-full blur-3xl animate-float" />
 
-      {/* Hero Image */}
-      {settings?.hero_image_url && (
+      {/* Hero Image (lazy & async) */}
+      {settings.hero_image_url && (
         <img
           src={settings.hero_image_url}
           alt="Hero Background"
@@ -52,27 +61,18 @@ export const HeroSection = memo(function HeroSection() {
           {/* Badge */}
           <div className="inline-flex items-center gap-2 bg-cream/10 border border-cream/20 text-cream px-4 py-2 rounded-full text-sm mb-8 animate-fade-up">
             <Sparkles className="w-4 h-4" />
-            <span>
-              {settings ? settings.hero_badge_text : "\u00A0"}
-            </span>
+            <span>{settings.hero_badge_text}</span>
           </div>
 
           {/* Title */}
           <h1
             className="font-display text-5xl md:text-7xl lg:text-8xl font-bold leading-tight mb-6 animate-fade-up delay-100"
-          >
-            {settings ? (
-              <span
-                dangerouslySetInnerHTML={{ __html: settings.hero_title }}
-              />
-            ) : (
-              <span className="block h-[3.5em]" />
-            )}
-          </h1>
+            dangerouslySetInnerHTML={{ __html: settings.hero_title }}
+          />
 
           {/* Subtitle */}
           <p className="text-[#e4a95c] text-lg md:text-xl max-w-2xl mx-auto mb-10 leading-relaxed animate-fade-up delay-200">
-            {settings ? settings.hero_subtitle : "\u00A0"}
+            {settings.hero_subtitle}
           </p>
 
           {/* CTAs */}
@@ -82,7 +82,6 @@ export const HeroSection = memo(function HeroSection() {
                 variant="hero"
                 size="xl"
                 className="bg-gradient-to-r from-golden to-accent text-chocolate"
-                disabled={!settings}
               >
                 View Products
                 <ArrowRight className="w-5 h-5 ml-2" />
@@ -94,13 +93,11 @@ export const HeroSection = memo(function HeroSection() {
                 className="border-cream/30 text-cream hover:bg-cream/10"
                 variant="outline"
                 size="xl"
-                disabled={!settings}
               >
                 Our Story
               </Button>
             </Link>
           </div>
-
         </div>
       </div>
     </section>
