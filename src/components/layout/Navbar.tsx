@@ -92,10 +92,10 @@ export function Navbar() {
               {showText && (
                 <div className="leading-tight">
                   <span className="font-display text-lg md:text-xl font-bold text-foreground">
-                    Gobbly Treat
+                    Saabz Kitchen
                   </span>
                   <span className="text-[10px] md:text-xs text-muted-foreground uppercase tracking-widest">
-                    Artisan Biscuits
+                    Kitchen needs
                   </span>
                 </div>
               )}

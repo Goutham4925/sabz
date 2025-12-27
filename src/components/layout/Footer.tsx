@@ -116,9 +116,9 @@ export function Footer() {
                   )}
                   {showText && (
                     <>
-                      <span className="font-bold text-xl">Gobbly Treat</span>
+                      <span className="font-bold text-xl">Saabz Kitchen</span>
                       <div className="text-xs opacity-60 uppercase">
-                        Artisan Biscuits
+                        Kitchen needs
                       </div>
                     </>
                   )}
@@ -230,7 +230,7 @@ export function Footer() {
         <div className="border-t border-white/10 py-6">
           <div className="container mx-auto flex flex-col md:flex-row justify-between gap-4">
             <p className="text-sm opacity-50">
-              © {new Date().getFullYear()} Gobbly Treat. All rights reserved.
+              © {new Date().getFullYear()} Saabz Kitchen. All rights reserved.
             </p>
 
             <div className="flex gap-6">
