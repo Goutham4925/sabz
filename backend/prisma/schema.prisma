@@ -31,19 +31,14 @@ model Category {
 /// ////////////////////////////////////////////////////////////////////////
 /// ////////////////////////////////////////////////////////////////////////
 model Product {
-  id             Int      @id @default(autoincrement())
+  id             Int            @id @default(autoincrement())
   name           String
   description    String?
   price          Float?
   image_url      String?
-
-  rating         Float?   @default(0)
-  ratingCount    Int?     @default(0)
-
-  is_featured    Boolean  @default(false)
-  created_at     DateTime @default(now())
-  updated_at     DateTime @updatedAt
-
+  is_featured    Boolean        @default(false)
+  created_at     DateTime       @default(now())
+  updated_at     DateTime       @updatedAt
   categoryId     Int?
   highlights     String?
   ingredients    String?
@@ -51,8 +46,9 @@ model Product {
   package_type   String?
   shelf_life     String?
   weight         String?
-
   gallery        Json?
+  rating         Float?         @default(0)
+  ratingCount    Int?           @default(0)
   category       Category?      @relation(fields: [categoryId], references: [id])
   images         ProductImage[]
 }
@@ -90,9 +86,9 @@ model SiteSetting {
   about_paragraph2        String?
   footer_subtext          String?
   footer_text             String?
-  hero_badge_text         String?  //Not currently Using
-  hero_customers_label    String?  //Not currently Using
-  hero_flavors_label      String?  //Not currently Using
+  hero_badge_text         String?
+  hero_customers_label    String?
+  hero_flavors_label      String?
   hero_years_label        String?
   navbar_logo             String?
   products_subtitle       String?
@@ -104,8 +100,8 @@ model SiteSetting {
   about_badge             String?
   navbar_brand_image      String?
   show_company_text       Boolean @default(true)
-  footer_email            String?  //Not currently Using
-  footer_phone            String?  //Not currently Using
+  footer_email            String?
+  footer_phone            String?
   privacy_policy          String?
   social_facebook         String?
   social_instagram        String?
@@ -118,7 +114,7 @@ model SiteSetting {
 /// ////////////////////////////////////////////////////////////////////////
 /// ////////////////////////////////////////////////////////////////////////
 model AboutPage {
-  id                  Int     @id @default(autoincrement())
+  id                  Int             @id @default(autoincrement())
   hero_badge          String?
   hero_title          String?
   hero_paragraph1     String?
@@ -136,21 +132,21 @@ model AboutPage {
   value_4_icon        String?
   value_4_title       String?
   value_4_desc        String?
-  milestone_1_year    String?  //Not currently Using
-  milestone_1_title   String?  //Not currently Using
-  milestone_1_desc    String?  //Not currently Using
-  milestone_2_year    String?  //Not currently Using
-  milestone_2_title   String?  //Not currently Using
-  milestone_2_desc    String?  //Not currently Using
-  milestone_3_year    String?  //Not currently Using
-  milestone_3_title   String?  //Not currently Using
-  milestone_3_desc    String?  //Not currently Using
-  milestone_4_year    String?  //Not currently Using
-  milestone_4_title   String?  //Not currently Using
-  milestone_4_desc    String?  //Not currently Using
-  milestone_5_year    String?  //Not currently Using
-  milestone_5_title   String?  //Not currently Using
-  milestone_5_desc    String?  //Not currently Using
+  milestone_1_year    String?
+  milestone_1_title   String?
+  milestone_1_desc    String?
+  milestone_2_year    String?
+  milestone_2_title   String?
+  milestone_2_desc    String?
+  milestone_3_year    String?
+  milestone_3_title   String?
+  milestone_3_desc    String?
+  milestone_4_year    String?
+  milestone_4_title   String?
+  milestone_4_desc    String?
+  milestone_5_year    String?
+  milestone_5_title   String?
+  milestone_5_desc    String?
   team_1_name         String?
   team_1_role         String?
   team_1_image        String?
@@ -166,12 +162,10 @@ model AboutPage {
   stat_customers      String?
   timeline_heading    String?
   timeline_subheading String?
-  timeline_hidden     Boolean @default(false)
+  timeline_hidden     Boolean         @default(false)
   team_heading        String?
   team_subheading     String?
-
-
-  timeline AboutTimeline[]
+  timeline            AboutTimeline[]
 
   @@map("AboutPage")
 }
@@ -229,12 +223,11 @@ model ContactMessage {
 }
 
 model AboutTimeline {
-  id    Int    @id @default(autoincrement())
-  year  String
-  title String
-  desc  String
-  order Int
-
+  id      Int       @id @default(autoincrement())
+  year    String
+  title   String
+  desc    String
+  order   Int
   aboutId Int
   about   AboutPage @relation(fields: [aboutId], references: [id], onDelete: Cascade)
 

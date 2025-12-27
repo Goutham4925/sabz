@@ -11,9 +11,12 @@ import { Textarea } from "@/components/ui/textarea";
 import { useToast } from "@/hooks/use-toast";
 import { API_URL } from "@/config/api";
 
+import { ProductDetailSkeleton } from "@/components/ui/ProductDetailSkeleton";
+
 export default function ProductDetail() {
   const { id } = useParams();
   const [product, setProduct] = useState<any>(null);
+  const [loading, setLoading] = useState(true);
 
   const [selectedImage, setSelectedImage] = useState<string | null>(null);
   const [zoomOpen, setZoomOpen] = useState(false);
@@ -32,55 +35,47 @@ export default function ProductDetail() {
      LOAD PRODUCT
   -------------------------------------------------- */
   useEffect(() => {
+    setLoading(true);
+
     (async () => {
       try {
         const res = await fetch(`${API_URL}/products/${id}`);
         const data = await res.json();
-        setProduct(data);
 
+        setProduct(data);
         setSelectedImage(
           data.image_url ||
             (data.images?.length ? data.images[0].url : null)
         );
       } catch {
         setProduct(null);
+      } finally {
+        setLoading(false);
       }
     })();
   }, [id]);
-
-  if (!product)
-    return (
-      <div className="min-h-screen">
-
-        <div className="pt-32 text-center">
-          <h2 className="text-xl font-bold">Product not found</h2>
-          <Link to="/products">
-            <Button className="mt-4">Back to products</Button>
-          </Link>
-        </div>
-        <Footer />
-      </div>
-    );
 
   /* --------------------------------------------------
      SAFE VALUES
   -------------------------------------------------- */
   const rating =
-    typeof product.rating === "number" ? product.rating : 4.5;
+    typeof product?.rating === "number" ? product.rating : 4.5;
 
   const ratingCount =
-    typeof product.ratingCount === "number" ? product.ratingCount : 0;
+    typeof product?.ratingCount === "number" ? product.ratingCount : 0;
 
   const parseList = (val: string | null) =>
     val ? val.split(",").map((v) => v.trim()).filter(Boolean) : [];
 
-  const highlights = parseList(product.highlights);
-  const ingredients = parseList(product.ingredients);
+  const highlights = parseList(product?.highlights);
+  const ingredients = parseList(product?.ingredients);
 
-  const galleryImages = [
-    ...(product.image_url ? [{ id: "main", url: product.image_url }] : []),
-    ...(product.images || []),
-  ];
+  const galleryImages = product
+    ? [
+        ...(product.image_url ? [{ id: "main", url: product.image_url }] : []),
+        ...(product.images || []),
+      ]
+    : [];
 
   /* --------------------------------------------------
      SEND ENQUIRY
@@ -130,166 +125,178 @@ export default function ProductDetail() {
             <ArrowLeft className="w-4 h-4" /> Back to Products
           </Link>
 
-          <div className="grid grid-cols-1 lg:grid-cols-2 gap-12">
-            {/* IMAGE */}
-            <div>
-              <div className="relative aspect-square rounded-3xl overflow-hidden shadow-lg">
-                <img
-                  src={selectedImage!}
-                  className="w-full h-full object-cover cursor-zoom-in"
-                  onClick={() => setZoomOpen(true)}
-                />
-
-                <button
-                  className="absolute bottom-3 right-3 bg-white p-2 rounded-full shadow"
-                  onClick={() => setZoomOpen(true)}
-                >
-                  <ZoomIn className="w-5 h-5" />
-                </button>
-              </div>
-
-              <div className="flex gap-3 mt-4 overflow-x-auto">
-                {galleryImages.map((img: any) => (
+          {/* 🔁 CONTENT SWITCH — THIS IS WHERE SKELETON LIVES */}
+          {loading ? (
+            <ProductDetailSkeleton />
+          ) : !product ? (
+            <div className="text-center py-16">
+              <h2 className="text-xl font-bold">Product not found</h2>
+              <Link to="/products">
+                <Button className="mt-4">Back to products</Button>
+              </Link>
+            </div>
+          ) : (
+            <div className="grid grid-cols-1 lg:grid-cols-2 gap-12">
+              {/* IMAGE */}
+              <div>
+                <div className="relative aspect-square rounded-3xl overflow-hidden shadow-lg">
                   <img
-                    key={img.id}
-                    src={img.url}
-                    onClick={() => setSelectedImage(img.url)}
-                    className={`h-20 w-20 object-cover rounded-xl cursor-pointer border-2 ${
-                      selectedImage === img.url
-                        ? "border-primary"
-                        : "border-transparent"
-                    }`}
+                    src={selectedImage!}
+                    className="w-full h-full object-cover cursor-zoom-in"
+                    onClick={() => setZoomOpen(true)}
                   />
-                ))}
-              </div>
-            </div>
 
-            {/* DETAILS */}
-            <div>
-              {/* RATING */}
-              <div className="flex items-center gap-1 mb-3">
-                {[1, 2, 3, 4, 5].map((i) => (
-                  <Star
-                    key={i}
-                    className={`w-5 h-5 ${
-                      i <= Math.round(rating)
-                        ? "fill-golden text-golden"
-                        : "text-gray-400"
-                    }`}
-                  />
-                ))}
-                <span className="text-sm text-muted-foreground ml-1">
-                  {rating.toFixed(1)} ({ratingCount})
-                </span>
-              </div>
+                  <button
+                    className="absolute bottom-3 right-3 bg-white p-2 rounded-full shadow"
+                    onClick={() => setZoomOpen(true)}
+                  >
+                    <ZoomIn className="w-5 h-5" />
+                  </button>
+                </div>
 
-              <h1 className="font-display text-5xl font-bold mb-3">
-                {product.name}
-              </h1>
-
-              <p className="text-muted-foreground text-lg mb-4">
-                {product.description}
-              </p>
-
-              <div className="text-4xl font-bold text-primary mb-6">
-                {product.price ? `₹${product.price}` : "—"}
+                <div className="flex gap-3 mt-4 overflow-x-auto">
+                  {galleryImages.map((img: any) => (
+                    <img
+                      key={img.id}
+                      src={img.url}
+                      onClick={() => setSelectedImage(img.url)}
+                      className={`h-20 w-20 object-cover rounded-xl cursor-pointer border-2 ${
+                        selectedImage === img.url
+                          ? "border-primary"
+                          : "border-transparent"
+                      }`}
+                    />
+                  ))}
+                </div>
               </div>
 
-              <Button
-                variant="hero"
-                size="lg"
-                className="w-full mb-8"
-                onClick={() => setOpen(true)}
-              >
-                <MessageCircle className="w-5 h-5 mr-2" />
-                Send Enquiry
-              </Button>
+              {/* DETAILS */}
+              <div>
+                {/* RATING */}
+                <div className="flex items-center gap-1 mb-3">
+                  {[1, 2, 3, 4, 5].map((i) => (
+                    <Star
+                      key={i}
+                      className={`w-5 h-5 ${
+                        i <= Math.round(rating)
+                          ? "fill-golden text-golden"
+                          : "text-gray-400"
+                      }`}
+                    />
+                  ))}
+                  <span className="text-sm text-muted-foreground ml-1">
+                    {rating.toFixed(1)} ({ratingCount})
+                  </span>
+                </div>
 
-              {/* HIGHLIGHTS */}
-              {highlights.length > 0 && (
-                <section className="mb-6">
-                  <h3 className="text-xl font-semibold mb-2">Highlights</h3>
-                  <div className="flex flex-wrap gap-2">
-                    {highlights.map((h) => (
-                      <span
-                        key={h}
-                        className="px-3 py-1 rounded-full bg-secondary"
-                      >
-                        {h}
-                      </span>
-                    ))}
-                  </div>
-                </section>
-              )}
+                <h1 className="font-display text-5xl font-bold mb-3">
+                  {product.name}
+                </h1>
 
-              {/* INGREDIENTS */}
-              {ingredients.length > 0 && (
-                <section className="mb-6">
-                  <h3 className="text-xl font-semibold mb-2">Ingredients</h3>
-                  <div className="flex flex-wrap gap-2">
-                    {ingredients.map((i) => (
-                      <span
-                        key={i}
-                        className="px-3 py-1 rounded-full bg-secondary"
-                      >
-                        {i}
-                      </span>
-                    ))}
-                  </div>
-                </section>
-              )}
+                <p className="text-muted-foreground text-lg mb-4">
+                  {product.description}
+                </p>
 
-              {/* EXTRA DETAILS */}
-              {(product.shelf_life ||
-                product.weight ||
-                product.package_type ||
-                product.nutrition_info) && (
-                <section className="mt-8">
-                  <h3 className="text-xl font-semibold mb-4">
-                    Product Details
-                  </h3>
+                <div className="text-4xl font-bold text-primary mb-6">
+                  {product.price ? `₹${product.price}` : "—"}
+                </div>
 
-                  <div className="grid grid-cols-2 md:grid-cols-3 gap-4 text-sm">
-                    {product.shelf_life && (
-                      <div className="bg-muted p-3 rounded">
-                        <strong>Shelf Life</strong>
-                        <p className="text-muted-foreground">
-                          {product.shelf_life}
-                        </p>
-                      </div>
-                    )}
+                <Button
+                  variant="hero"
+                  size="lg"
+                  className="w-full mb-8"
+                  onClick={() => setOpen(true)}
+                >
+                  <MessageCircle className="w-5 h-5 mr-2" />
+                  Send Enquiry
+                </Button>
 
-                    {product.weight && (
-                      <div className="bg-muted p-3 rounded">
-                        <strong>Weight</strong>
-                        <p className="text-muted-foreground">
-                          {product.weight}
-                        </p>
-                      </div>
-                    )}
-
-                    {product.package_type && (
-                      <div className="bg-muted p-3 rounded">
-                        <strong>Package Type</strong>
-                        <p className="text-muted-foreground">
-                          {product.package_type}
-                        </p>
-                      </div>
-                    )}
-                  </div>
-
-                  {product.nutrition_info && (
-                    <div className="mt-4">
-                      <strong>Nutrition Info</strong>
-                      <p className="text-muted-foreground whitespace-pre-wrap">
-                        {product.nutrition_info}
-                      </p>
+                {/* HIGHLIGHTS */}
+                {highlights.length > 0 && (
+                  <section className="mb-6">
+                    <h3 className="text-xl font-semibold mb-2">Highlights</h3>
+                    <div className="flex flex-wrap gap-2">
+                      {highlights.map((h) => (
+                        <span
+                          key={h}
+                          className="px-3 py-1 rounded-full bg-secondary"
+                        >
+                          {h}
+                        </span>
+                      ))}
                     </div>
-                  )}
-                </section>
-              )}
+                  </section>
+                )}
+
+                {/* INGREDIENTS */}
+                {ingredients.length > 0 && (
+                  <section className="mb-6">
+                    <h3 className="text-xl font-semibold mb-2">Ingredients</h3>
+                    <div className="flex flex-wrap gap-2">
+                      {ingredients.map((i) => (
+                        <span
+                          key={i}
+                          className="px-3 py-1 rounded-full bg-secondary"
+                        >
+                          {i}
+                        </span>
+                      ))}
+                    </div>
+                  </section>
+                )}
+
+                {/* EXTRA DETAILS */}
+                {(product.shelf_life ||
+                  product.weight ||
+                  product.package_type ||
+                  product.nutrition_info) && (
+                  <section className="mt-8">
+                    <h3 className="text-xl font-semibold mb-4">
+                      Product Details
+                    </h3>
+
+                    <div className="grid grid-cols-2 md:grid-cols-3 gap-4 text-sm">
+                      {product.shelf_life && (
+                        <div className="bg-muted p-3 rounded">
+                          <strong>Shelf Life</strong>
+                          <p className="text-muted-foreground">
+                            {product.shelf_life}
+                          </p>
+                        </div>
+                      )}
+
+                      {product.weight && (
+                        <div className="bg-muted p-3 rounded">
+                          <strong>Weight</strong>
+                          <p className="text-muted-foreground">
+                            {product.weight}
+                          </p>
+                        </div>
+                      )}
+
+                      {product.package_type && (
+                        <div className="bg-muted p-3 rounded">
+                          <strong>Package Type</strong>
+                          <p className="text-muted-foreground">
+                            {product.package_type}
+                          </p>
+                        </div>
+                      )}
+                    </div>
+
+                    {product.nutrition_info && (
+                      <div className="mt-4">
+                        <strong>Nutrition Info</strong>
+                        <p className="text-muted-foreground whitespace-pre-wrap">
+                          {product.nutrition_info}
+                        </p>
+                      </div>
+                    )}
+                  </section>
+                )}
+              </div>
             </div>
-          </div>
+          )}
         </div>
       </main>
 
@@ -306,7 +313,7 @@ export default function ProductDetail() {
       <Dialog open={open} onOpenChange={setOpen}>
         <DialogContent className="max-w-lg">
           <h2 className="text-xl font-semibold mb-4">
-            Enquire about {product.name}
+            Enquire about {product?.name}
           </h2>
 
           <Input
