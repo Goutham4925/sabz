@@ -120,7 +120,7 @@ const Products = () => {
               dangerouslySetInnerHTML={{
                 __html:
                   sanitize(settings?.products_title) ||
-                  "Premium <span class='text-gradient'>Products</span>",
+                  "Premium <span class='text-gradient'>Masalas</span>",
               }}
             />
 
@@ -129,7 +129,7 @@ const Products = () => {
               dangerouslySetInnerHTML={{
                 __html:
                   sanitize(settings?.products_subtitle) ||
-                  "Explore our complete range of handcrafted products.",
+                  "Discover our handcrafted selection of authentic Kerala masala powders, each one a testament to our commitment to quality and tradition.",
               }}
             />
           </div>

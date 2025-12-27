@@ -1,7 +1,7 @@
 import { useEffect, useState } from "react";
 import { Navbar } from "@/components/layout/Navbar";
 import { Footer } from "@/components/layout/Footer";
-import { Award, Heart, Leaf, Users, Cookie } from "lucide-react";
+import { Award, Heart, Leaf, Users, History } from "lucide-react";
 import { API_URL } from "@/config/api";
 
 const iconMap: any = {
@@ -32,7 +32,7 @@ const About = () => {
       {/* =====================================================
          MAIN — HEIGHT ALWAYS RESERVED (NO CLS)
       ===================================================== */}
-      <main className="pt-32 pb-24">
+      <main className="pt-32 pb-1">
 
         {/* ================= HERO ================= */}
         <section className="container mx-auto px-4 md:px-8 mb-24">
@@ -64,7 +64,7 @@ const About = () => {
 
               <p className="text-muted-foreground text-lg mb-6">
                 {loading ? (
-                  <div className="h-4 w-full bg-muted/30 rounded animate-pulse" />
+                  <span className="inline-block h-4 w-full bg-muted/30 rounded animate-pulse" />
                 ) : (
                   about.hero_paragraph1
                 )}
@@ -72,7 +72,7 @@ const About = () => {
 
               <p className="text-muted-foreground text-lg">
                 {loading ? (
-                  <div className="h-4 w-5/6 bg-muted/30 rounded animate-pulse" />
+                  <span className="inline-block h-4 w-5/6 bg-muted/30 rounded animate-pulse" />
                 ) : (
                   about.hero_paragraph2
                 )}
@@ -97,12 +97,12 @@ const About = () => {
 
               {!loading && (
                 <div className="absolute -bottom-6 -left-6 glass-card p-6 shadow-elevated golden-glow">
-                  <Cookie className="w-8 h-8 text-primary mb-2" />
+                  <History className="w-8 h-8 text-primary mb-2" />
                   <p className="font-display text-lg font-semibold">
                     {(() => {
                       const establishedYear = Number(about?.stat_years) || 1980;
                       const currentYear = new Date().getFullYear();
-                      return `Est. ${currentYear - establishedYear}+ years`;
+                      return `Est.  ${currentYear - establishedYear}`;
                     })()}
                   </p>
                 </div>
@@ -260,7 +260,7 @@ const About = () => {
         </section>
 
         {/* ================= STATS ================= */}
-        <section className="py-24 bg-chocolate text-cream">
+        <section className="py-24 bg-chocolate text-cream ">
           <div className="container mx-auto px-4 md:px-8 grid grid-cols-2 md:grid-cols-4 gap-8 text-center">
             {[
               ["Years", about?.stat_years],
