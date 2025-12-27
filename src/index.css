@@ -315,6 +315,8 @@ body {
   overscroll-behavior-x: none;
   -webkit-overflow-scrolling: touch;
   touch-action: pan-y;
+  overflow-x: hidden;
+  touch-action: pan-y;
 }
 
 /* Swiper should never block vertical scroll */

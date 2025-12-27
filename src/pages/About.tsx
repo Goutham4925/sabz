@@ -16,42 +16,52 @@ const About = () => {
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
-    fetch(`${API_URL}/about?v=${Date.now()}`, { cache: "no-store" })
+    fetch(`${API_URL}/about`, { cache: "no-store" })
       .then((r) => r.json())
       .then((d) => {
         setAbout(d);
         setLoading(false);
       })
-      .catch(() => {
-        setLoading(false);
-      });
+      .catch(() => setLoading(false));
   }, []);
 
-  // 🔹 No global blocking loader — page renders instantly
-  if (loading || !about) return null;
+  /* =====================================================
+     ✅ NEVER RETURN NULL (MOBILE SCROLL FIX)
+  ===================================================== */
+  if (loading || !about) {
+    return (
+      <div className="min-h-screen bg-background">
+        <Navbar />
+        <div className="pt-32 px-4 text-center text-muted-foreground">
+          Loading...
+        </div>
+        <Footer />
+      </div>
+    );
+  }
 
   return (
-    <div className="min-h-screen">
-
+    <div className="min-h-screen overflow-x-hidden">
+      <Navbar />
 
       <main className="pt-32 pb-24">
 
-        {/* ================= HERO SECTION ================= */}
+        {/* ================= HERO ================= */}
         <section className="container mx-auto px-4 md:px-8 mb-24">
           <div className="grid grid-cols-1 lg:grid-cols-2 gap-16 items-center">
 
             {/* LEFT */}
             <div>
-              <span className="badge-premium mb-4 inline-block animate-fade-up">
+              <span className="badge-premium mb-4 inline-block">
                 {about.hero_badge || "Our Story"}
               </span>
 
               <h1
-                className="section-title mb-6 animate-fade-up stagger-1"
+                className="section-title mb-6"
                 dangerouslySetInnerHTML={{
                   __html:
                     about.hero_title ||
-                    `A Legacy of <span class='text-gradient'>Baking Excellence</span>`
+                    `A Legacy of <span class='text-gradient'>Baking Excellence</span>`,
                 }}
               />
 
@@ -65,12 +75,13 @@ const About = () => {
             </div>
 
             {/* RIGHT */}
-            <div className="relative animate-fade-up stagger-4">
+            <div className="relative">
               <div className="relative rounded-3xl overflow-hidden shadow-elevated">
                 {about.hero_image_url && (
                   <img
                     src={about.hero_image_url}
-                    className="w-full h-[500px] object-cover"
+                    className="w-full h-[280px] sm:h-[380px] lg:h-[500px] object-cover"
+                    alt="About hero"
                   />
                 )}
               </div>
@@ -81,7 +92,7 @@ const About = () => {
                   {(() => {
                     const establishedYear = Number(about?.stat_years) || 1980;
                     const currentYear = new Date().getFullYear();
-                    return `Est. at ${currentYear - establishedYear}`;
+                    return `Est. ${currentYear - establishedYear}+ years`;
                   })()}
                 </p>
               </div>
@@ -89,7 +100,7 @@ const About = () => {
           </div>
         </section>
 
-        {/* ================= VALUES SECTION ================= */}
+        {/* ================= VALUES ================= */}
         <section className="py-24 bg-secondary/30">
           <div className="container mx-auto px-4 md:px-8">
             <div className="text-center max-w-3xl mx-auto mb-16">
@@ -110,6 +121,7 @@ const About = () => {
                       <img
                         src={iconVal}
                         className="w-16 h-16 rounded-2xl mx-auto mb-6 object-cover"
+                        alt=""
                       />
                     ) : (
                       <div className="w-16 h-16 bg-gradient-to-br from-primary to-accent rounded-2xl flex items-center justify-center mx-auto mb-6">
@@ -131,7 +143,7 @@ const About = () => {
           </div>
         </section>
 
-        {/* ================= TIMELINE SECTION ================= */}
+        {/* ================= TIMELINE ================= */}
         {!about.timeline_hidden && about.timeline?.length > 0 && (
           <section className="py-24">
             <div className="container mx-auto px-4 md:px-8 max-w-4xl">
@@ -140,34 +152,28 @@ const About = () => {
                 <h2
                   className="section-title mb-4"
                   dangerouslySetInnerHTML={{
-                    __html: about.timeline_heading?.trim() || "Our Journey",
+                    __html: about.timeline_heading || "Our Journey",
                   }}
                 />
                 <p className="section-subtitle">
-                  {about.timeline_subheading?.trim() ||
-                    "From humble beginnings to international recognition"}
+                  {about.timeline_subheading ||
+                    "From humble beginnings to today"}
                 </p>
               </div>
 
               <div className="relative">
-                <div className="absolute left-1/2 top-0 bottom-0 w-1 bg-border transform -translate-x-1/2" />
+                {/* CENTER LINE — DESKTOP ONLY */}
+                <div className="hidden md:block absolute left-1/2 top-0 bottom-0 w-1 bg-border -translate-x-1/2" />
 
                 {about.timeline.map((item: any, index: number) => {
                   if (!item.year && !item.title && !item.desc) return null;
-                  const isLeft = index % 2 === 0;
 
                   return (
                     <div
                       key={item.id}
-                      className={`relative flex items-start mb-16 last:mb-0 ${
-                        isLeft ? "flex-row" : "flex-row-reverse"
-                      }`}
+                      className="flex flex-col md:flex-row items-start mb-16"
                     >
-                      <div
-                        className={`w-1/2 px-6 ${
-                          isLeft ? "text-right" : "text-left"
-                        }`}
-                      >
+                      <div className="md:w-1/2 md:px-6 text-left md:text-right">
                         <span className="font-display text-4xl font-bold text-primary block">
                           {item.year}
                         </span>
@@ -177,11 +183,11 @@ const About = () => {
                         <p className="text-muted-foreground">{item.desc}</p>
                       </div>
 
-                      <div className="relative flex items-center justify-center w-12">
-                        <div className="w-4 h-4 bg-primary rounded-full shadow-md" />
+                      <div className="hidden md:flex items-center justify-center w-12">
+                        <div className="w-4 h-4 bg-primary rounded-full" />
                       </div>
 
-                      <div className="w-1/2 px-6" />
+                      <div className="hidden md:block md:w-1/2 px-6" />
                     </div>
                   );
                 })}
@@ -190,28 +196,26 @@ const About = () => {
           </section>
         )}
 
-        {/* ================= TEAM SECTION ================= */}
+        {/* ================= TEAM ================= */}
         <section className="py-24 bg-secondary/30">
           <div className="container mx-auto px-4 md:px-8 text-center">
-            <h2
-              className="section-title mb-4"
-              dangerouslySetInnerHTML={{
-                __html: about.team_heading || "Meet the Team",
-              }}
-            />
+            <h2 className="section-title mb-4">
+              {about.team_heading || "Meet the Team"}
+            </h2>
             <p className="section-subtitle mb-16">
               {about.team_subheading ||
-                "The passionate people behind every authentic blend"}
+                "The people behind every product"}
             </p>
 
             <div className="grid grid-cols-1 md:grid-cols-3 gap-8 max-w-4xl mx-auto">
               {[1, 2, 3].map((i) => (
                 <div key={i} className="text-center">
-                  <div className="w-48 h-48 mx-auto mb-6 rounded-full overflow-hidden shadow-card">
+                  <div className="w-40 h-40 mx-auto mb-6 rounded-full overflow-hidden shadow-card">
                     {about[`team_${i}_image`] && (
                       <img
                         src={about[`team_${i}_image`]}
                         className="w-full h-full object-cover"
+                        alt=""
                       />
                     )}
                   </div>
@@ -227,33 +231,22 @@ const About = () => {
           </div>
         </section>
 
-        {/* ================= STATS SECTION ================= */}
+        {/* ================= STATS ================= */}
         <section className="py-24 bg-chocolate text-cream">
           <div className="container mx-auto px-4 md:px-8 grid grid-cols-2 md:grid-cols-4 gap-8 text-center">
-            <div>
-              <p className="font-display text-5xl font-bold text-golden">
-                {about.stat_years}
-              </p>
-              <p>Years of Excellence</p>
-            </div>
-            <div>
-              <p className="font-display text-5xl font-bold text-golden">
-                {about.stat_flavors}
-              </p>
-              <p>Unique Flavors</p>
-            </div>
-            <div>
-              <p className="font-display text-5xl font-bold text-golden">
-                {about.stat_countries}
-              </p>
-              <p>Countries Served</p>
-            </div>
-            <div>
-              <p className="font-display text-5xl font-bold text-golden">
-                {about.stat_customers}
-              </p>
-              <p>Happy Customers</p>
-            </div>
+            {[
+              ["Years", about.stat_years],
+              ["Flavors", about.stat_flavors],
+              ["Countries", about.stat_countries],
+              ["Customers", about.stat_customers],
+            ].map(([label, value]) => (
+              <div key={label}>
+                <p className="font-display text-5xl font-bold text-golden">
+                  {value}
+                </p>
+                <p>{label}</p>
+              </div>
+            ))}
           </div>
         </section>
 
