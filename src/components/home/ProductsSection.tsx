@@ -3,82 +3,102 @@ import { ProductCard } from "./ProductCard";
 import { Button } from "@/components/ui/button";
 import { Link } from "react-router-dom";
 import { ArrowRight } from "lucide-react";
+import DOMPurify from "dompurify";
+import { API_URL } from "@/config/api";
+
+// Swiper (lazy used on mobile only)
 import { Swiper, SwiperSlide } from "swiper/react";
 import { Pagination } from "swiper/modules";
-import DOMPurify from "dompurify";
 import "swiper/css";
 import "swiper/css/pagination";
-import { API_URL } from "@/config/api";
 
 export function ProductsSection() {
   const sectionRef = useRef<HTMLElement>(null);
   const [isVisible, setIsVisible] = useState(false);
 
   /* =====================================================
-     1️⃣ PRELOADED DATA (FAST PATH)
+     PRELOAD FAST PATH
   ===================================================== */
   const preload = (window as any).__PRELOADED__?.productsBundle;
-  const preProducts = preload?.products || [];
-  const preSettings = preload?.settings || null;
+  const preProducts = preload?.products ?? [];
+  const preSettings = preload?.settings ?? null;
 
   const [products, setProducts] = useState<any[]>(preProducts);
   const [settings, setSettings] = useState<any>(preSettings);
-  const [loading, setLoading] = useState(!preProducts.length);
+
+  const [productsLoading, setProductsLoading] = useState(!preProducts.length);
+  const [isMobile, setIsMobile] = useState(false);
 
   /* =====================================================
-     2️⃣ FETCH ONLY IF PRELOAD FAILED
+     DEVICE CHECK (for Swiper)
   ===================================================== */
   useEffect(() => {
-    if (preProducts.length) {
-      setLoading(false);
-      return;
-    }
-
-    async function load() {
-      try {
-        const prodRes = await fetch(`${API_URL}/products/featured`);
-        const prodData = await prodRes.json();
-
-        const featured = prodData.filter((p: any) => p.is_featured);
-        const nonFeatured = prodData.filter((p: any) => !p.is_featured);
-        setProducts([...featured, ...nonFeatured].slice(0, 4));
-
-        const setRes = await fetch(`${API_URL}/settings`);
-        setSettings(await setRes.json());
-      } catch (err) {
-        console.error("Product load error:", err);
-      } finally {
-        setLoading(false);
-      }
-    }
-
-    load();
+    setIsMobile(window.innerWidth < 768);
   }, []);
 
   /* =====================================================
-     3️⃣ INTERSECTION OBSERVER
+     FETCH PRODUCTS FIRST (NON-BLOCKING SETTINGS)
+  ===================================================== */
+  useEffect(() => {
+    if (preProducts.length) {
+      setProductsLoading(false);
+      return;
+    }
+
+    // 🚀 PRODUCTS (priority)
+    fetch(`${API_URL}/products/featured`)
+      .then((r) => r.json())
+      .then((prodData) => {
+        const featured = prodData.filter((p: any) => p.is_featured);
+        const nonFeatured = prodData.filter((p: any) => !p.is_featured);
+        setProducts([...featured, ...nonFeatured].slice(0, 4));
+        setProductsLoading(false); // ⬅ products can render NOW
+      })
+      .catch(console.error);
+
+    // 🎨 SETTINGS (background)
+    fetch(`${API_URL}/settings`)
+      .then((r) => r.json())
+      .then(setSettings)
+      .catch(() => {});
+  }, []);
+
+  /* =====================================================
+     INTERSECTION OBSERVER (SAFE + FALLBACK)
   ===================================================== */
   useEffect(() => {
     const observer = new IntersectionObserver(
-      ([entry]) => entry.isIntersecting && setIsVisible(true),
-      { threshold: 0.2 }
+      ([entry]) => {
+        if (entry.isIntersecting) {
+          setIsVisible(true);
+          observer.disconnect();
+        }
+      },
+      { threshold: 0.15 }
     );
 
     if (sectionRef.current) observer.observe(sectionRef.current);
-    return () => observer.disconnect();
+
+    // 🛟 Fallback — NEVER stay invisible
+    const timeout = setTimeout(() => setIsVisible(true), 600);
+
+    return () => {
+      observer.disconnect();
+      clearTimeout(timeout);
+    };
   }, []);
 
   /* =====================================================
      SANITIZE CMS HTML
   ===================================================== */
-  const sanitize = (html: string | null | undefined) =>
+  const sanitize = (html?: string | null) =>
     DOMPurify.sanitize(html || "", {
       ALLOWED_TAGS: ["span", "strong", "b", "em", "i"],
       ALLOWED_ATTR: ["class", "style"],
     });
 
   /* =====================================================
-     SKELETONS (LOCAL, LIGHTWEIGHT)
+     SKELETONS
   ===================================================== */
   const HeaderSkeleton = () => (
     <div className="text-center max-w-3xl mx-auto mb-16">
@@ -97,6 +117,9 @@ export function ProductsSection() {
     </div>
   );
 
+  /* =====================================================
+     RENDER
+  ===================================================== */
   return (
     <section
       ref={sectionRef}
@@ -107,7 +130,7 @@ export function ProductsSection() {
       <div className="container mx-auto px-4 md:px-8">
 
         {/* =================== HEADER =================== */}
-        {loading ? (
+        {productsLoading ? (
           <HeaderSkeleton />
         ) : (
           <div className="text-center max-w-3xl mx-auto mb-16">
@@ -136,7 +159,7 @@ export function ProductsSection() {
         )}
 
         {/* =================== PRODUCTS =================== */}
-        {loading ? (
+        {productsLoading ? (
           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-8 mb-12">
             {Array.from({ length: 4 }).map((_, i) => (
               <CardSkeleton key={i} />
@@ -145,38 +168,42 @@ export function ProductsSection() {
         ) : (
           <>
             {/* Desktop Grid */}
-            <div className="hidden md:grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-8 mb-12">
-              {products.map((p, i) => (
-                <div
-                  key={p.id}
-                  style={{ transitionDelay: `${i * 120}ms` }}
-                  className="transition-all duration-700"
-                >
-                  <ProductCard {...p} />
-                </div>
-              ))}
-            </div>
+            {!isMobile && (
+              <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-8 mb-12">
+                {products.map((p, i) => (
+                  <div
+                    key={p.id}
+                    style={{ transitionDelay: `${i * 120}ms` }}
+                    className="transition-all duration-700"
+                  >
+                    <ProductCard {...p} />
+                  </div>
+                ))}
+              </div>
+            )}
 
             {/* Mobile Swiper */}
-            <div className="md:hidden mb-12">
-              <Swiper
-                modules={[Pagination]}
-                spaceBetween={20}
-                slidesPerView={1.2}
-                pagination={{ clickable: true }}
-              >
-                {products.map((p) => (
-                  <SwiperSlide key={p.id}>
-                    <ProductCard {...p} />
-                  </SwiperSlide>
-                ))}
-              </Swiper>
-            </div>
+            {isMobile && (
+              <div className="mb-12">
+                <Swiper
+                  modules={[Pagination]}
+                  spaceBetween={20}
+                  slidesPerView={1.2}
+                  pagination={{ clickable: true }}
+                >
+                  {products.map((p) => (
+                    <SwiperSlide key={p.id}>
+                      <ProductCard {...p} />
+                    </SwiperSlide>
+                  ))}
+                </Swiper>
+              </div>
+            )}
           </>
         )}
 
         {/* =================== CTA =================== */}
-        {!loading && (
+        {!productsLoading && (
           <div className="text-center">
             <Link to="/products">
               <Button
@@ -195,7 +222,7 @@ export function ProductsSection() {
 }
 
 /* =====================================================
-   PRELOAD (UNCHANGED)
+   PRELOAD (OPTIONAL BUT FAST)
 ===================================================== */
 ProductsSection.preload = async () => {
   try {
