@@ -169,9 +169,14 @@ const About = () => {
           <section className="py-24">
             <div className="container mx-auto px-4 md:px-8 max-w-4xl">
               <div className="text-center max-w-2xl mx-auto mb-16">
-                <h2 className="section-title mb-4">
-                  {about.timeline_heading || "Our Journey"}
-                </h2>
+                <h2
+                  className="section-title mb-4"
+                  dangerouslySetInnerHTML={{
+                    __html:
+                      about.timeline_heading ||
+                      "Our <span class='text-gradient'>Journey</span>",
+                  }}
+                />
                 <p className="section-subtitle">
                   {about.timeline_subheading || "From humble beginnings to today"}
                 </p>
