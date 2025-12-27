@@ -10,7 +10,6 @@ import { Button } from "@/components/ui/button";
 
 import { Swiper, SwiperSlide } from "swiper/react";
 import { Pagination } from "swiper/modules";
-
 import "swiper/css";
 import "swiper/css/pagination";
 
@@ -28,54 +27,62 @@ const Products = () => {
   ]);
   const [settings, setSettings] = useState<any>(null);
 
-  const [showPrices, setShowPrices] = useState(true);
   const [productsLoading, setProductsLoading] = useState(true);
+  const [showPrices, setShowPrices] = useState(true);
+  const [isMobile, setIsMobile] = useState(false);
 
-  // URL PARAMS
   const [searchParams, setSearchParams] = useSearchParams();
   const activeCategoryId = searchParams.get("categoryId") || "all";
 
-  // -------------------------------------------
-  // SANITIZE CMS HTML
-  // -------------------------------------------
-  const sanitize = (html: string | null | undefined) =>
+  /* =====================================================
+     DEVICE CHECK (Swiper only on mobile)
+  ===================================================== */
+  useEffect(() => {
+    setIsMobile(window.innerWidth < 768);
+  }, []);
+
+  /* =====================================================
+     SANITIZE CMS HTML
+  ===================================================== */
+  const sanitize = (html?: string | null) =>
     DOMPurify.sanitize(html || "", {
       ALLOWED_TAGS: ["span", "strong", "b", "em", "i"],
       ALLOWED_ATTR: ["class"],
     });
 
-  // -------------------------------------------
-  // FETCH DATA
-  // -------------------------------------------
+  /* =====================================================
+     FETCH PRODUCTS FIRST (CRITICAL PATH)
+  ===================================================== */
   useEffect(() => {
-    const load = async () => {
-      try {
-        const [prodRes, catRes, settingsRes] = await Promise.all([
-          fetch(`${API_URL}/products`),
-          fetch(`${API_URL}/categories`),
-          fetch(`${API_URL}/settings`),
-        ]);
-
-        const productsData = await prodRes.json();
-        const categoryData = await catRes.json();
-        const settingsData = await settingsRes.json();
-
-        setProducts(productsData);
-        setCategories([{ id: "all", name: "All" }, ...categoryData]);
-        setSettings(settingsData);
-      } catch (err) {
-        console.error("Failed to load products page:", err);
-      } finally {
+    fetch(`${API_URL}/products`)
+      .then((r) => r.json())
+      .then((data) => {
+        setProducts(data);
+        setProductsLoading(false); // 🚀 products render immediately
+      })
+      .catch((err) => {
+        console.error("Products load error:", err);
         setProductsLoading(false);
-      }
-    };
+      });
 
-    load();
+    // 🎨 categories (background)
+    fetch(`${API_URL}/categories`)
+      .then((r) => r.json())
+      .then((cats) =>
+        setCategories([{ id: "all", name: "All" }, ...cats])
+      )
+      .catch(() => {});
+
+    // 🎨 settings (background)
+    fetch(`${API_URL}/settings`)
+      .then((r) => r.json())
+      .then(setSettings)
+      .catch(() => {});
   }, []);
 
-  // -------------------------------------------
-  // FILTER PRODUCTS
-  // -------------------------------------------
+  /* =====================================================
+     FILTER PRODUCTS
+  ===================================================== */
   const filteredProducts =
     activeCategoryId === "all"
       ? products
@@ -83,17 +90,17 @@ const Products = () => {
           (p) => String(p.categoryId) === String(activeCategoryId)
         );
 
-  // -------------------------------------------
-  // HANDLE CATEGORY CLICK
-  // -------------------------------------------
+  /* =====================================================
+     CATEGORY CLICK
+  ===================================================== */
   const handleCategoryClick = (id: string | number) => {
-    if (id === "all") {
-      setSearchParams({});
-    } else {
-      setSearchParams({ categoryId: String(id) });
-    }
+    if (id === "all") setSearchParams({});
+    else setSearchParams({ categoryId: String(id) });
   };
 
+  /* =====================================================
+     RENDER
+  ===================================================== */
   return (
     <div className="min-h-screen">
       <Navbar />
@@ -157,44 +164,48 @@ const Products = () => {
             </label>
           </div>
 
-          {/* ================= PRODUCTS GRID ================= */}
-          <div className="hidden md:block">
-            {productsLoading ? (
-              <ProductsGridLoader />
-            ) : (
-              <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-8">
-                {filteredProducts.map((product, idx) => (
-                  <div
-                    key={product.id}
-                    className="animate-fade-up"
-                    style={{ animationDelay: `${idx * 100}ms` }}
-                  >
-                    <ProductCard {...product} showPrice={showPrices} />
-                  </div>
-                ))}
-              </div>
-            )}
-          </div>
+          {/* ================= DESKTOP GRID ================= */}
+          {!isMobile && (
+            <div className="hidden md:block">
+              {productsLoading ? (
+                <ProductsGridLoader />
+              ) : (
+                <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-8">
+                  {filteredProducts.map((product, idx) => (
+                    <div
+                      key={product.id}
+                      className="animate-fade-up"
+                      style={{ animationDelay: `${idx * 80}ms` }}
+                    >
+                      <ProductCard {...product} showPrice={showPrices} />
+                    </div>
+                  ))}
+                </div>
+              )}
+            </div>
+          )}
 
           {/* ================= MOBILE SWIPER ================= */}
-          <div className="md:hidden mb-12">
-            {productsLoading ? (
-              <ProductsGridLoader count={3} />
-            ) : (
-              <Swiper
-                modules={[Pagination]}
-                slidesPerView={1.2}
-                pagination={{ clickable: true }}
-                spaceBetween={20}
-              >
-                {filteredProducts.map((product) => (
-                  <SwiperSlide key={product.id}>
-                    <ProductCard {...product} showPrice={showPrices} />
-                  </SwiperSlide>
-                ))}
-              </Swiper>
-            )}
-          </div>
+          {isMobile && (
+            <div className="md:hidden mb-12">
+              {productsLoading ? (
+                <ProductsGridLoader count={3} />
+              ) : (
+                <Swiper
+                  modules={[Pagination]}
+                  slidesPerView={1.2}
+                  pagination={{ clickable: true }}
+                  spaceBetween={20}
+                >
+                  {filteredProducts.map((product) => (
+                    <SwiperSlide key={product.id}>
+                      <ProductCard {...product} showPrice={showPrices} />
+                    </SwiperSlide>
+                  ))}
+                </Swiper>
+              )}
+            </div>
+          )}
 
           {/* ================= EMPTY STATE ================= */}
           {!productsLoading && filteredProducts.length === 0 && (
