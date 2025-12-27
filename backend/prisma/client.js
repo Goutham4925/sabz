@@ -1,6 +1,16 @@
-// backend/prisma/client.js
-const { PrismaClient } = require('@prisma/client');
+// prisma/client.js
+const { PrismaClient } = require("@prisma/client");
 
-const prisma = new PrismaClient();
+const globalForPrisma = global;
+
+const prisma =
+  globalForPrisma.prisma ||
+  new PrismaClient({
+    log: ["error"],
+  });
+
+if (process.env.NODE_ENV !== "production") {
+  globalForPrisma.prisma = prisma;
+}
 
 module.exports = prisma;

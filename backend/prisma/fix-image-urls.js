@@ -1,14 +1,13 @@
-const { PrismaClient } = require("@prisma/client");
+// prisma/fix-image-urls.js
+const prisma = require("./client");
 
-// CHANGE DOMAIN HERE
+// 🔁 CHANGE DOMAINS HERE
 const OLD = "http://localhost:5000";
-const NEW = "https://your-render-backend.onrender.com"; // <-- change this
-
-const prisma = new PrismaClient();
+const NEW = "https://saabz-kitchen-backend.vercel.app"; // ✅ YOUR REAL BACKEND DOMAIN
 
 function replace(value) {
-  if (!value) return value;
-  return value.replaceAll(OLD, NEW);
+  if (!value || typeof value !== "string") return value;
+  return value.includes(OLD) ? value.replaceAll(OLD, NEW) : value;
 }
 
 async function updateProductImages() {
@@ -20,7 +19,7 @@ async function updateProductImages() {
         where: { id: p.id },
         data: { image_url: updated },
       });
-      console.log("✔ Updated product", p.id);
+      console.log("✔ Updated product image", p.id);
     }
   }
 }
@@ -51,16 +50,19 @@ async function updateSiteSettings() {
     ];
 
     const updates = {};
-    fields.forEach((f) => {
-      if (s[f]) updates[f] = replace(s[f]);
-    });
+    for (const f of fields) {
+      if (s[f]) {
+        const replaced = replace(s[f]);
+        if (replaced !== s[f]) updates[f] = replaced;
+      }
+    }
 
     if (Object.keys(updates).length > 0) {
       await prisma.siteSetting.update({
         where: { id: s.id },
         data: updates,
       });
-      console.log("✔ Updated SiteSettings", s.id);
+      console.log("✔ Updated SiteSetting", s.id);
     }
   }
 }
@@ -80,9 +82,12 @@ async function updateAboutPage() {
     ];
 
     const updates = {};
-    fields.forEach((f) => {
-      if (a[f]) updates[f] = replace(a[f]);
-    });
+    for (const f of fields) {
+      if (a[f]) {
+        const replaced = replace(a[f]);
+        if (replaced !== a[f]) updates[f] = replaced;
+      }
+    }
 
     if (Object.keys(updates).length > 0) {
       await prisma.aboutPage.update({
@@ -97,12 +102,20 @@ async function updateAboutPage() {
 async function updateContactPage() {
   const list = await prisma.contactPage.findMany();
   for (const c of list) {
-    const fields = ["card_1_icon", "card_2_icon", "card_3_icon", "card_4_icon"];
+    const fields = [
+      "card_1_icon",
+      "card_2_icon",
+      "card_3_icon",
+      "card_4_icon",
+    ];
 
     const updates = {};
-    fields.forEach((f) => {
-      if (c[f]) updates[f] = replace(c[f]);
-    });
+    for (const f of fields) {
+      if (c[f]) {
+        const replaced = replace(c[f]);
+        if (replaced !== c[f]) updates[f] = replaced;
+      }
+    }
 
     if (Object.keys(updates).length > 0) {
       await prisma.contactPage.update({
@@ -116,19 +129,16 @@ async function updateContactPage() {
 
 async function main() {
   console.log("🚀 Fixing image URLs...");
-
   await updateProductImages();
   await updateGalleryImages();
   await updateSiteSettings();
   await updateAboutPage();
   await updateContactPage();
-
   console.log("🎉 All URLs updated successfully!");
 }
 
 main()
-  .then(() => prisma.$disconnect())
-  .catch((err) => {
-    console.error(err);
-    prisma.$disconnect();
+  .catch(console.error)
+  .finally(async () => {
+    await prisma.$disconnect();
   });
