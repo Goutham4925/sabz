@@ -43,16 +43,16 @@ const About = () => {
                 dangerouslySetInnerHTML={{
                   __html:
                     about?.hero_title ||
-                    "A Legacy of <span class='text-gradient'>Baking Excellence</span>",
+                    "A Legacy of <span class='text-gradient'>Spice Excellence</span>",
                 }}
               />
 
               <p className="text-muted-foreground text-lg mb-6">
-                {about?.hero_paragraph1}
+                {about?.hero_paragraph1 || "For over four decades, Kerala Spice Co. has been more than just a masala company. We're a family of passionate spice experts dedicated to bringing the authentic flavors of Kerala to every home through our carefully crafted blends."}
               </p>
 
               <p className="text-muted-foreground text-lg">
-                {about?.hero_paragraph2}
+                {about?.hero_paragraph2 || "What started in 1985 as a small spice shop in Kochi has grown into a beloved brand, but our commitment to quality, tradition, and the art of spice blending remains unchanged."}
               </p>
             </div>
 
