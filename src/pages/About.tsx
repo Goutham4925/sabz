@@ -27,7 +27,7 @@ const About = () => {
 
   return (
     <div className="min-h-screen overflow-x-hidden bg-background">
-      <Navbar />
+
 
       {/* =====================================================
          MAIN — HEIGHT ALWAYS RESERVED (NO CLS)

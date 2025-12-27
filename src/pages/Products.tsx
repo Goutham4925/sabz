@@ -104,7 +104,7 @@ const Products = () => {
   ===================================================== */
   return (
     <div className="min-h-screen overflow-x-hidden">
-      <Navbar />
+
 
       <main className="pt-32 pb-24">
         <div className="container mx-auto px-4 md:px-8">
