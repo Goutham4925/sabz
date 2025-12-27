@@ -4,12 +4,19 @@ import { useAuth } from "@/hooks/useAuth";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
+import {
+  Card,
+  CardContent,
+  CardDescription,
+  CardHeader,
+  CardTitle,
+} from "@/components/ui/card";
 import { Cookie, Eye, EyeOff, Loader2 } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
 import { z } from "zod";
+import { API_URL } from "@/config/api";
 
-const ALLOW_SIGNUP = true; // Set to false to disable signups
+const ALLOW_SIGNUP = true;
 
 const loginSchema = z.object({
   email: z.string().email("Enter a valid email"),
@@ -22,12 +29,34 @@ const AdminLogin = () => {
   const [showPassword, setShowPassword] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
   const [isSignUp, setIsSignUp] = useState(false);
-  const [errors, setErrors] = useState<{ email?: string; password?: string }>({});
+  const [errors, setErrors] = useState<{ email?: string; password?: string }>(
+    {}
+  );
+  const [settings, setSettings] = useState<any>(null);
 
   const { signIn, signUp, user, isAdmin, loading } = useAuth();
   const navigate = useNavigate();
   const { toast } = useToast();
 
+  /* -------------------------------------------------
+     ✅ LOAD SITE SETTINGS (LOGO FIX)
+  ------------------------------------------------- */
+  useEffect(() => {
+    const loadSettings = async () => {
+      try {
+        const res = await fetch(`${API_URL}/settings`);
+        const data = await res.json();
+        setSettings(data);
+      } catch (err) {
+        console.error("Failed to load settings:", err);
+      }
+    };
+    loadSettings();
+  }, []);
+
+  /* -------------------------------------------------
+     AUTH REDIRECT
+  ------------------------------------------------- */
   useEffect(() => {
     if (!loading && user && isAdmin) {
       navigate("/admin/dashboard");
@@ -42,7 +71,9 @@ const AdminLogin = () => {
     } catch (err) {
       if (err instanceof z.ZodError) {
         const out: any = {};
-        err.errors.forEach(e => { out[e.path[0]] = e.message });
+        err.errors.forEach((e) => {
+          out[e.path[0]] = e.message;
+        });
         setErrors(out);
       }
       return false;
@@ -58,14 +89,25 @@ const AdminLogin = () => {
     if (isSignUp) {
       const { error } = await signUp(email, password);
       if (error) {
-        toast({ title: "Signup failed", description: error, variant: "destructive" });
+        toast({
+          title: "Signup failed",
+          description: error,
+          variant: "destructive",
+        });
       } else {
-        toast({ title: "Account created", description: "Waiting for admin approval." });
+        toast({
+          title: "Account created",
+          description: "Waiting for admin approval.",
+        });
       }
     } else {
       const { error } = await signIn(email, password);
       if (error) {
-        toast({ title: "Login failed", description: error, variant: "destructive" });
+        toast({
+          title: "Login failed",
+          description: error,
+          variant: "destructive",
+        });
       }
     }
 
@@ -80,21 +122,38 @@ const AdminLogin = () => {
     );
   }
 
+  const logo = settings?.navbar_logo;
+
   return (
     <div className="min-h-screen flex items-center justify-center p-4">
       <Card className="w-full max-w-md">
         <CardHeader className="text-center">
-          <div className="mx-auto w-16 h-16 rounded-full bg-primary/10 flex items-center justify-center">
-            <Cookie className="w-8 h-8 text-primary" />
+          {/* ✅ LOGO BLOCK */}
+          <div className="mx-auto w-32 h-18 rounded-full flex items-center justify-center overflow-hidden">
+            {logo ? (
+              <img
+                src={logo}
+                alt="Brand logo"
+                className="w-30 h-auto object-contain"
+              />
+            ) : (
+              <Cookie className="w-8 h-8 text-primary" />
+            )}
           </div>
-          <CardTitle>{isSignUp ? "Create Account" : "Admin Login"}</CardTitle>
+
+          <CardTitle>
+            {isSignUp ? "Create Account" : "Admin Login"}
+          </CardTitle>
           <CardDescription>
-            {isSignUp ? "Sign up request" : "Sign in to access admin"}
+            {isSignUp
+              ? "Sign up request"
+              : "Sign in to access admin"}
           </CardDescription>
         </CardHeader>
 
         <CardContent>
           <form onSubmit={handleSubmit} className="space-y-4">
+            {/* EMAIL */}
             <div>
               <Label>Email</Label>
               <Input
@@ -103,9 +162,14 @@ const AdminLogin = () => {
                 onChange={(e) => setEmail(e.target.value)}
                 className={errors.email ? "border-destructive" : ""}
               />
-              {errors.email && <p className="text-destructive text-sm">{errors.email}</p>}
+              {errors.email && (
+                <p className="text-destructive text-sm">
+                  {errors.email}
+                </p>
+              )}
             </div>
 
+            {/* PASSWORD */}
             <div>
               <Label>Password</Label>
               <div className="relative">
@@ -113,7 +177,11 @@ const AdminLogin = () => {
                   type={showPassword ? "text" : "password"}
                   value={password}
                   onChange={(e) => setPassword(e.target.value)}
-                  className={errors.password ? "border-destructive pr-10" : "pr-10"}
+                  className={
+                    errors.password
+                      ? "border-destructive pr-10"
+                      : "pr-10"
+                  }
                 />
                 <button
                   type="button"
@@ -123,21 +191,30 @@ const AdminLogin = () => {
                   {showPassword ? <EyeOff /> : <Eye />}
                 </button>
               </div>
-              {errors.password && <p className="text-destructive text-sm">{errors.password}</p>}
+              {errors.password && (
+                <p className="text-destructive text-sm">
+                  {errors.password}
+                </p>
+              )}
             </div>
 
+            {/* SUBMIT */}
             <Button className="w-full" type="submit">
-              {isLoading ? (
+              {isLoading && (
                 <Loader2 className="animate-spin h-4 w-4 mr-2" />
-              ) : null}
+              )}
               {isSignUp ? "Create Account" : "Sign In"}
             </Button>
 
+            {/* TOGGLE */}
             {ALLOW_SIGNUP && (
-              <p className="text-center text-primary text-sm cursor-pointer"
+              <p
+                className="text-center text-primary text-sm cursor-pointer"
                 onClick={() => setIsSignUp(!isSignUp)}
               >
-                {isSignUp ? "Already have an account? Login" : "Create new account"}
+                {isSignUp
+                  ? "Already have an account? Login"
+                  : "Create new account"}
               </p>
             )}
           </form>
