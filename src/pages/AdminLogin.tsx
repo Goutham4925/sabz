@@ -137,7 +137,7 @@ const AdminLogin = () => {
                 className="w-30 h-auto object-contain"
               />
             ) : (
-              <Cookie className="w-8 h-8 text-primary" />
+              <img src="https://res.cloudinary.com/dglumbcje/image/upload/v1766763015/saabz_kitchen/0769bd28-050c-4886-a8f6-d3714a683ce2.png" className="w-30 h-auto object-contain" />
             )}
           </div>
 

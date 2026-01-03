@@ -106,7 +106,7 @@ export function Footer() {
                   {logo ? (
                     <img src={logo} className="object-contain w-full h-full" />
                   ) : (
-                    <Cookie className="w-7 h-7" />
+                    <img src="https://res.cloudinary.com/dglumbcje/image/upload/v1766763015/saabz_kitchen/0769bd28-050c-4886-a8f6-d3714a683ce2.png" className="object-contain w-full h-full" />
                   )}
                 </div>
 

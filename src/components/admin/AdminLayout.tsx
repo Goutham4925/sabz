@@ -73,7 +73,7 @@ const AdminLayout = ({ children }: AdminLayoutProps) => {
           {logo ? (
             <img src={logo} className="h-8 w-auto object-contain" />
           ) : (
-            <Cookie className="h-6 w-6 text-primary" />
+            <img src="https://res.cloudinary.com/dglumbcje/image/upload/v1766763015/saabz_kitchen/0769bd28-050c-4886-a8f6-d3714a683ce2.png" className="h-8 w-auto object-contain" />
           )}
           <span className="font-display text-lg text-chocolate">Admin</span>
         </div>
@@ -109,7 +109,7 @@ const AdminLayout = ({ children }: AdminLayoutProps) => {
                     alt="Admin Logo"
                   />
                 ) : (
-                  <Cookie className="h-6 w-6 text-primary" />
+                  <img src="https://res.cloudinary.com/dglumbcje/image/upload/v1766763015/saabz_kitchen/0769bd28-050c-4886-a8f6-d3714a683ce2.png" className="object-contain w-full h-full" />
                 )}
               </div>
 
