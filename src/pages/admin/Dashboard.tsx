@@ -57,25 +57,23 @@ export default function Dashboard() {
 
     try {
       setLoading(true);
-      const [productRes, userRes, msgRes] = await Promise.all([
+      const [productRes, userRes, msgRes, categoryRes] = await Promise.all([
         fetch(`${API_URL}/products`),
         fetch(`${API_URL}/admin/users`, {
           headers: { Authorization: `Bearer ${token}` },
         }),
         fetch(`${API_URL}/messages`),
+        fetch(`${API_URL}/categories`),
       ]);
 
-      const [products, users, messages] = await Promise.all([
+
+      const [products, users, messages, categories] = await Promise.all([
         productRes.json(),
         userRes.json(),
         msgRes.json(),
+        categoryRes.json(),
       ]);
 
-      const categories = new Set(
-        products
-          .map((p: any) => p.categoryId)
-          .filter(Boolean)
-      );
 
       const avgPrice =
         products.reduce((sum: number, p: any) => sum + Number(p.price || 0), 0) /
@@ -88,7 +86,7 @@ export default function Dashboard() {
       setStats({
         totalProducts: products.length,
         featuredProducts: products.filter((p: any) => p.is_featured).length,
-        categories: categories.size,
+        categories: categories.length,
         averagePrice: avgPrice,
         totalUsers: users.length,
         pendingUsers,
