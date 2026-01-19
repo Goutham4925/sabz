@@ -71,7 +71,12 @@ export default function Dashboard() {
         msgRes.json(),
       ]);
 
-      const categories = new Set(products.map((p: any) => p.category));
+      const categories = new Set(
+        products
+          .map((p: any) => p.categoryId)
+          .filter(Boolean)
+      );
+
       const avgPrice =
         products.reduce((sum: number, p: any) => sum + Number(p.price || 0), 0) /
         (products.length || 1);

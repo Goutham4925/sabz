@@ -17,6 +17,7 @@ export default function AboutPageAdmin() {
   const [saving, setSaving] = useState(false);
   const { toast } = useToast();
   const [timeline, setTimeline] = useState<any[]>([]);
+  const [teamMembers, setTeamMembers] = useState<any[]>([]);
 
   // -----------------------------------------
   // UNIVERSAL IMAGE UPLOADER
@@ -43,6 +44,28 @@ export default function AboutPageAdmin() {
     }
   };
 
+  // Upload for team members (separate endpoint)
+  const uploadTeamImage = async (file: File, onDone: (url: string) => void) => {
+    const form = new FormData();
+    form.append("image", file);
+
+    try {
+      const res = await fetch(`${BASE}/upload`, {
+        method: "POST",
+        body: form,
+      });
+      const out = await res.json();
+      onDone(out.url);
+      toast({ title: "Image Uploaded", description: "Team image updated successfully." });
+    } catch {
+      toast({
+        title: "Upload Failed",
+        description: "Image upload failed",
+        variant: "destructive",
+      });
+    }
+  };
+
   const saveTimelineItem = async (id: number, payload: any) => {
     const token = localStorage.getItem("token");
 
@@ -54,6 +77,23 @@ export default function AboutPageAdmin() {
       },
       body: JSON.stringify(payload),
     });
+  };
+
+  const saveTeamMember = async (id: number, payload: any) => {
+    const token = localStorage.getItem("token");
+    
+    try {
+      await fetch(`${BASE}/about-team/${id}`, {
+        method: "PUT",
+        headers: {
+          "Content-Type": "application/json",
+          Authorization: `Bearer ${token}`,
+        },
+        body: JSON.stringify(payload),
+      });
+    } catch (error) {
+      console.error("Failed to save team member:", error);
+    }
   };
 
   // -------------------------------------
@@ -199,6 +239,7 @@ export default function AboutPageAdmin() {
 
         setData(cleaned);
         setTimeline(d.timeline || []);
+        setTeamMembers(d.teamMembers || []);
         setLoading(false);
       });
   }, []);
@@ -576,11 +617,10 @@ export default function AboutPageAdmin() {
               <CardTitle className="text-lg">Team Section</CardTitle>
             </CardHeader>
 
-            <CardContent className="space-y-8 pt-6">
-
+            <CardContent className="space-y-6 pt-6">
               {/* ---------- SECTION HEADING ---------- */}
               <div className="space-y-3">
-                <Label>Team Section Heading (supports &lt;span&gt;)</Label>
+                <Label>Team Heading (supports &lt;span&gt; formatting)</Label>
                 <Textarea
                   rows={2}
                   value={data.team_heading}
@@ -588,7 +628,6 @@ export default function AboutPageAdmin() {
                     handleChange("team_heading", e.target.value)
                   }
                   className="w-full"
-                  placeholder="Meet the <span class='text-gradient'>Team</span>"
                 />
 
                 <HighlightTool
@@ -599,7 +638,7 @@ export default function AboutPageAdmin() {
 
               {/* ---------- SECTION SUBTITLE ---------- */}
               <div className="space-y-3">
-                <Label>Team Section Subtitle</Label>
+                <Label>Team Subheading</Label>
                 <Textarea
                   rows={2}
                   value={data.team_subheading}
@@ -607,31 +646,53 @@ export default function AboutPageAdmin() {
                     handleChange("team_subheading", e.target.value)
                   }
                   className="w-full"
-                  placeholder="The passionate people behind every authentic blend"
                 />
               </div>
 
               <hr className="opacity-30" />
 
               {/* ---------- TEAM MEMBERS ---------- */}
-              {[1, 2, 3].map((i) => (
-                <div key={i} className="border p-4 rounded-xl space-y-3">
-                  <h3 className="font-semibold">Team Member {i}</h3>
+              {teamMembers.map((member, index) => (
+                <div
+                  key={member.id}
+                  className="border p-4 rounded-xl space-y-3"
+                >
+                  <h3 className="font-semibold">
+                    Team Member {index + 1}
+                  </h3>
 
                   <Label>Name</Label>
                   <Input
-                    value={data[`team_${i}_name`]}
-                    onChange={(e) =>
-                      handleChange(`team_${i}_name`, e.target.value)
+                    value={member.name}
+                    onChange={(e) => {
+                      const copy = [...teamMembers];
+                      copy[index].name = e.target.value;
+                      setTeamMembers(copy);
+                    }}
+                    onBlur={() =>
+                      saveTeamMember(member.id, {
+                        name: member.name,
+                        role: member.role,
+                        image: member.image,
+                      })
                     }
                     className="w-full"
                   />
 
                   <Label>Role</Label>
                   <Input
-                    value={data[`team_${i}_role`]}
-                    onChange={(e) =>
-                      handleChange(`team_${i}_role`, e.target.value)
+                    value={member.role}
+                    onChange={(e) => {
+                      const copy = [...teamMembers];
+                      copy[index].role = e.target.value;
+                      setTeamMembers(copy);
+                    }}
+                    onBlur={() =>
+                      saveTeamMember(member.id, {
+                        name: member.name,
+                        role: member.role,
+                        image: member.image,
+                      })
                     }
                     className="w-full"
                   />
@@ -640,47 +701,99 @@ export default function AboutPageAdmin() {
                   <div className="flex flex-col sm:flex-row items-start sm:items-center gap-4">
                     <div className="flex-1 w-full">
                       <Input
-                        value={data[`team_${i}_image`]}
-                        onChange={(e) =>
-                          handleChange(`team_${i}_image`, e.target.value)
-                        }
+                        value={member.image || ""}
+                        readOnly
                         className="w-full"
                       />
                     </div>
 
                     <input
-                      id={`teamUpload${i}`}
                       type="file"
                       accept="image/*"
                       className="hidden"
+                      id={`teamUpload-${member.id}`}
                       onChange={(e) =>
                         e.target.files &&
-                        uploadImage(e.target.files[0], `team_${i}_image`)
+                        uploadTeamImage(e.target.files[0], (url) => {
+                          const copy = [...teamMembers];
+                          copy[index].image = url;
+                          setTeamMembers(copy);
+
+                          saveTeamMember(member.id, {
+                            name: member.name,
+                            role: member.role,
+                            image: url,
+                          });
+                        })
                       }
                     />
-
+                    
                     <Button
                       className="w-full sm:w-auto"
                       onClick={() =>
-                        document.getElementById(`teamUpload${i}`)!.click()
+                        document
+                          .getElementById(`teamUpload-${member.id}`)!
+                          .click()
                       }
                     >
                       <Upload className="w-4 h-4 mr-2" /> Upload
                     </Button>
                   </div>
 
-                  {data[`team_${i}_image`]?.startsWith("http") && (
+                  {member.image && (
                     <img
-                      src={data[`team_${i}_image`]}
-                      className="w-24 rounded-xl mt-2 max-w-full"
-                      alt={`Team member ${i}`}
+                      src={member.image}
+                      className="w-24 rounded-lg mt-2"
+                      alt={`Team member ${member.name}`}
                     />
                   )}
+
+                  <Button
+                    variant="destructive"
+                    onClick={async () => {
+                      const token = localStorage.getItem("token");
+                      await fetch(`${BASE}/about-team/${member.id}`, {
+                        method: "DELETE",
+                        headers: {
+                          Authorization: `Bearer ${token}`,
+                        },
+                      });
+
+                      setTeamMembers(
+                        teamMembers.filter((m) => m.id !== member.id)
+                      );
+                    }}
+                    className="w-full sm:w-auto"
+                  >
+                    <Trash2 className="w-4 h-4 mr-2" />
+                    Delete Member
+                  </Button>
                 </div>
               ))}
+
+              {/* ADD TEAM MEMBER */}
+              <Button
+                onClick={async () => {
+                  const token = localStorage.getItem("token");
+                  const res = await fetch(`${BASE}/about-team`, {
+                    method: "POST",
+                    headers: {
+                      "Content-Type": "application/json",
+                      Authorization: `Bearer ${token}`,
+                    },
+                    body: JSON.stringify({ aboutId: data.id }),
+                  });
+
+                  const newMember = await res.json();
+                  setTeamMembers([...teamMembers, newMember]);
+                }}
+                className="w-full"
+              >
+                <Plus className="w-4 h-4 mr-2" />
+                Add Team Member
+              </Button>
             </CardContent>
           </Card>
-
 
           {/* ===================== STATS SECTION ===================== */}
           <Card className="overflow-hidden">

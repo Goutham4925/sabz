@@ -48,7 +48,7 @@ function LegalModal({
   if (!open) return null;
 
   return (
-    <div className="fixed inset-0 z-50 bg-black/60 flex items-center justify-center px-4">
+    <div className="fixed inset-0 z-[9999] bg-black/60 flex items-center justify-center px-4">
       <div className="bg-white max-w-3xl w-full rounded-xl shadow-lg relative">
         <button
           onClick={onClose}

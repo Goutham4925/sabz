@@ -154,44 +154,57 @@ const About = () => {
         )}
 
         {/* ================= TEAM ================= */}
-        <section className="py-24 bg-secondary/30">
-          <div className="container mx-auto px-4 md:px-8 text-center">
-            <h2
-              className="section-title mb-4"
-              dangerouslySetInnerHTML={{
-                __html:
-                  about?.team_heading ||
-                  "Meet <span class='text-gradient'>Our Team</span>",
-              }}
-            />
+        {about?.teamMembers?.length > 0 && (
+          <section className="py-24 bg-secondary/30">
+            <div className="container mx-auto px-4 md:px-8 text-center">
+              <h2
+                className="section-title mb-4"
+                dangerouslySetInnerHTML={{
+                  __html:
+                    about?.team_heading ||
+                    "Meet <span class='text-gradient'>Our Team</span>",
+                }}
+              />
 
-            <p className="section-subtitle mb-16">
-              {about?.team_subheading}
-            </p>
+              <p className="section-subtitle mb-16">
+                {about?.team_subheading}
+              </p>
 
-            <div className="grid grid-cols-1 md:grid-cols-3 gap-8 max-w-4xl mx-auto">
-              {[1, 2, 3].map((i) => (
-                <div key={i}>
-                  <div className="w-40 h-40 mx-auto mb-6 rounded-full overflow-hidden shadow-card">
-                    {about?.[`team_${i}_image`] && (
-                      <img
-                        src={about[`team_${i}_image`]}
-                        className="w-full h-full object-cover"
-                        alt=""
-                      />
-                    )}
+              {/* DYNAMIC GRID */}
+              <div
+                className={`
+                  grid gap-8 mx-auto
+                  ${about.teamMembers.length === 1 ? "grid-cols-1 max-w-sm" : ""}
+                  ${about.teamMembers.length === 2 ? "grid-cols-1 md:grid-cols-2 max-w-2xl" : ""}
+                  ${about.teamMembers.length >= 3 ? "grid-cols-1 md:grid-cols-3 max-w-4xl" : ""}
+                `}
+              >
+                {about.teamMembers.map((member: any) => (
+                  <div key={member.id} className="text-center">
+                    <div className="w-40 h-40 mx-auto mb-6 rounded-full overflow-hidden shadow-card">
+                      {member.image && (
+                        <img
+                          src={member.image}
+                          className="w-full h-full object-cover"
+                          alt={member.name}
+                        />
+                      )}
+                    </div>
+
+                    <h3 className="font-display text-xl font-semibold">
+                      {member.name}
+                    </h3>
+
+                    <p className="text-primary font-medium">
+                      {member.role}
+                    </p>
                   </div>
-                  <h3 className="font-display text-xl font-semibold">
-                    {about?.[`team_${i}_name`]}
-                  </h3>
-                  <p className="text-primary font-medium">
-                    {about?.[`team_${i}_role`]}
-                  </p>
-                </div>
-              ))}
+                ))}
+              </div>
             </div>
-          </div>
-        </section>
+          </section>
+        )}
+
 
         {/* ================= STATS ================= */}
         <section className="py-24 bg-chocolate text-cream">

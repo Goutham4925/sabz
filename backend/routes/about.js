@@ -8,21 +8,24 @@ const router = express.Router();
 // ------------------------------------
 router.get("/", async (req, res) => {
   try {
-    let about = await prisma.aboutPage.findFirst();
+    let about = await prisma.aboutPage.findFirst({
+      include: {
+        timeline: { orderBy: { order: "asc" } },
+        teamMembers: { orderBy: { order: "asc" } },
+      },
+    });
 
     if (!about) {
-      about = await prisma.aboutPage.create({ data: {} });
+      about = await prisma.aboutPage.create({
+        data: {},
+        include: {
+          timeline: true,
+          teamMembers: true,
+        },
+      });
     }
 
-    const timeline = await prisma.aboutTimeline.findMany({
-      where: { aboutId: about.id },
-      orderBy: { order: "asc" },
-    });
-
-    res.json({
-      ...about,
-      timeline,
-    });
+    res.json(about);
   } catch (err) {
     console.error("GET /about error:", err);
     res.status(500).json({ error: "Failed to fetch About Page" });
