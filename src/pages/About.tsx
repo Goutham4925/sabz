@@ -23,7 +23,6 @@ const About = () => {
 
   return (
     <div className="min-h-screen flex flex-col bg-background overflow-x-hidden">
-      <Navbar />
 
       {/* MAIN CONTENT — height always reserved */}
       <main className="flex-1 pt-32 pb-0 min-h-[calc(100vh-8rem)]">
