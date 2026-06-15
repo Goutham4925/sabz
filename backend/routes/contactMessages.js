@@ -74,7 +74,7 @@ router.post("/", async (req, res) => {
       subject: enrichedSubject,
       message: enrichedMessage,
       products: Array.isArray(products) && products.length > 0 ? products : null,
-    }).catch((err) => console.error("Mail send error:", err));
+    }).catch((err) => console.error("Mail send error:", err.message, err.code, err.response));
 
     res.json({ success: true, message: "Message stored", saved });
   } catch (err) {
