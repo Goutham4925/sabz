@@ -101,8 +101,13 @@ process.on("SIGTERM", shutdown);
 process.on("SIGINT", shutdown);
 
 // ----------------------------
-// START SERVER
+// START SERVER (local/Render)
 // ----------------------------
-app.listen(PORT, () => {
-  console.log(`Backend server running on port ${PORT}`);
-});
+if (require.main === module) {
+  app.listen(PORT, () => {
+    console.log(`Backend server running on port ${PORT}`);
+  });
+}
+
+// Export for Vercel serverless
+module.exports = app;
