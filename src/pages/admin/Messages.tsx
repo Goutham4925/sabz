@@ -4,7 +4,7 @@ import ProtectedRoute from "@/components/admin/ProtectedRoute";
 import { Card, CardHeader, CardTitle, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
-import { Trash2, Loader2, Eye, Mail, Phone, Calendar, Package } from "lucide-react";
+import { Trash2, Loader2, Eye, Mail, Phone, Calendar, Package, ShoppingCart, MapPin } from "lucide-react";
 import { Link } from "react-router-dom";
 import { useToast } from "@/hooks/use-toast";
 import { API_URL } from "@/config/api";
@@ -103,7 +103,12 @@ export default function MessagesPage() {
                                 </Badge>
                               )}
                               
-                              {m.productId ? (
+                              {m.products && Array.isArray(m.products) && m.products.length > 0 ? (
+                                <Badge className="bg-green-600 text-white flex items-center gap-1">
+                                  <ShoppingCart className="h-3 w-3" />
+                                  Cart Enquiry
+                                </Badge>
+                              ) : m.productId ? (
                                 <Badge variant="outline" className="flex items-center gap-1">
                                   <Package className="h-3 w-3" />
                                   Product Enquiry
@@ -137,8 +142,30 @@ export default function MessagesPage() {
                               </div>
                             </div>
 
-                            {/* PRODUCT LINK (if applicable) */}
-                            {m.productId && (
+                            {/* CART ITEMS (if applicable) */}
+                            {m.products && Array.isArray(m.products) && m.products.length > 0 && (
+                              <div>
+                                <p className="font-semibold text-sm text-gray-500 mb-1">Cart Items</p>
+                                <div className="bg-gray-50 rounded p-2 space-y-1">
+                                  {m.products.map((p: any, i: number) => (
+                                    <div key={i} className="flex justify-between text-sm">
+                                      <span className="flex items-center gap-1">
+                                        <ShoppingCart className="h-3 w-3 text-gray-400" />
+                                        {p.name}{p.quantity > 1 ? ` × ${p.quantity}` : ""}
+                                      </span>
+                                      {p.price && (
+                                        <span className="text-primary font-medium">
+                                          ₹{(p.price * p.quantity).toFixed(2)}
+                                        </span>
+                                      )}
+                                    </div>
+                                  ))}
+                                </div>
+                              </div>
+                            )}
+
+                            {/* SINGLE PRODUCT LINK (if applicable) */}
+                            {m.productId && !m.products && (
                               <div>
                                 <p className="font-semibold text-sm text-gray-500">Product</p>
                                 <Link
@@ -148,6 +175,17 @@ export default function MessagesPage() {
                                   <Package className="h-3 w-3" />
                                   {m.productName || "View Product"}
                                 </Link>
+                              </div>
+                            )}
+
+                            {/* ADDRESS */}
+                            {m.address && (
+                              <div>
+                                <p className="font-semibold text-sm text-gray-500">Delivery Address</p>
+                                <p className="text-sm flex items-start gap-1">
+                                  <MapPin className="h-3 w-3 mt-0.5 text-gray-400 shrink-0" />
+                                  {m.address}
+                                </p>
                               </div>
                             )}
 

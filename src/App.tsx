@@ -4,6 +4,9 @@ import { TooltipProvider } from "@/components/ui/tooltip";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { BrowserRouter, Routes, Route } from "react-router-dom";
 import { AuthProvider } from "@/hooks/useAuth";
+import { CartProvider } from "@/context/CartContext";
+import { CartDrawer } from "@/components/cart/CartDrawer";
+import { MobileCartBar } from "@/components/cart/MobileCartBar";
 
 /* ----------------------------
    GLOBAL UTIL
@@ -87,10 +90,14 @@ const App = () => (
     <TooltipProvider>
       <Toaster />
       <Sonner />
-      <BrowserRouter>
+      <BrowserRouter future={{ v7_startTransition: true, v7_relativeSplatPath: true }}>
         <ScrollToTop />
         <AuthProvider>
-          <RouterWrapper />
+          <CartProvider>
+            <RouterWrapper />
+            <CartDrawer />
+            <MobileCartBar />
+          </CartProvider>
         </AuthProvider>
       </BrowserRouter>
     </TooltipProvider>

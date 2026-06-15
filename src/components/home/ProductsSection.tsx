@@ -6,17 +6,10 @@ import { ArrowRight } from "lucide-react";
 import DOMPurify from "dompurify";
 import { API_URL } from "@/config/api";
 
-// Swiper (mobile only)
-import { Swiper, SwiperSlide } from "swiper/react";
-import { Pagination } from "swiper/modules";
-import "swiper/css";
-import "swiper/css/pagination";
-
 export function ProductsSection() {
   const sectionRef = useRef<HTMLElement>(null);
 
-  const [isVisible, setIsVisible] = useState(true); // ✅ visible by default (no dead state)
-  const [isMobile, setIsMobile] = useState(false);
+  const [isVisible, setIsVisible] = useState(true);
 
   /* =====================================================
      PRELOAD FAST PATH
@@ -28,16 +21,6 @@ export function ProductsSection() {
   const [products, setProducts] = useState<any[]>(preProducts);
   const [settings, setSettings] = useState<any>(preSettings);
   const [loading, setLoading] = useState(!preProducts.length);
-
-  /* =====================================================
-     DEVICE CHECK
-  ===================================================== */
-  useEffect(() => {
-    const check = () => setIsMobile(window.innerWidth < 768);
-    check();
-    window.addEventListener("resize", check);
-    return () => window.removeEventListener("resize", check);
-  }, []);
 
   /* =====================================================
      FETCH DATA (PRODUCTS FIRST)
@@ -67,11 +50,9 @@ export function ProductsSection() {
   }, []);
 
   /* =====================================================
-     INTERSECTION OBSERVER (DESKTOP ONLY)
+     INTERSECTION OBSERVER
   ===================================================== */
   useEffect(() => {
-    if (isMobile) return;
-
     const observer = new IntersectionObserver(
       ([entry]) => {
         if (entry.isIntersecting) {
@@ -84,7 +65,7 @@ export function ProductsSection() {
 
     if (sectionRef.current) observer.observe(sectionRef.current);
     return () => observer.disconnect();
-  }, [isMobile]);
+  }, []);
 
   /* =====================================================
      SANITIZE CMS HTML
@@ -167,44 +148,17 @@ export function ProductsSection() {
             ))}
           </div>
         ) : (
-          <>
-            {/* DESKTOP GRID */}
-            {!isMobile && (
-              <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-8 mb-12">
-                {products.map((p, i) => (
-                  <div
-                    key={p.id}
-                    style={{ transitionDelay: `${i * 120}ms` }}
-                    className="transition-opacity duration-500"
-                  >
-                    <ProductCard {...p} />
-                  </div>
-                ))}
+          <div className="grid grid-cols-2 sm:grid-cols-2 lg:grid-cols-4 gap-4 md:gap-8 mb-12">
+            {products.map((p, i) => (
+              <div
+                key={p.id}
+                style={{ transitionDelay: `${i * 120}ms` }}
+                className="transition-opacity duration-500"
+              >
+                <ProductCard {...p} />
               </div>
-            )}
-
-            {/* MOBILE SWIPER */}
-            {isMobile && (
-              <div className="mb-12">
-                <Swiper
-                  modules={[Pagination]}
-                  slidesPerView={1.2}
-                  spaceBetween={20}
-                  pagination={{ clickable: true }}
-                  touchStartPreventDefault={false}
-                  touchMoveStopPropagation={false}
-                  passiveListeners={true}
-                  resistanceRatio={0}
-                >
-                  {products.map((p) => (
-                    <SwiperSlide key={p.id}>
-                      <ProductCard {...p} />
-                    </SwiperSlide>
-                  ))}
-                </Swiper>
-              </div>
-            )}
-          </>
+            ))}
+          </div>
         )}
 
         {/* ================= CTA ================= */}

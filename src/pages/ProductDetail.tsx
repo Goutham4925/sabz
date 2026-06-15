@@ -1,9 +1,9 @@
 import { useEffect, useState } from "react";
 import { useParams, Link } from "react-router-dom";
-import { Navbar } from "@/components/layout/Navbar";
 import { Footer } from "@/components/layout/Footer";
 import { Button } from "@/components/ui/button";
-import { ArrowLeft, Star, MessageCircle, ZoomIn } from "lucide-react";
+import { ArrowLeft, Star, MessageCircle, ZoomIn, ShoppingCart } from "lucide-react";
+import { useCart } from "@/context/CartContext";
 
 import { Dialog, DialogContent } from "@/components/ui/dialog";
 import { Input } from "@/components/ui/input";
@@ -17,6 +17,7 @@ export default function ProductDetail() {
   const { id } = useParams();
   const [product, setProduct] = useState<any>(null);
   const [loading, setLoading] = useState(true);
+  const { addToCart } = useCart();
 
   const [selectedImage, setSelectedImage] = useState<string | null>(null);
   const [zoomOpen, setZoomOpen] = useState(false);
@@ -200,15 +201,32 @@ export default function ProductDetail() {
                   {product.price ? `₹${product.price}` : "—"}
                 </div>
 
-                <Button
-                  variant="hero"
-                  size="lg"
-                  className="w-full mb-8"
-                  onClick={() => setOpen(true)}
-                >
-                  <MessageCircle className="w-5 h-5 mr-2" />
-                  Send Enquiry
-                </Button>
+                <div className="flex gap-3 mb-8">
+                  <Button
+                    variant="hero"
+                    size="lg"
+                    className="flex-1"
+                    onClick={() =>
+                      addToCart({
+                        id: product.id,
+                        name: product.name,
+                        price: product.price ?? null,
+                        image_url: product.image_url ?? null,
+                      })
+                    }
+                  >
+                    <ShoppingCart className="w-5 h-5 mr-2" />
+                    Add to Cart
+                  </Button>
+                  <Button
+                    variant="outline"
+                    size="lg"
+                    onClick={() => setOpen(true)}
+                  >
+                    <MessageCircle className="w-5 h-5 mr-2" />
+                    Enquire
+                  </Button>
+                </div>
 
                 {/* HIGHLIGHTS */}
                 {highlights.length > 0 && (

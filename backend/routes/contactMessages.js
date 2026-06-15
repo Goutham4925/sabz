@@ -1,53 +1,80 @@
 const express = require("express");
 const prisma = require("../prisma/client");
+const { sendEnquiryMail } = require("../utils/mailer");
 const router = express.Router();
 
 /* ============================================================
-   POST — NEW CONTACT MESSAGE or PRODUCT ENQUIRY
+   POST — CONTACT MESSAGE / PRODUCT ENQUIRY / CART ENQUIRY
 ============================================================ */
 router.post("/", async (req, res) => {
   try {
-    const {
-      name,
-      email,
-      phone,
-      subject,
-      message,
-      productId,
-    } = req.body;
+    const { name, email, phone, subject, message, productId, address, products } = req.body;
 
     let enrichedSubject = subject;
     let enrichedMessage = message;
     let productName = null;
 
-    // If enquiry contains a productId → fetch product name
-    if (productId) {
+    // Cart enquiry — multiple products
+    if (Array.isArray(products) && products.length > 0) {
+      const lines = products.map(
+        (p) =>
+          `• ${p.name}${p.quantity > 1 ? ` × ${p.quantity}` : ""}${
+            p.price ? ` — ₹${(p.price * p.quantity).toFixed(2)}` : ""
+          }`
+      );
+      enrichedSubject =
+        subject || `Cart Enquiry — ${products.length} product(s)`;
+      enrichedMessage = [
+        "Products requested:",
+        ...lines,
+        "",
+        address ? `Delivery address: ${address}` : "",
+        message ? `Note: ${message}` : "",
+      ]
+        .filter((l) => l !== undefined)
+        .join("\n")
+        .trim();
+    } else if (productId) {
+      // Single product enquiry
       const product = await prisma.product.findUnique({
         where: { id: Number(productId) },
+        select: { name: true },
       });
 
       if (product) {
         productName = product.name;
-
         enrichedSubject = subject || `Enquiry about ${product.name}`;
         enrichedMessage =
           message ||
-          `Customer has requested information about the product "${product.name}".`;
+          `Customer requested information about "${product.name}".`;
       }
     }
 
     const saved = await prisma.contactMessage.create({
       data: {
         name,
-        email,
+        email: email || null,
         phone: phone || null,
         subject: enrichedSubject,
         message: enrichedMessage,
         productId: productId ? Number(productId) : null,
         productName,
-        is_read: false, // ensure new messages default to unread
+        address: address || null,
+        products: Array.isArray(products) && products.length > 0 ? products : undefined,
+        is_read: false,
       },
     });
+
+    // Fire email — non-blocking so slow SMTP doesn't delay response
+    sendEnquiryMail({
+      name,
+      email,
+      phone,
+      address,
+      subject: enrichedSubject,
+      message: enrichedMessage,
+      products: Array.isArray(products) && products.length > 0 ? products : null,
+    }).catch((err) => console.error("Mail send error:", err));
 
     res.json({ success: true, message: "Message stored", saved });
   } catch (err) {
@@ -77,10 +104,8 @@ router.get("/", async (req, res) => {
 ============================================================ */
 router.put("/:id/read", async (req, res) => {
   try {
-    const id = Number(req.params.id);
-
     const updated = await prisma.contactMessage.update({
-      where: { id },
+      where: { id: Number(req.params.id) },
       data: { is_read: true },
     });
 

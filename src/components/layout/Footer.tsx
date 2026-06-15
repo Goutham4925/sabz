@@ -84,9 +84,9 @@ export function Footer() {
   const [openTerms, setOpenTerms] = useState(false);
 
   useEffect(() => {
-    fetch(`${API_URL}/settings`).then((res) => res.json()).then(setSettings);
-    fetch(`${API_URL}/categories`).then((res) => res.json()).then(setCategories);
-    fetch(`${API_URL}/contact-page`).then((res) => res.json()).then(setContact);
+    fetch(`${API_URL}/settings`).then((r) => r.json()).then(setSettings).catch(() => {});
+    fetch(`${API_URL}/categories`).then((r) => r.json()).then((d) => Array.isArray(d) && setCategories(d)).catch(() => {});
+    fetch(`${API_URL}/contact-page`).then((r) => r.json()).then(setContact).catch(() => {});
   }, []);
 
   const logo = settings?.navbar_logo;

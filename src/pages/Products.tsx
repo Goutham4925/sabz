@@ -2,16 +2,10 @@ import { useEffect, useState } from "react";
 import { useSearchParams } from "react-router-dom";
 import DOMPurify from "dompurify";
 
-import { Navbar } from "@/components/layout/Navbar";
 import { Footer } from "@/components/layout/Footer";
 import { ProductCard } from "@/components/home/ProductCard";
 import { ProductsGridLoader } from "@/components/home/ProductsGridLoader";
 import { Button } from "@/components/ui/button";
-
-import { Swiper, SwiperSlide } from "swiper/react";
-import { Pagination } from "swiper/modules";
-import "swiper/css";
-import "swiper/css/pagination";
 
 import { API_URL } from "@/config/api";
 
@@ -29,7 +23,6 @@ const Products = () => {
 
   const [productsLoading, setProductsLoading] = useState(true);
   const [showPrices, setShowPrices] = useState(true);
-  const [isMobile, setIsMobile] = useState(false);
 
   const [searchParams, setSearchParams] = useSearchParams();
   const activeCategoryId = searchParams.get("categoryId") || "all";
@@ -37,12 +30,6 @@ const Products = () => {
   /* =====================================================
      DEVICE CHECK (SAFE + RESPONSIVE)
   ===================================================== */
-  useEffect(() => {
-    const check = () => setIsMobile(window.innerWidth < 768);
-    check();
-    window.addEventListener("resize", check);
-    return () => window.removeEventListener("resize", check);
-  }, []);
 
   /* =====================================================
      SANITIZE CMS HTML
@@ -58,7 +45,7 @@ const Products = () => {
   ===================================================== */
   useEffect(() => {
     // 🚀 PRODUCTS — critical path
-    fetch(`${API_URL}/products`)
+    fetch(`${API_URL}/products?view=list`)
       .then((r) => r.json())
       .then((data) => {
         setProducts(data);
@@ -69,9 +56,7 @@ const Products = () => {
     // 🎨 Categories (background)
     fetch(`${API_URL}/categories`)
       .then((r) => r.json())
-      .then((cats) =>
-        setCategories([{ id: "all", name: "All" }, ...cats])
-      )
+      .then((cats) => Array.isArray(cats) && setCategories([{ id: "all", name: "All" }, ...cats]))
       .catch(() => {});
 
     // 🎨 Settings (background)
@@ -166,55 +151,22 @@ const Products = () => {
           </div>
 
           {/* ================= DESKTOP GRID ================= */}
-          {!isMobile && (
-            <div className="hidden md:block">
-              {productsLoading ? (
-                <ProductsGridLoader />
-              ) : (
-                <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-8">
-                  {filteredProducts.map((product, idx) => (
-                    <div
-                      key={product.id}
-                      className="animate-fade-up"
-                      style={{ animationDelay: `${idx * 80}ms` }}
-                    >
-                      <ProductCard
-                        {...product}
-                        showPrice={showPrices}
-                      />
-                    </div>
-                  ))}
-                </div>
-              )}
-            </div>
-          )}
-
-          {/* ================= MOBILE SWIPER ================= */}
-          {isMobile && (
-            <div className="md:hidden mb-12">
-              {productsLoading ? (
-                <ProductsGridLoader count={3} />
-              ) : (
-                <Swiper
-                  modules={[Pagination]}
-                  slidesPerView={1.2}
-                  spaceBetween={20}
-                  pagination={{ clickable: true }}
-                  touchStartPreventDefault={false}
-                  touchMoveStopPropagation={false}
-                  passiveListeners={true}
-                  resistanceRatio={0}
+          {productsLoading ? (
+            <ProductsGridLoader />
+          ) : (
+            <div className="grid grid-cols-2 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4 md:gap-8">
+              {filteredProducts.map((product, idx) => (
+                <div
+                  key={product.id}
+                  className="animate-fade-up"
+                  style={{ animationDelay: `${idx * 80}ms` }}
                 >
-                  {filteredProducts.map((product) => (
-                    <SwiperSlide key={product.id}>
-                      <ProductCard
-                        {...product}
-                        showPrice={showPrices}
-                      />
-                    </SwiperSlide>
-                  ))}
-                </Swiper>
-              )}
+                  <ProductCard
+                    {...product}
+                    showPrice={showPrices}
+                  />
+                </div>
+              ))}
             </div>
           )}
 

@@ -5,7 +5,7 @@ generator client {
 datasource db {
   provider  = "postgresql"
   url       = env("DATABASE_URL")
-  directUrl = env("DATABASE_URL")
+  directUrl = env("DIRECT_URL")
 }
 
 /// ////////////////////////////////////////////////////////////////////////
@@ -213,7 +213,7 @@ model ContactPage {
 model ContactMessage {
   id          Int      @id @default(autoincrement())
   name        String
-  email       String
+  email       String?
   subject     String
   message     String
   createdAt   DateTime @default(now())
@@ -221,6 +221,8 @@ model ContactMessage {
   productId   Int?
   productName String?
   is_read     Boolean  @default(false)
+  address     String?
+  products    Json?
 }
 
 model AboutTimeline {

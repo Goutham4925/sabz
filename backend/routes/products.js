@@ -5,17 +5,32 @@ const router = express.Router();
 
 /* ============================================================
    1️⃣ GET ALL PRODUCTS (ADMIN + PUBLIC)
+   ?view=list  → card-only fields (faster for listing pages)
 ============================================================ */
 router.get("/", async (req, res) => {
   try {
+    const isList = req.query.view === "list";
+
     const products = await prisma.product.findMany({
-      include: {
-        category: true,
-        images: true,
-      },
+      select: isList
+        ? {
+            id: true,
+            name: true,
+            description: true,
+            price: true,
+            image_url: true,
+            is_featured: true,
+            categoryId: true,
+            rating: true,
+            ratingCount: true,
+            category: { select: { id: true, name: true } },
+          }
+        : undefined,
+      include: isList ? undefined : { category: true, images: true },
       orderBy: { created_at: "desc" },
     });
 
+    res.set("Cache-Control", "public, max-age=30, stale-while-revalidate=60");
     res.json(products);
   } catch (err) {
     console.error("GET /products error:", err);
@@ -30,10 +45,22 @@ router.get("/featured", async (req, res) => {
   try {
     const featured = await prisma.product.findMany({
       where: { is_featured: true },
-      include: { category: true, images: true },
+      select: {
+        id: true,
+        name: true,
+        description: true,
+        price: true,
+        image_url: true,
+        is_featured: true,
+        categoryId: true,
+        rating: true,
+        ratingCount: true,
+        category: { select: { id: true, name: true } },
+      },
       orderBy: { created_at: "desc" },
     });
 
+    res.set("Cache-Control", "public, max-age=30, stale-while-revalidate=60");
     res.json(featured);
   } catch (err) {
     console.error("Featured products error:", err);

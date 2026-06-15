@@ -1,9 +1,10 @@
 import { useState, useEffect } from "react";
 import { Link, useLocation } from "react-router-dom";
-import { Menu, X, Cookie } from "lucide-react";
+import { Menu, X, ShoppingCart } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { cn } from "@/lib/utils";
 import { API_URL } from "@/config/api";
+import { useCart } from "@/context/CartContext";
 
 const navLinks = [
   { name: "Home", path: "/" },
@@ -17,6 +18,7 @@ export function Navbar() {
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
   const [settings, setSettings] = useState<any>(null);
   const location = useLocation();
+  const { itemCount, openCart, isOpen } = useCart();
 
   /* ================= LOAD SETTINGS ================= */
   useEffect(() => {
@@ -58,7 +60,7 @@ export function Navbar() {
     <header
       className={cn(
         "fixed top-0 left-0 right-0 z-[100] isolate transition-all duration-500",
-        isScrolled
+        isScrolled || isOpen
           ? "bg-background/95 backdrop-blur-md shadow-soft py-3"
           : "bg-transparent py-5"
       )}
@@ -125,6 +127,19 @@ export function Navbar() {
                 Order Now
               </Button>
             </Link>
+
+            <button
+              onClick={openCart}
+              className="relative p-2 hover:text-primary transition-colors"
+              aria-label="Open cart"
+            >
+              <ShoppingCart className="w-5 h-5" />
+              {itemCount > 0 && (
+                <span className="absolute -top-1 -right-1 bg-primary text-primary-foreground text-[10px] font-bold w-4 h-4 rounded-full flex items-center justify-center">
+                  {itemCount > 9 ? "9+" : itemCount}
+                </span>
+              )}
+            </button>
           </div>
 
           {/* ================= MOBILE TOGGLE ================= */}
