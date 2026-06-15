@@ -1,16 +1,7 @@
-const nodemailer = require("nodemailer");
+const { Resend } = require("resend");
 
-const transporter = nodemailer.createTransport({
-  service: "gmail",
-  auth: {
-    user: process.env.SMTP_USER,
-    pass: process.env.SMTP_PASS,
-  },
-});
+const resend = new Resend(process.env.RESEND_API_KEY);
 
-/**
- * Send enquiry notification email to admin.
- */
 async function sendEnquiryMail({ name, email, phone, address, subject, message, products }) {
   const isCart = Array.isArray(products) && products.length > 0;
 
@@ -43,7 +34,7 @@ async function sendEnquiryMail({ name, email, phone, address, subject, message, 
     <!-- HEADER -->
     <div style="background:linear-gradient(135deg,#8B1A1A,#c0392b);padding:28px 32px;">
       <h1 style="margin:0;color:#fff;font-size:20px;font-weight:700;">
-        ${isCart ? "🛒 New Cart Enquiry" : "📩 New Enquiry"}
+        ${isCart ? "New Cart Enquiry" : "New Enquiry"}
       </h1>
       <p style="margin:6px 0 0;color:#ffd6d6;font-size:14px;">Saabz Kitchen · ${new Date().toLocaleString("en-IN", { timeZone: "Asia/Kolkata" })}</p>
     </div>
@@ -106,10 +97,10 @@ async function sendEnquiryMail({ name, email, phone, address, subject, message, 
 </body>
 </html>`;
 
-  await transporter.sendMail({
-    from: `"Saabz Kitchen Enquiry" <${process.env.MAIL_FROM}>`,
+  await resend.emails.send({
+    from: process.env.MAIL_FROM,
     to: process.env.MAIL_TO,
-    replyTo: email || undefined,
+    reply_to: email || undefined,
     subject: subject || "New Enquiry — Saabz Kitchen",
     html,
   });
