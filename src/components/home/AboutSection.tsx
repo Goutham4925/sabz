@@ -14,8 +14,9 @@ export function AboutSection() {
     async function load() {
       try {
         const res = await fetch(`${API_URL}/settings`);
-        const json = await res.json();
-        setSettings(json);
+        const text = await res.text();
+        console.log("[About] settings status:", res.status, "url:", res.url, "body[:100]:", text.slice(0, 100));
+        setSettings(JSON.parse(text));
       } catch (e) {
         console.error("About load error:", e);
       }

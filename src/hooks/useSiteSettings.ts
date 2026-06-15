@@ -55,8 +55,10 @@ export function useSiteSettings() {
     const fetchSettings = async () => {
       try {
         const res = await fetch(`${API_URL}/settings`);
-        if (!res.ok) throw new Error("Failed to fetch settings");
-        const data = await res.json();
+        const text = await res.text();
+        console.log("[useSiteSettings] status:", res.status, "url:", res.url, "body[:100]:", text.slice(0, 100));
+        if (!res.ok) throw new Error(`HTTP ${res.status}`);
+        const data = JSON.parse(text);
         setSettings(data);
       } catch (err: any) {
         console.error("Failed to fetch site settings:", err);

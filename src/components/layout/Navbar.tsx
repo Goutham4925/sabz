@@ -25,7 +25,9 @@ export function Navbar() {
     const load = async () => {
       try {
         const r = await fetch(`${API_URL}/settings`);
-        setSettings(await r.json());
+        const text = await r.text();
+        console.log("[Navbar] settings status:", r.status, "url:", r.url, "body[:100]:", text.slice(0, 100));
+        setSettings(JSON.parse(text));
       } catch (e) {
         console.error("Failed to load navbar settings", e);
       }
