@@ -1,7 +1,8 @@
+"use client";
 import { useEffect, useState, useRef } from "react";
 import { Button } from "@/components/ui/button";
 import { ArrowRight, Gift } from "lucide-react";
-import { Link } from "react-router-dom";
+import Link from "next/link";
 import { useSiteSettings } from "@/hooks/useSiteSettings";
 
 export function CTASection() {
@@ -87,7 +88,7 @@ export function CTASection() {
             visible ? "opacity-100 translate-y-0" : "opacity-0 translate-y-10"
           }`}
         >
-          <Link to={settings.cta_primary_href || "/products"}>
+          <Link href={settings.cta_primary_href || "/products"}>
             <Button
               size="xl"
               className="bg-gradient-to-r from-golden to-accent text-chocolate font-bold hover:shadow-glow"
@@ -97,7 +98,7 @@ export function CTASection() {
             </Button>
           </Link>
 
-          <Link to="/contact">
+          <Link href="/contact">
             <Button
               variant="outline"
               size="xl"

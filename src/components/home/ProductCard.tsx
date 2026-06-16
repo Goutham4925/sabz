@@ -1,5 +1,6 @@
+"use client";
 import { memo } from "react";
-import { Link } from "react-router-dom";
+import Link from "next/link";
 import { ShoppingCart, Plus, Minus } from "lucide-react";
 import { useCart } from "@/context/CartContext";
 
@@ -52,7 +53,7 @@ export const ProductCard = memo(function ProductCard({
     <div className="group flex flex-col rounded-2xl overflow-hidden bg-card border border-border/40 shadow-sm hover:shadow-lg transition-all duration-300 hover:-translate-y-0.5">
 
       {/* IMAGE */}
-      <Link to={`/products/${id}`} className="block relative aspect-square overflow-hidden bg-muted/30">
+      <Link href={`/products/${id}`} className="block relative aspect-square overflow-hidden bg-muted/30">
         <img
           src={image_url || FALLBACK_IMAGE}
           alt={name}
@@ -65,7 +66,7 @@ export const ProductCard = memo(function ProductCard({
 
       {/* CONTENT */}
       <div className="flex flex-col flex-1 p-3 md:p-4 gap-1">
-        <Link to={`/products/${id}`} className="block">
+        <Link href={`/products/${id}`} className="block">
           <h3 className="font-semibold text-sm md:text-base text-foreground leading-snug line-clamp-1 group-hover:text-primary transition-colors">
             {name}
           </h3>

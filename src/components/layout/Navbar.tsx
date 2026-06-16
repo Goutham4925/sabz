@@ -1,5 +1,7 @@
+"use client";
 import { useState, useEffect } from "react";
-import { Link, useLocation } from "react-router-dom";
+import Link from "next/link";
+import { usePathname } from "next/navigation";
 import { Menu, X, ShoppingCart } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { cn } from "@/lib/utils";
@@ -17,10 +19,9 @@ export function Navbar() {
   const [isScrolled, setIsScrolled] = useState(false);
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
   const [settings, setSettings] = useState<any>(null);
-  const location = useLocation();
+  const pathname = usePathname();
   const { itemCount, openCart, isOpen } = useCart();
 
-  /* ================= LOAD SETTINGS ================= */
   useEffect(() => {
     const load = async () => {
       try {
@@ -33,19 +34,16 @@ export function Navbar() {
     load();
   }, []);
 
-  /* ================= SCROLL STATE ================= */
   useEffect(() => {
     const handleScroll = () => setIsScrolled(window.scrollY > 20);
     window.addEventListener("scroll", handleScroll);
     return () => window.removeEventListener("scroll", handleScroll);
   }, []);
 
-  /* ================= CLOSE MENU ON ROUTE CHANGE ================= */
   useEffect(() => {
     setIsMobileMenuOpen(false);
-  }, [location]);
+  }, [pathname]);
 
-  /* ================= LOCK BODY SCROLL ================= */
   useEffect(() => {
     document.body.style.overflow = isMobileMenuOpen ? "hidden" : "";
   }, [isMobileMenuOpen]);
@@ -68,15 +66,10 @@ export function Navbar() {
       <div className="container mx-auto px-4 md:px-8">
         <nav className="flex items-center justify-between">
 
-          {/* ================= LOGO + BRAND ================= */}
-          <Link to="/" className="flex items-center gap-3 md:gap-4">
+          <Link href="/" className="flex items-center gap-3 md:gap-4">
             <div className="relative h-14 w-24 sm:h-16 sm:w-28 md:h-20 md:w-32 lg:h-24 lg:w-40 overflow-hidden flex items-end justify-center">
               {logo ? (
-                <img
-                  src={logo}
-                  className="object-contain w-full h-full"
-                  alt="Logo"
-                />
+                <img src={logo} className="object-contain w-full h-full" alt="Logo" />
               ) : (
                 <img src="https://res.cloudinary.com/dglumbcje/image/upload/v1766763015/saabz_kitchen/0769bd28-050c-4886-a8f6-d3714a683ce2.png" className="object-contain w-full h-full" />
               )}
@@ -84,42 +77,32 @@ export function Navbar() {
 
             <div className="flex flex-col justify-center">
               {brandImage && (
-                <img
-                  src={brandImage}
-                  className="h-10 w-auto sm:h-12 md:h-14 object-contain"
-                  alt="Brand"
-                />
+                <img src={brandImage} className="h-10 w-auto sm:h-12 md:h-14 object-contain" alt="Brand" />
               )}
-
               {showText && (
                 <div className="leading-tight">
-                  <span className="font-display text-lg md:text-xl font-bold text-foreground">
-                    Saabz Kitchen
-                  </span>
-                  <span className="text-[10px] md:text-xs text-muted-foreground uppercase tracking-widest">
-                    Kitchen needs
-                  </span>
+                  <span className="font-display text-lg md:text-xl font-bold text-foreground">Saabz Kitchen</span>
+                  <span className="text-[10px] md:text-xs text-muted-foreground uppercase tracking-widest">Kitchen needs</span>
                 </div>
               )}
             </div>
           </Link>
 
-          {/* ================= DESKTOP NAV ================= */}
           <div className="hidden md:flex items-center gap-8">
             {navLinks.map((l) => (
               <Link
                 key={l.path}
-                to={l.path}
+                href={l.path}
                 className={cn(
                   "font-medium text-sm tracking-wide uppercase transition-colors",
-                  location.pathname === l.path && "text-golden"
+                  pathname === l.path && "text-golden"
                 )}
               >
                 {l.name}
               </Link>
             ))}
 
-            <Link to="/products">
+            <Link href="/products">
               <Button
                 className="bg-gradient-to-r from-golden to-accent text-chocolate px-4 py-2 font-semibold hover:opacity-90 transition"
                 size="sm"
@@ -142,51 +125,39 @@ export function Navbar() {
             </button>
           </div>
 
-          {/* ================= MOBILE TOGGLE ================= */}
           <button
             className="md:hidden p-2 relative z-[60]"
             onClick={() => setIsMobileMenuOpen((v) => !v)}
             aria-label="Toggle menu"
           >
-            {isMobileMenuOpen ? (
-              <X className="h-6 w-6" />
-            ) : (
-              <Menu className="h-6 w-6" />
-            )}
+            {isMobileMenuOpen ? <X className="h-6 w-6" /> : <Menu className="h-6 w-6" />}
           </button>
         </nav>
 
-        {/* ================= MOBILE MENU ================= */}
         <div
           className={cn(
             "md:hidden relative z-40 overflow-hidden transition-all duration-500 bg-background/75 backdrop-blur-md shadow-lg px-4",
-            isMobileMenuOpen
-              ? "max-h-96 opacity-100 mt-6"
-              : "max-h-0 opacity-0"
+            isMobileMenuOpen ? "max-h-96 opacity-100 mt-6" : "max-h-0 opacity-0"
           )}
         >
           <div className="flex flex-col gap-4 pb-6">
             {navLinks.map((l) => (
               <Link
                 key={l.path}
-                to={l.path}
+                href={l.path}
                 className={cn(
                   "font-medium text-base py-2 border-b border-border transition-colors",
-                  location.pathname === l.path
-                    ? "text-primary border-primary"
-                    : "text-foreground/80"
+                  pathname === l.path ? "text-primary border-primary" : "text-foreground/80"
                 )}
               >
                 {l.name}
               </Link>
             ))}
-
-            <Link to="/products">
+            <Link href="/products">
               <Button className="mt-4 w-full">Order Now</Button>
             </Link>
           </div>
         </div>
-
       </div>
     </header>
   );

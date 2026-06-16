@@ -1,7 +1,8 @@
+"use client";
 import { useEffect, useState, useRef } from "react";
 import { ProductCard } from "./ProductCard";
 import { Button } from "@/components/ui/button";
-import { Link } from "react-router-dom";
+import Link from "next/link";
 import { ArrowRight } from "lucide-react";
 import DOMPurify from "dompurify";
 import { API_URL } from "@/config/api";
@@ -14,7 +15,7 @@ export function ProductsSection() {
   /* =====================================================
      PRELOAD FAST PATH
   ===================================================== */
-  const preload = (window as any).__PRELOADED__?.productsBundle;
+  const preload = typeof window !== "undefined" ? (window as any).__PRELOADED__?.productsBundle : null;
   const preProducts = preload?.products ?? [];
   const preSettings = preload?.settings ?? null;
 
@@ -164,7 +165,7 @@ export function ProductsSection() {
         {/* ================= CTA ================= */}
         {!loading && (
           <div className="text-center">
-            <Link to="/products">
+            <Link href="/products">
               <Button
                 size="lg"
                 className="bg-gradient-to-r from-golden to-accent text-white"

@@ -1,7 +1,8 @@
+"use client";
 import { useEffect, useState, memo } from "react";
 import { Button } from "@/components/ui/button";
 import { ArrowRight, Sparkles } from "lucide-react";
-import { Link } from "react-router-dom";
+import Link from "next/link";
 import { API_URL } from "@/config/api";
 
 const FALLBACK = {
@@ -77,7 +78,7 @@ export const HeroSection = memo(function HeroSection() {
 
           {/* CTAs */}
           <div className="flex flex-col sm:flex-row items-center justify-center gap-4 animate-fade-up delay-300">
-            <Link to="/products">
+            <Link href="/products">
               <Button
                 variant="hero"
                 size="xl"
@@ -88,7 +89,7 @@ export const HeroSection = memo(function HeroSection() {
               </Button>
             </Link>
 
-            <Link to="/about">
+            <Link href="/about">
               <Button
                 className="border-cream/30 text-cream hover:bg-cream/10"
                 variant="outline"

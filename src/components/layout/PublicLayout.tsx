@@ -1,11 +1,11 @@
-import { Outlet } from "react-router-dom";
+"use client";
 import { Navbar } from "@/components/layout/Navbar";
 
-export default function PublicLayout() {
+export default function PublicLayout({ children }: { children: React.ReactNode }) {
   return (
     <>
       <Navbar />
-      <Outlet />
+      {children}
     </>
   );
 }
