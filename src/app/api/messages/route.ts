@@ -38,10 +38,14 @@ export async function POST(req: NextRequest) {
       },
     });
 
-    sendEnquiryMail({
-      name, email, phone, address, subject: enrichedSubject, message: enrichedMessage,
-      products: Array.isArray(products) && products.length > 0 ? products : null,
-    }).catch((err) => console.error("Mail send error:", err.message));
+    try {
+      await sendEnquiryMail({
+        name, email, phone, address, subject: enrichedSubject, message: enrichedMessage,
+        products: Array.isArray(products) && products.length > 0 ? products : null,
+      });
+    } catch (mailErr: any) {
+      console.error("Mail send error:", mailErr?.message);
+    }
 
     return NextResponse.json({ success: true, message: "Message stored", saved });
   } catch (err) {
